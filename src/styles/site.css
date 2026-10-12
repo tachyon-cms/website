@@ -1,0 +1,192 @@
+:root {
+  color-scheme: dark;
+  --bg: #08090c;
+  --surface: #11131a;
+  --line: #23262f;
+  --text: #e8eaf0;
+  --muted: #9aa0ad;
+  --accent: #7cf7d4;
+  --accent-ink: #04130e;
+  --glow: rgb(124 247 212 / 0.14);
+  --radius: 10px;
+  --font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background:
+    radial-gradient(60rem 30rem at 50% -10rem, var(--glow), transparent 70%),
+    var(--bg);
+  color: var(--text);
+  font: 400 1.0625rem/1.65 var(--font);
+  padding: 0 16px;
+}
+
+a {
+  color: var(--accent);
+  text-underline-offset: 3px;
+}
+
+a:focus-visible,
+button:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.brand {
+  max-width: 44rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.75rem 0 0;
+}
+
+.brand a {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.mark {
+  width: 28px;
+  height: 28px;
+  fill: var(--text);
+}
+
+.mark .streak {
+  fill: var(--accent);
+}
+
+main {
+  flex: 1;
+  max-width: 44rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 4.5rem 0 3rem;
+}
+
+h1 {
+  font-size: clamp(2rem, 5.5vw, 3.25rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+  margin: 0 0 1.25rem;
+  text-wrap: balance;
+}
+
+.lede {
+  font-size: 1.25rem;
+  color: var(--text);
+  margin: 0 0 2rem;
+}
+
+p {
+  color: var(--muted);
+  margin: 0 0 1.25rem;
+}
+
+.signup {
+  margin-top: 2.5rem;
+  padding: 1.5rem;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.signup > label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+input[type='email'] {
+  flex: 1 1 14rem;
+  min-width: 0;
+  padding: 0.8rem 0.95rem;
+  font: inherit;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+input[type='email']::placeholder {
+  color: #6b7180;
+}
+
+button {
+  padding: 0.8rem 1.3rem;
+  font: inherit;
+  font-weight: 650;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 0;
+  border-radius: var(--radius);
+  cursor: pointer;
+}
+
+button:hover {
+  filter: brightness(1.08);
+}
+
+.signup .fine {
+  font-size: 0.875rem;
+  margin: 0.9rem 0 0;
+}
+
+.cf-turnstile:not(:empty) {
+  margin-top: 0.9rem;
+}
+
+/* Hidden from people, still in the form for bots that fill every field. */
+.trap {
+  position: absolute;
+  left: -10000px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+
+.notice {
+  text-align: left;
+}
+
+.notice form {
+  margin-top: 1.5rem;
+}
+
+footer {
+  max-width: 44rem;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 0 2rem;
+  border-top: 1px solid var(--line);
+}
+
+footer p {
+  font-size: 0.875rem;
+  margin: 0;
+}

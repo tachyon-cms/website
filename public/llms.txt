@@ -1,0 +1,6 @@
+# TachyonCMS
+
+> An open-source CMS written in Rust, built in public. Not launched yet.
+
+- [Source code](https://github.com/tachyon-cms/tachyoncms): the CMS, MIT licensed.
+- [Launch page](https://tachyoncms.com/): sign up to hear when it launches.

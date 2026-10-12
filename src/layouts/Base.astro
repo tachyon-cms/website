@@ -1,0 +1,49 @@
+---
+import '../styles/site.css';
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Pages that only make sense mid-signup stay out of search results. */
+  noindex?: boolean;
+}
+const { title, description = 'TachyonCMS is an open-source CMS written in Rust, built in public.', noindex = false } =
+  Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site);
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#08090c" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonical} />
+    <slot name="head" />
+  </head>
+  <body>
+    <header class="brand">
+      <a href="/" aria-label="TachyonCMS home">
+        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M6 7h20v4h-8v15h-4V11H6z" />
+          <path class="streak" d="M2 15h8v2H2zM0 20h10v2H0z" />
+        </svg>
+        <span>TachyonCMS</span>
+      </a>
+    </header>
+    <slot />
+    <footer>
+      <p>
+        MIT licensed · <a href="https://github.com/tachyon-cms/tachyoncms">Source on GitHub</a> · © 2026 TachyonCMS
+      </p>
+    </footer>
+  </body>
+</html>

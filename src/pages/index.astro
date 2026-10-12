@@ -1,0 +1,40 @@
+---
+import Base from '../layouts/Base.astro';
+
+// Public by design: the site key only identifies the widget. Cloudflare's always-pass test
+// key stands in locally; a production build without the real one fails rather than ship it.
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? (import.meta.env.CF_PAGES ? undefined : '1x00000000000000000000AA');
+if (!siteKey) throw new Error('PUBLIC_TURNSTILE_SITE_KEY must be set for a Cloudflare Pages build');
+---
+
+<Base title="TachyonCMS · fast for the developer, easy for the editor">
+  <script slot="head" is:inline src="/signup.js" defer></script>
+  <main class="hero">
+    <h1>Fast for the developer. Easy for the editor. No plugins holding it together.</h1>
+    <p class="lede">TachyonCMS is an open-source CMS written in Rust, and we're building it in public.</p>
+    <p>
+      Pick a CMS today and you usually pick a side. One kind is a joy to code against and baffling to whoever
+      publishes the Tuesday newsletter. The other is easy to publish with, and you pay for that in plugins, patches
+      and page speed.
+    </p>
+    <p>
+      We don't think you should have to choose. The core already runs on Postgres. Your content types live in a file
+      you can review like code, and when something's wrong the API names the exact field. The editor's side comes
+      next. And speed? We'll publish the benchmarks before we quote you a single number.
+    </p>
+
+    <form class="signup" method="post" action="/api/subscribe">
+      <label for="email">Tell me when it launches</label>
+      <div class="row">
+        <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com" />
+        <button type="submit">Notify me</button>
+      </div>
+      <div class="trap" aria-hidden="true">
+        <label for="website">Leave this empty</label>
+        <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
+      </div>
+      <div class="cf-turnstile" data-sitekey={siteKey}></div>
+      <p class="fine">We'll send one email to confirm your address, then write only about the launch. One click unsubscribes.</p>
+    </form>
+  </main>
+</Base>
