@@ -110,6 +110,25 @@ describe('subscribe', () => {
     expect(JSON.stringify(log.mock.calls)).not.toContain('a@b.co');
   });
 
+  it('names settings that are missing instead of calling out with them', async () => {
+    const calls = fakeNetwork();
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const broken = { ...env, TURNSTILE_SECRET_KEY: '', RESEND_API_KEY: undefined } as unknown as Env;
+    const res = await subscribe(post('/api/subscribe', { email: 'a@b.co', 'cf-turnstile-response': 't' }), broken);
+    expect(where(res)).toBe('/signup-problem/');
+    expect(log).toHaveBeenCalledWith('signup: settings missing', ['TURNSTILE_SECRET_KEY', 'RESEND_API_KEY']);
+    expect(calls).toEqual([]);
+  });
+
+  it('logs the reason Turnstile gives even when it answers 400', async () => {
+    vi.stubGlobal('fetch', async () =>
+      Response.json({ success: false, 'error-codes': ['missing-input-secret'] }, { status: 400 }),
+    );
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    await subscribe(post('/api/subscribe', { email: 'a@b.co', 'cf-turnstile-response': 't' }), env);
+    expect(log).toHaveBeenCalledWith('signup: human check failed', ['missing-input-secret'], '');
+  });
+
   it('logs why the human check failed', async () => {
     vi.stubGlobal('fetch', async () =>
       Response.json({ success: false, 'error-codes': ['invalid-input-secret'], hostname: 'tachyoncms.com' }),
