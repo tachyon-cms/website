@@ -40,8 +40,15 @@ async function humanCheck(env: Env, request: Request, token: unknown): Promise<b
   const ip = request.headers.get('CF-Connecting-IP');
   if (ip) body.set('remoteip', ip);
   const res = await fetch(TURNSTILE, { method: 'POST', body });
-  if (!res.ok) return false;
-  const outcome = (await res.json()) as { success?: boolean };
+  if (!res.ok) {
+    console.error('signup: human check unavailable', res.status);
+    return false;
+  }
+  const outcome = (await res.json()) as { success?: boolean; 'error-codes'?: string[]; hostname?: string };
+  if (outcome.success !== true) {
+    // The codes say whether it's the visitor or our keys, such as `invalid-input-secret`.
+    console.error('signup: human check failed', outcome['error-codes'] ?? [], outcome.hostname ?? '');
+  }
   return outcome.success === true;
 }
 
@@ -77,7 +84,12 @@ export async function subscribe(request: Request, env: Env): Promise<Response> {
     text: `One click and you're on the list:\n\n${link}\n\nDidn't ask for this? Ignore it and you won't hear from us again.`,
     html: `<p>One click and you're on the list: <a href="${escapeHtml(link.toString())}">Confirm my email</a>.</p><p>Didn't ask for this? Ignore it and you won't hear from us again.</p>`,
   });
-  return redirect(request, sent.ok ? '/check-your-inbox/' : '/signup-problem/');
+  if (!sent.ok) {
+    // Resend's message names the cause, such as an unverified domain. Never log the address.
+    console.error('signup: sending the confirmation email failed', sent.status, await sent.text());
+    return redirect(request, '/signup-problem/');
+  }
+  return redirect(request, '/check-your-inbox/');
 }
 
 function confirmPage(token: string): string {
@@ -127,5 +139,9 @@ export async function confirm(request: Request, env: Env): Promise<Response> {
   const contact = `/contacts/${encodeURIComponent(email)}`;
   const updated = await resend(env, contact, 'PATCH', { unsubscribed: false });
   const joined = await resend(env, `${contact}/segments/${encodeURIComponent(env.RESEND_SEGMENT_ID)}`, 'POST');
-  return redirect(request, updated.ok && joined.ok ? '/confirmed/' : '/signup-problem/');
+  if (!updated.ok || !joined.ok) {
+    console.error('signup: saving the contact failed', created.status, updated.status, joined.status);
+    return redirect(request, '/signup-problem/');
+  }
+  return redirect(request, '/confirmed/');
 }

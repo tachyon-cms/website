@@ -38,7 +38,10 @@ function post(path: string, fields: Record<string, string>): Request {
 
 const where = (res: Response) => new URL(res.headers.get('Location') ?? '').pathname;
 
-afterEach(() => vi.unstubAllGlobals());
+afterEach(() => {
+  vi.unstubAllGlobals();
+  vi.restoreAllMocks();
+});
 
 describe('confirmation tokens', () => {
   it('round-trip the address', async () => {
@@ -98,10 +101,23 @@ describe('subscribe', () => {
     expect(calls.filter((c) => c.url.includes('resend'))).toEqual([]);
   });
 
-  it('says so when the email fails to send', async () => {
-    fakeNetwork({ resend: () => 500 });
+  it('says so when the email fails to send, and logs why without the address', async () => {
+    fakeNetwork({ resend: () => 403 });
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
     const res = await subscribe(post('/api/subscribe', { email: 'a@b.co', 'cf-turnstile-response': 't' }), env);
     expect(where(res)).toBe('/signup-problem/');
+    expect(log).toHaveBeenCalledWith('signup: sending the confirmation email failed', 403, '{}');
+    expect(JSON.stringify(log.mock.calls)).not.toContain('a@b.co');
+  });
+
+  it('logs why the human check failed', async () => {
+    vi.stubGlobal('fetch', async () =>
+      Response.json({ success: false, 'error-codes': ['invalid-input-secret'], hostname: 'tachyoncms.com' }),
+    );
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const res = await subscribe(post('/api/subscribe', { email: 'a@b.co', 'cf-turnstile-response': 't' }), env);
+    expect(where(res)).toBe('/signup-problem/');
+    expect(log).toHaveBeenCalledWith('signup: human check failed', ['invalid-input-secret'], 'tachyoncms.com');
   });
 });
 
