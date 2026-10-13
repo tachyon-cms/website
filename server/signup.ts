@@ -40,11 +40,12 @@ async function humanCheck(env: Env, request: Request, token: unknown): Promise<b
   const ip = request.headers.get('CF-Connecting-IP');
   if (ip) body.set('remoteip', ip);
   const res = await fetch(TURNSTILE, { method: 'POST', body });
-  if (!res.ok) {
-    console.error('signup: human check unavailable', res.status);
-    return false;
-  }
-  const outcome = (await res.json()) as { success?: boolean; 'error-codes'?: string[]; hostname?: string };
+  // Turnstile answers 400 for bad keys, with the reason in the body, so read it either way.
+  const outcome = (await res.json().catch(() => ({}))) as {
+    success?: boolean;
+    'error-codes'?: string[];
+    hostname?: string;
+  };
   if (outcome.success !== true) {
     // The codes say whether it's the visitor or our keys, such as `invalid-input-secret`.
     console.error('signup: human check failed', outcome['error-codes'] ?? [], outcome.hostname ?? '');
@@ -64,8 +65,24 @@ function escapeHtml(text: string): string {
   return text.replace(/[&<>"']/g, (c) => `&#${c.charCodeAt(0)};`);
 }
 
+const REQUIRED: (keyof Env)[] = [
+  'TURNSTILE_SECRET_KEY',
+  'RESEND_API_KEY',
+  'RESEND_SEGMENT_ID',
+  'SIGNING_SECRET',
+  'MAIL_FROM',
+];
+
+/** Names any setting that's missing or empty, such as one saved with a stray space in its name. */
+function missingSettings(env: Env): boolean {
+  const missing = REQUIRED.filter((name) => !env[name]?.trim());
+  if (missing.length > 0) console.error('signup: settings missing', missing);
+  return missing.length > 0;
+}
+
 /** POST /api/subscribe: checks the visitor is human and emails a confirmation link. */
 export async function subscribe(request: Request, env: Env): Promise<Response> {
+  if (missingSettings(env)) return redirect(request, '/signup-problem/');
   const form = await request.formData().catch(() => null);
   if (!form) return redirect(request, '/signup-problem/');
   // Bots fill every field; people never see this one.
@@ -124,6 +141,7 @@ export async function showConfirm(request: Request, env: Env): Promise<Response>
 
 /** POST /confirm/: adds the address to the launch segment. */
 export async function confirm(request: Request, env: Env): Promise<Response> {
+  if (missingSettings(env)) return redirect(request, '/signup-problem/');
   const form = await request.formData().catch(() => null);
   const token = form?.get('token');
   const email = typeof token === 'string' ? await verifyToken(token, env.SIGNING_SECRET) : null;
