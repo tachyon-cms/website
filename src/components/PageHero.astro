@@ -33,6 +33,12 @@ const { eyebrow, title, lede } = Astro.props;
     letter-spacing: -0.035em;
     text-wrap: balance;
   }
+  /* Short pages, such as the signup steps, pass their one paragraph as .notice. */
+  .page-hero > :global(.notice) {
+    max-width: 38rem;
+    font-size: 1.125rem;
+    color: var(--c-muted);
+  }
   .lede {
     max-width: 38rem;
     margin: 0;

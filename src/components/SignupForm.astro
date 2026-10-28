@@ -6,6 +6,9 @@ interface Props {
 }
 const { source } = Astro.props;
 const id = `signup-email-${source}`;
+// One script tag per page, however many forms: it binds every form.signup.
+const firstForm = !Astro.locals.signupScript;
+Astro.locals.signupScript = true;
 
 // Public by design: the site key only identifies the widget. Cloudflare's always-pass test
 // key stands in locally; a production build without the real one fails rather than ship it.
@@ -26,7 +29,7 @@ if (!siteKey) throw new Error('PUBLIC_TURNSTILE_SITE_KEY must be set for a Cloud
   <div class="cf-turnstile" data-sitekey={siteKey}></div>
   <p class="fine">We'll send one email to confirm your address, then write only about the launch. One click unsubscribes.</p>
 </form>
-<script is:inline src="/signup.js" defer></script>
+{firstForm && <script is:inline src="/signup.js" defer />}
 
 <style>
   .signup {

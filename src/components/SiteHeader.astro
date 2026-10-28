@@ -1,15 +1,13 @@
 ---
 import Icon from './Icon.astro';
+import { isCurrent, nav } from '../lib/nav';
 import { formatStars, stars } from '../lib/stars';
 
+interface Props {
+  path: string;
+}
+const { path } = Astro.props;
 const count = await stars();
-const nav = [
-  { href: '/product/content-modelling', label: 'Product' },
-  { href: '/compare', label: 'Compare' },
-  { href: 'https://docs.tachyoncms.com', label: 'Docs' },
-  { href: '/blog', label: 'Blog' },
-  { href: '/roadmap', label: 'Roadmap' },
-];
 ---
 
 <header class="site-header">
@@ -20,7 +18,15 @@ const nav = [
     </a>
     <nav aria-label="Main">
       <ul>
-        {nav.map(({ href, label }) => <li><a href={href}>{label}</a></li>)}
+        {
+          nav.map(({ href, section, label }) => (
+            <li>
+              <a href={href} aria-current={isCurrent(path, section) ? 'page' : undefined}>
+                {label}
+              </a>
+            </li>
+          ))
+        }
       </ul>
     </nav>
     <a class="github" href="https://github.com/tachyon-cms/tachyoncms">
@@ -79,7 +85,8 @@ const nav = [
     text-decoration: none;
     white-space: nowrap;
   }
-  nav a:hover {
+  nav a:hover,
+  nav a[aria-current='page'] {
     color: var(--c-text);
   }
   .github {

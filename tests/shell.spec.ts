@@ -18,8 +18,15 @@ test('the theme toggle switches to light and remembers it', async ({ page }) => 
   await page.locator('[data-theme-toggle]').click();
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
   expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('light');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#faf8ff');
+  await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute('content', 'light');
   await page.goto('/confirmed');
   await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  // A saved theme applies to the browser chrome before first paint too.
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#faf8ff');
+  await page.locator('[data-theme-toggle]').click();
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#07060c');
+  await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute('content', 'dark');
 });
 
 test.describe('without JavaScript', () => {
@@ -62,4 +69,36 @@ test('the footer lists every contact address and the theme toggle', async ({ pag
     await expect(footer.locator(`a[href="mailto:${box}@tachyoncms.com"]`)).toHaveCount(1);
   }
   await expect(footer.locator('[data-theme-toggle]')).toBeVisible();
+});
+
+test.describe('at phone width', () => {
+  test.use({ viewport: { width: 390, height: 844 } });
+
+  for (const path of pages) {
+    test(`${path} has no horizontal scroll`, async ({ page }) => {
+      await page.goto(path);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    });
+  }
+});
+
+test('the main nav marks no page current on the home page', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('nav[aria-label="Main"] [aria-current]')).toHaveCount(0);
+});
+
+test('signup.js loads once and binds every signup form', async ({ page }) => {
+  // No page has two forms yet, so serve the home page with its form doubled.
+  await page.route('**/', async (route) => {
+    const res = await route.fetch();
+    const html = (await res.text()).replace(/<form class="signup[\s\S]*?<\/form>/, (form) => form + form);
+    await route.fulfill({ response: res, body: html });
+  });
+  const turnstile = page.waitForRequest(/challenges\.cloudflare\.com\/turnstile/);
+  await page.goto('/');
+  await expect(page.locator('script[src="/signup.js"]')).toHaveCount(1);
+  await expect(page.locator('form.signup')).toHaveCount(2);
+  await page.route(/challenges\.cloudflare\.com/, (route) => route.abort());
+  await page.locator('form.signup').nth(1).locator('input[type="email"]').focus();
+  await turnstile;
 });

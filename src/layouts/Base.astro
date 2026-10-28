@@ -23,7 +23,7 @@ const {
   image,
   noindex,
 } = Astro.props;
-// Inlined so it runs before first paint; scripts/csp.mjs hashes it like any inline script.
+// Inlined so it runs before first paint, after the meta tags it updates; scripts/csp.mjs hashes it like any inline script.
 const themeScript = `(${initTheme.toString()})();`;
 ---
 
@@ -32,10 +32,10 @@ const themeScript = `(${initTheme.toString()})();`;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <script is:inline set:html={themeScript} />
-    <Seo title={title} description={description} path={path} image={image} noindex={noindex} />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#07060c" />
+    <script is:inline set:html={themeScript} />
+    <Seo title={title} description={description} path={path} image={image} noindex={noindex} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <Font cssVariable="--font-sans" preload={[{ weight: 400 }]} />
     <Font cssVariable="--font-mono" />
@@ -43,7 +43,7 @@ const themeScript = `(${initTheme.toString()})();`;
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
-    <SiteHeader />
+    <SiteHeader path={path} />
     <main id="main">
       <slot />
     </main>
