@@ -1,0 +1,24 @@
+name: Rebuild site
+
+on:
+  workflow_dispatch:
+  # Daily, so a post dated for today goes live. Pages builds on its own for pushes.
+  schedule:
+    - cron: '0 7 * * *'
+
+permissions: {}
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger the Cloudflare Pages deploy hook
+        env:
+          PAGES_DEPLOY_HOOK: ${{ secrets.PAGES_DEPLOY_HOOK }}
+        run: |
+          if [ -z "$PAGES_DEPLOY_HOOK" ]; then
+            echo "::notice::PAGES_DEPLOY_HOOK is not set, so no rebuild was triggered."
+            exit 0
+          fi
+          curl --proto '=https' -fsS -X POST "$PAGES_DEPLOY_HOOK" -o /dev/null
+          echo "Pages rebuild triggered."

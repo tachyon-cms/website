@@ -8,7 +8,15 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  WRANGLER_SEND_METRICS: 'false'
+
 jobs:
+  # The test job: unit tests, both builds, the link check and the browser tests.
   check:
     runs-on: ubuntu-latest
     steps:
@@ -27,10 +35,63 @@ jobs:
           # Lifts the API rate limit for the header's star count.
           GITHUB_TOKEN: ${{ github.token }}
       - run: npm run build:docs
+      - name: Every site link resolves, including links into the docs
+        run: node scripts/links.mjs dist docs/dist
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+
+  # Reads only the lockfile, so it needs no install.
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: npm audit --audit-level=moderate
+
+  # No banned words, benchmark numbers or the reference CMS's name in what we publish.
+  claims:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build:site
         env:
-          WRANGLER_SEND_METRICS: 'false'
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: npm run build:docs
+      - run: node scripts/claims.mjs dist docs/dist
+
+  # 100 in all four categories, mobile and desktop, median of three runs.
+  lighthouse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build:site
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: npm run build:docs
+      # Run with npx, not installed: its dependency tree fails npm audit.
+      - name: Lighthouse (mobile)
+        run: npx -y @lhci/cli@0.15.1 autorun --config=lighthouserc.mobile.json
+      - name: Lighthouse (desktop)
+        run: npx -y @lhci/cli@0.15.1 autorun --config=lighthouserc.json
 
   # The CLI pages are committed; they must match the pinned release's --help.
   # Its own job: it runs a downloaded binary, so it gets no token, no npm install and no cache.
