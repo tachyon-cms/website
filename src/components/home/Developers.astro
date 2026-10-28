@@ -16,7 +16,8 @@ import SectionHead from './SectionHead.astro';
       <h3>Speed you can reason about</h3>
       <p>
         One Rust binary on Axum and Tokio, and Postgres beside it. That's the whole install. Each document sits in a
-        single row, its published fields in one JSONB column, so reading a post isn't a join across a table per field.
+        single row, its published fields in one JSONB column. A post's own fields come straight from that row;
+        linked documents you ask to populate come from theirs.
       </p>
       <p>
         Numbers? Not yet. We'll publish reproducible benchmarks against the popular CMSs first, method and all, and

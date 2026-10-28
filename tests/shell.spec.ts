@@ -47,7 +47,7 @@ test('the signup form posts to /api/subscribe with a Turnstile slot', async ({ p
   await expect(form).toHaveAttribute('action', '/api/subscribe');
   await expect(form).toHaveAttribute('method', 'post');
   await expect(form.locator('.cf-turnstile[data-sitekey]')).toHaveCount(1);
-  await expect(form.getByLabel('Tell me when it launches')).toHaveAttribute('name', 'email');
+  await expect(form.getByLabel('Tell me when the admin is ready')).toHaveAttribute('name', 'email');
 });
 
 test('the CSP lets Turnstile load', async ({ request }) => {

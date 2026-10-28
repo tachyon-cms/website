@@ -1,12 +1,12 @@
 ---
 // A field renamed in the schema file, then the CLI asked about it twice: once
 // without --rename, once with. The output is copied from tachyon 0.1.0, run
-// against a database holding the file's earlier version.
+// against a set-up install holding two posts under the file's earlier version.
 import Code from './Code.astro';
 import Diagram from './Diagram.astro';
 ---
 
-<Diagram id="schema-diff" loop={10500} caption="Real output from tachyon 0.1.0. Nothing changes until apply runs.">
+<Diagram id="schema-diff" loop={10500} caption="Real output from tachyon 0.1.0, run against two existing posts. Nothing changes until apply runs.">
   <div class="sd">
     <div class="pane">
       <p class="pane-head">schema.json, in your pull request</p>
@@ -29,12 +29,16 @@ import Diagram from './Diagram.astro';
         lines={[
           { text: '$ tachyon schema diff schema.json', at: 1400 },
           { text: '~ change posts: remove title, deleting its data; add headline (text)', at: 2200, class: 'warn' },
+          { text: "  2 of 2 documents won't validate against the new fields", at: 2200, class: 'warn' },
+          { text: "  users isn't in the file; left as it is", at: 2200, class: 'q' },
           { text: '', at: 3400 },
           { text: '$ tachyon schema diff schema.json --rename posts:title=headline', at: 3400 },
           { text: '~ change posts: rename title to headline', at: 4200, class: 'ok' },
+          { text: "  users isn't in the file; left as it is", at: 4200, class: 'q' },
           { text: '', at: 5600 },
           { text: '$ tachyon schema apply schema.json --rename posts:title=headline', at: 5600 },
           { text: '~ change posts: rename title to headline', at: 6400, class: 'ok' },
+          { text: "  users isn't in the file; left as it is", at: 6400, class: 'q' },
           { text: '', at: 6400 },
           { text: 'Applied.', at: 6900, class: 'ok' },
         ]}

@@ -44,7 +44,8 @@ function diagram(root: HTMLElement) {
 }
 
 export function play() {
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const still = matchMedia('(prefers-reduced-motion: reduce)');
+  if (still.matches) return;
   const roots = document.querySelectorAll<HTMLElement>('[data-play]');
   if (!roots.length) return;
   const players = new Map<Element, ReturnType<typeof diagram>>();
@@ -62,4 +63,10 @@ export function play() {
     players.set(root, diagram(root));
     watcher.observe(root);
   }
+  // Reduced motion switched on mid-visit: stop everything on the finished picture.
+  still.addEventListener('change', () => {
+    if (!still.matches) return;
+    watcher.disconnect();
+    for (const p of players.values()) p.finish();
+  });
 }

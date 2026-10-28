@@ -103,7 +103,7 @@ export async function subscribe(request: Request, env: Env): Promise<Response> {
   const sent = await resend(env, '/emails', 'POST', {
     from: env.MAIL_FROM,
     to: [email],
-    subject: 'Confirm your TachyonCMS launch alert',
+    subject: 'Confirm your TachyonCMS updates',
     text: `One click and you're on the list:\n\n${link}\n\nDidn't ask for this? Ignore it and you won't hear from us again.`,
     html: `<p>One click and you're on the list: <a href="${escapeHtml(link.toString())}">Confirm my email</a>.</p><p>Didn't ask for this? Ignore it and you won't hear from us again.</p>`,
   });
@@ -128,7 +128,7 @@ function confirmPage(token: string): string {
 <body>
 <main class="notice">
 <h1>One more click</h1>
-<p>Confirm and we'll let you know the day TachyonCMS launches.</p>
+<p>Confirm, and we'll write when there's a release or news about the admin.</p>
 <form method="post" action="/confirm/">
 <input type="hidden" name="token" value="${escapeHtml(token)}">
 <button type="submit">Confirm my email</button>

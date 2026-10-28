@@ -53,6 +53,16 @@ test('a diagram plays once it is on screen', async ({ page }) => {
   await expect(last).toHaveClass(/\bon\b/, { timeout: 15_000 });
 });
 
+test('turning on reduced motion mid-visit stops on the finished picture', async ({ page }) => {
+  await page.goto('/');
+  const d = page.locator('[data-diagram="schema-diff"]');
+  await d.scrollIntoViewIfNeeded();
+  await expect(d).toHaveClass(/\barmed\b/);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await expect(page.locator('[data-play].armed')).toHaveCount(0);
+  await expect(d.locator('[data-at]:not(.on)')).toHaveCount(0);
+});
+
 test('the hero offers the docs and the repo', async ({ page }) => {
   await page.goto('/');
   const hero = page.locator('.hero');
@@ -92,6 +102,7 @@ test('the schema diff shows the CLI wording', async ({ page }) => {
   const d = page.locator('[data-diagram="schema-diff"]');
   await expect(d).toContainText('~ change posts: rename title to headline');
   await expect(d).toContainText('~ change posts: remove title, deleting its data; add headline (text)');
+  await expect(d).toContainText("2 of 2 documents won't validate against the new fields");
 });
 
 test('the latest posts section stays out until a post is published', async ({ page }) => {
