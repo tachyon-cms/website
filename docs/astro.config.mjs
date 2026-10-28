@@ -78,7 +78,15 @@ export default defineConfig({
               'reference/errors',
             ],
           },
-          { label: 'CLI', link: '/cli', items: ['cli'] },
+          {
+            label: 'CLI',
+            link: '/cli',
+            // The command pages are generated (docs/scripts/gen-cli.mjs), so a new command shows up on its own.
+            items: [
+              { label: 'Overview', slug: 'cli' },
+              { autogenerate: { directory: 'cli' } },
+            ],
+          },
         ]),
         // Fails the build on a broken internal link or #anchor.
         starlightLinksValidator(),

@@ -77,6 +77,26 @@ test('a reference page marks the Reference tab current and shows only the Refere
   await expect(sidebar.locator('a[aria-current="page"]')).toHaveAttribute('href', '/reference/http-api');
 });
 
+test('a generated CLI page marks the CLI tab current and lists every command in the CLI sidebar', async ({ page }) => {
+  await page.goto('/cli/tachyon-schema-diff');
+  await expect(tabs(page).locator('[aria-current]')).toHaveCount(1);
+  await expect(tabs(page).getByRole('link', { name: 'CLI', exact: true })).toHaveAttribute('aria-current', 'true');
+  const sidebar = page.getByRole('navigation', { name: 'Main' });
+  const hrefs = await sidebar.getByRole('link').evaluateAll((links) => links.map((a) => a.getAttribute('href')));
+  expect(hrefs).toEqual([
+    '/cli',
+    '/cli/tachyon',
+    '/cli/tachyon-serve',
+    '/cli/tachyon-migrate',
+    '/cli/tachyon-schema',
+    '/cli/tachyon-schema-export',
+    '/cli/tachyon-schema-diff',
+    '/cli/tachyon-schema-apply',
+  ]);
+  await expect(sidebar.locator('a[aria-current="page"]')).toHaveAttribute('href', '/cli/tachyon-schema-diff');
+  await expect(page.locator('pre').first()).toContainText('Usage: tachyon schema diff [OPTIONS] <FILE>');
+});
+
 test('search opens with Cmd/Ctrl+K', async ({ page }) => {
   await page.goto('/');
   // The shortcut is wired up by a module script; wait for it before pressing.
@@ -105,7 +125,7 @@ test('dark is the default even when the OS prefers light, and the toggle switche
 
 test('no horizontal overflow on a phone', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const link of [...topics.map((t) => t.link), '/access-rules', '/deploy/docker', '/tutorials/build-a-blog', '/reference/http-api', '/reference/field-types', '/reference/errors']) {
+  for (const link of [...topics.map((t) => t.link), '/access-rules', '/deploy/docker', '/tutorials/build-a-blog', '/reference/http-api', '/reference/field-types', '/reference/errors', '/cli/tachyon-schema-apply']) {
     await page.goto(link);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow, link).toBeLessThanOrEqual(0);

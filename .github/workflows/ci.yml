@@ -22,6 +22,17 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      # The CLI pages are committed; they must match the pinned release's --help, byte for byte.
+      - name: CLI pages match the release binary
+        run: |
+          bin=$(sh docs/scripts/fetch-tachyon.sh "$RUNNER_TEMP/tachyon")
+          node docs/scripts/gen-cli.mjs "$bin" docs/src/content/docs/cli
+          if [ -n "$(git status --porcelain -- docs/src/content/docs/cli)" ]; then
+            git status --short -- docs/src/content/docs/cli
+            git diff -- docs/src/content/docs/cli
+            echo "::error::CLI pages are stale. Run docs/scripts/fetch-tachyon.sh and gen-cli.mjs, then commit."
+            exit 1
+          fi
       - run: npm run build:site
         env:
           # Lifts the API rate limit for the header's star count.
