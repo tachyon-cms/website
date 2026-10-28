@@ -18,4 +18,18 @@ export const collections = {
       sources: z.array(source).min(1),
     }),
   }),
+  // One entry per product we compare against. Every row cites the other product's own site.
+  compare: defineCollection({
+    loader: glob({ pattern: '*.md', base: './src/content/compare' }),
+    schema: z.object({
+      name: z.string(),
+      summary: z.string(),
+      checked: z.coerce.date(),
+      rows: z
+        .array(z.object({ topic: z.string(), tachyon: z.string(), them: z.string(), source: z.url() }))
+        .min(1),
+      // Where TachyonCMS isn't there yet. Every page has to say.
+      notYet: z.array(z.string()).min(1),
+    }),
+  }),
 };

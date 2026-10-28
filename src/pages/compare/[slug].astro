@@ -1,0 +1,180 @@
+---
+// One comparison: the table, where TachyonCMS isn't there yet, then who should pick which.
+import { getCollection, render, type CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import PageHero from '../../components/PageHero.astro';
+import Prose from '../../components/Prose.astro';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('compare');
+  return entries.map((entry) => ({ params: { slug: entry.id }, props: { entry } }));
+}
+
+const { entry } = Astro.props as { entry: CollectionEntry<'compare'> };
+const { name, summary, checked, rows, notYet } = entry.data;
+const { Content } = await render(entry);
+const path = `/compare/${entry.id}`;
+const readme = 'https://github.com/tachyon-cms/tachyoncms/blob/v0.1.0/README.md';
+const day = checked.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+// Cells are plain strings; `backticks` mark code, as in Markdown.
+const code = (text: string) => text.split('`');
+---
+
+<Base title={`TachyonCMS vs ${name}`} description={summary} path={path}>
+  <PageHero eyebrow="Compare" title={`TachyonCMS and ${name}`} lede={summary} />
+
+  <div class="compare">
+    <p class="checked">
+      Checked on <time datetime={checked.toISOString().slice(0, 10)}>{day}</time> against TachyonCMS v0.1.0 and {name}'s
+      own docs. Each {name} row links to the page it came from.
+    </p>
+
+    <table>
+      <thead>
+        <tr>
+          <th scope="col"><span class="sr-only">Topic</span></th>
+          <th scope="col">TachyonCMS v0.1.0</th>
+          <th scope="col">{name}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {
+          rows.map((row) => (
+            <tr>
+              <th scope="row">{row.topic}</th>
+              <td data-label="TachyonCMS v0.1.0">
+                {code(row.tachyon).map((part, i) => (i % 2 ? <code>{part}</code> : part))}
+              </td>
+              <td data-label={name}>
+                {code(row.them).map((part, i) => (i % 2 ? <code>{part}</code> : part))}{' '}
+                <a class="src" href={row.source}>
+                  Source<span class="sr-only">: {name}, {row.topic.toLowerCase()}</span>
+                </a>
+              </td>
+            </tr>
+          ))
+        }
+      </tbody>
+    </table>
+
+    <Prose>
+      <h2>Where TachyonCMS isn't there yet</h2>
+      <ul>
+        {notYet.map((item) => <li>{code(item).map((part, i) => (i % 2 ? <code>{part}</code> : part))}</li>)}
+      </ul>
+      <Content />
+    </Prose>
+
+    <section class="sources" aria-labelledby="sources-title">
+      <h2 id="sources-title">Where this comes from</h2>
+      <p>
+        The TachyonCMS side comes from the <a href={readme}>v0.1.0 README</a> and its code. If a row's out of date,{' '}
+        <a href="https://github.com/tachyon-cms/tachyoncms/issues">tell me in an issue</a> and I'll fix it.
+      </p>
+      <p><a href="/compare">All comparisons</a></p>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .compare {
+    display: grid;
+    gap: 2.5rem;
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+  .checked {
+    max-width: 42rem;
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--c-muted);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+  th,
+  td {
+    padding: 0.85rem 1rem 0.85rem 0;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--c-border);
+  }
+  thead th {
+    font: 600 0.8125rem/1.2 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c-soft);
+  }
+  tbody th {
+    width: 11rem;
+    color: var(--c-text);
+  }
+  td {
+    color: var(--c-muted);
+  }
+  td:nth-child(2) {
+    color: var(--c-text);
+  }
+  code {
+    font: 0.9em var(--font-mono);
+    color: var(--c-hi);
+  }
+  .src {
+    font-size: 0.8125rem;
+    white-space: nowrap;
+    color: var(--c-soft);
+  }
+  /* On a phone each row becomes a card, with the product named above each cell. */
+  @media (max-width: 40rem) {
+    thead {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+    tr,
+    th,
+    td {
+      display: block;
+    }
+    tr {
+      padding: 1rem 0;
+      border-bottom: 1px solid var(--c-border);
+    }
+    tbody th,
+    td {
+      width: auto;
+      padding: 0.25rem 0;
+      border: 0;
+    }
+    tbody th {
+      font-size: 1.0625rem;
+    }
+    td::before {
+      content: attr(data-label);
+      display: block;
+      margin-top: 0.5rem;
+      font: 600 0.75rem/1.4 var(--font-mono);
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--c-soft);
+    }
+  }
+  .sources {
+    max-width: 42rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--c-border);
+  }
+  .sources h2 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+  }
+  .sources p {
+    margin: 0 0 0.75rem;
+    font-size: 0.9375rem;
+    color: var(--c-muted);
+  }
+</style>

@@ -98,3 +98,35 @@ test('nothing runs off the side of a phone', async ({ page }) => {
     expect(overflow, path).toBeLessThanOrEqual(0);
   }
 });
+
+const compare = ['wordpress', 'strapi', 'contentful', 'sanity', 'directus'];
+
+test('/compare links to every comparison', async ({ page }) => {
+  await page.goto('/compare');
+  await expect(page.locator('h1')).toHaveCount(1);
+  for (const slug of compare) await expect(page.locator(`main a[href="/compare/${slug}"]`)).toHaveCount(1);
+  await expect(page.locator('header a[href="/compare"]')).toHaveAttribute('aria-current', 'page');
+});
+
+for (const slug of compare) {
+  test(`/compare/${slug} cites every row, then says where we're behind and who should pick which`, async ({ page }) => {
+    await page.goto(`/compare/${slug}`);
+    await expect(page.locator('h1')).toHaveCount(1);
+    const rows = page.locator('main tbody tr');
+    expect(await rows.count()).toBeGreaterThan(0);
+    for (const row of await rows.all()) await expect(row.locator('a.src[href^="https://"]')).toHaveCount(1);
+    const headings = await page.locator('main h2').allTextContents();
+    expect(headings.indexOf("Where TachyonCMS isn't there yet")).toBeGreaterThanOrEqual(0);
+    expect(headings.indexOf('Who should pick which')).toBeGreaterThan(headings.indexOf("Where TachyonCMS isn't there yet"));
+    await expect(page.locator('main time')).toHaveAttribute('datetime', /^\d{4}-\d{2}-\d{2}$/);
+  });
+}
+
+test('compare pages fit a phone', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const path of ['/compare', ...compare.map((s) => `/compare/${s}`)]) {
+    await page.goto(path);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow, path).toBeLessThanOrEqual(0);
+  }
+});
