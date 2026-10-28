@@ -1,0 +1,36 @@
+/* Shared by every post graphic. Fonts load from the installed @fontsource
+ * files, the same ones the site serves; colours are the dark Ultraviolet tokens. */
+@font-face { font-family: "Instrument Sans"; font-weight: 400; src: url("../../node_modules/@fontsource/instrument-sans/files/instrument-sans-latin-400-normal.woff2"); }
+@font-face { font-family: "Instrument Sans"; font-weight: 600; src: url("../../node_modules/@fontsource/instrument-sans/files/instrument-sans-latin-600-normal.woff2"); }
+@font-face { font-family: "Instrument Sans"; font-weight: 700; src: url("../../node_modules/@fontsource/instrument-sans/files/instrument-sans-latin-700-normal.woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 400; src: url("../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2"); }
+@font-face { font-family: "IBM Plex Mono"; font-weight: 600; src: url("../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-600-normal.woff2"); }
+
+:root {
+  --bg: #07060c;
+  --surface: #140d24;
+  --border: #2b1d4a;
+  --text: #e9e3ff;
+  --muted: #a99cc9;
+  --violet: #8b5cf6;
+  --pink: #ec4899;
+  --hi: #f0abfc;
+  --soft: #c3a6ff;
+  --grad: linear-gradient(90deg, var(--violet), var(--pink));
+  --sans: "Instrument Sans", sans-serif;
+  --mono: "IBM Plex Mono", monospace;
+}
+* { box-sizing: border-box; margin: 0; }
+body {
+  background:
+    radial-gradient(60rem 30rem at 85% -10%, rgb(139 92 246 / 0.28), transparent 70%),
+    radial-gradient(40rem 24rem at 0% 110%, rgb(236 72 153 / 0.16), transparent 70%),
+    var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+}
+.eyebrow { font: 600 20px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--soft); }
+.grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+code, pre { font-family: var(--mono); }
+.box { background: var(--surface); border: 2px solid var(--border); border-radius: 18px; }

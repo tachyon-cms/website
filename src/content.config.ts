@@ -7,6 +7,19 @@ import { z } from 'astro/zod';
 const source = z.string().regex(/^(https:\/\/\S+|[\w.][\w./-]*(#[\w-]+)?)$/, 'a repo path at v0.1.0, or an https:// URL');
 
 export const collections = {
+  // Posts. One dated later than today waits for its day (src/lib/published.js).
+  blog: defineCollection({
+    loader: glob({ pattern: '*.md', base: './src/content/blog' }),
+    schema: z.object({
+      title: z.string(),
+      description: z.string(),
+      date: z.coerce.date(),
+      author: z.string().default('James Conway'),
+      // The social card, such as /media/blog/v0-1-0/card.png (1200x630).
+      image: z.string().optional(),
+      imageAlt: z.string().optional(),
+    }),
+  }),
   // One entry per product page: its copy, and where every fact in it comes from.
   features: defineCollection({
     loader: glob({ pattern: '*.md', base: './src/content/features' }),

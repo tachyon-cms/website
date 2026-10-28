@@ -105,15 +105,10 @@ test('the schema diff shows the CLI wording', async ({ page }) => {
   await expect(d).toContainText("2 of 2 documents won't validate against the new fields");
 });
 
-test('the latest posts section stays out until a post is published', async ({ page }) => {
-  await page.goto('/');
-  await expect(page.locator('#latest')).toHaveCount(0);
-});
-
 test('the sections run in order', async ({ page }) => {
   await page.goto('/');
   const order = await page
     .locator('main > section[id]')
     .evaluateAll((els) => els.map((el) => el.id));
-  expect(order).toEqual(['top', 'how', 'developers', 'rules', 'editors', 'schema', 'trust', 'contribute', 'start']);
+  expect(order).toEqual(['top', 'how', 'developers', 'rules', 'editors', 'schema', 'trust', 'latest', 'contribute', 'start']);
 });

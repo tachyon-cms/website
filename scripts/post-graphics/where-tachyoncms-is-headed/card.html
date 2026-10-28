@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Where TachyonCMS is headed: social card</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+  body { width: 1200px; height: 630px; overflow: hidden; }
+  .frame { height: 100%; padding: 60px 72px; display: grid; grid-template-rows: auto 1fr auto; }
+  .top { display: flex; justify-content: space-between; align-items: center; }
+  .top img { height: 40px; }
+  h1 { align-self: center; font-size: 80px; line-height: 1.02; letter-spacing: -0.04em; }
+  ol { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; padding: 0; list-style: none; counter-reset: step; }
+  li { position: relative; padding: 18px 16px 16px; font-size: 20px; line-height: 1.25; font-weight: 600; }
+  li::before { counter-increment: step; content: "0" counter(step); display: block; margin-bottom: 10px; font: 600 16px/1 var(--mono); color: var(--soft); }
+  li.now { border-color: var(--violet); }
+  li.now::after { content: "under way"; position: absolute; top: -14px; right: 12px; padding: 4px 10px; font: 600 14px/1 var(--mono); color: #fff; background: var(--grad); border-radius: 999px; }
+  li.last { border-style: dashed; }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="top"><img src="../../../public/brand/logo-dark.svg" alt=""><span class="eyebrow">Roadmap</span></div>
+  <h1>Where TachyonCMS<br><span class="grad">is headed.</span></h1>
+  <ol>
+    <li class="box now">Rich text and blocks</li>
+    <li class="box">Drafts, versions, scheduling</li>
+    <li class="box">Media</li>
+    <li class="box">Live preview</li>
+    <li class="box">Authoring tools</li>
+    <li class="box last">The admin screen</li>
+  </ol>
+</div>
+</body>
+</html>

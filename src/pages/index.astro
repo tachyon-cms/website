@@ -11,10 +11,15 @@ import LatestPosts, { type PostLink } from '../components/home/LatestPosts.astro
 import SectionHead from '../components/home/SectionHead.astro';
 import Trust from '../components/home/Trust.astro';
 import Base from '../layouts/Base.astro';
+import { publishedPosts } from '../lib/posts';
 
-// Filled from the blog collection, published posts only, once the blog exists.
-// Until then the section stays out of the page.
-const latestPosts: PostLink[] = [];
+// The newest published posts. With none, the section stays out of the page.
+const latestPosts: PostLink[] = (await publishedPosts()).slice(0, 3).map((p) => ({
+  title: p.data.title,
+  href: `/blog/${p.id}`,
+  date: p.data.date,
+  summary: p.data.description,
+}));
 ---
 
 <Base

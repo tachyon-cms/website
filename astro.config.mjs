@@ -1,6 +1,9 @@
 // @ts-check
+import sitemap from '@astrojs/sitemap';
 import { defineConfig } from 'astro/config';
 import { fonts } from './brand/fonts.mjs';
+
+const noindex = ['/404', '/check-your-inbox', '/confirmed', '/link-expired', '/signup-problem'];
 
 export default defineConfig({
   site: 'https://tachyoncms.com',
@@ -13,5 +16,8 @@ export default defineConfig({
   scopedStyleStrategy: 'class',
   // Syntax highlighting writes style="" attributes, which the CSP refuses.
   markdown: { syntaxHighlight: false },
+  // Unpublished posts never get a page, so they can't reach the sitemap. The filter
+  // drops the pages marked noindex, which only make sense mid-signup.
+  integrations: [sitemap({ filter: (page) => !noindex.some((p) => page.endsWith(p)) })],
   fonts,
 });

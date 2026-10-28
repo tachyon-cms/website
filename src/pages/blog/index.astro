@@ -1,0 +1,88 @@
+---
+import Icon from '../../components/Icon.astro';
+import PageHero from '../../components/PageHero.astro';
+import Base from '../../layouts/Base.astro';
+import { postDate, publishedPosts } from '../../lib/posts';
+
+const posts = await publishedPosts();
+---
+
+<Base
+  title="Blog · TachyonCMS"
+  description="Releases, plans and notes from building TachyonCMS in public."
+  path="/blog"
+>
+  <PageHero
+    eyebrow="Blog"
+    title="Notes from the build"
+    lede="What shipped, what's next, and why it's in that order. Written as it happens, with nothing promised before it's real."
+  >
+    <p class="feed">
+      <a href="/rss.xml"><Icon name="FiRss" size={16} /> Follow along by RSS</a>
+    </p>
+  </PageHero>
+
+  <ol class="posts">
+    {
+      posts.map((p) => (
+        <li>
+          <time datetime={p.data.date.toISOString().slice(0, 10)}>{postDate.format(p.data.date)}</time>
+          <h2>
+            <a href={`/blog/${p.id}`}>{p.data.title}</a>
+          </h2>
+          <p>{p.data.description}</p>
+        </li>
+      ))
+    }
+  </ol>
+</Base>
+
+<style>
+  .feed {
+    margin: 1.5rem 0 0;
+  }
+  .feed a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .posts {
+    max-width: 48rem;
+    margin: 0 0 clamp(3rem, 8vw, 5rem);
+    padding: 0;
+    list-style: none;
+  }
+  .posts li {
+    position: relative;
+    padding: 2rem 0;
+    border-top: 1px solid var(--c-border);
+  }
+  time {
+    font: 0.8125rem var(--font-mono);
+    color: var(--c-muted);
+  }
+  h2 {
+    margin: 0.5rem 0 0.6rem;
+    font-size: clamp(1.4rem, 3.5vw, 1.85rem);
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  h2 a {
+    color: var(--c-text);
+    text-decoration: none;
+  }
+  /* The whole entry is the link's target, while the h2 stays the accessible name. */
+  h2 a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  li:hover h2 a {
+    text-decoration: underline;
+  }
+  .posts p {
+    max-width: 40rem;
+    margin: 0;
+    color: var(--c-muted);
+  }
+</style>

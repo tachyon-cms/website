@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>v0.1.0: infographic</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+  body { width: 1600px; }
+  .frame { padding: 80px 88px; display: grid; gap: 56px; }
+  .top { display: flex; justify-content: space-between; align-items: center; }
+  .top img { height: 44px; }
+  .eyebrow span { text-transform: none; }
+  h1 { font-size: 76px; line-height: 1.04; letter-spacing: -0.03em; }
+  .lede { margin-top: 20px; max-width: 1100px; font-size: 30px; line-height: 1.4; color: var(--muted); }
+  h2 { margin-bottom: 24px; }
+  .get { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .get .box { padding: 32px 36px; }
+  .get h3 { font-size: 30px; margin-bottom: 14px; }
+  .get p { font-size: 24px; line-height: 1.45; color: var(--muted); }
+  .get code { color: var(--hi); font-size: 21px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .grid .box { padding: 30px 32px; }
+  .grid h3 { font-size: 28px; line-height: 1.2; margin-bottom: 12px; }
+  .grid p { font-size: 22px; line-height: 1.45; color: var(--muted); }
+  .grid code { color: var(--hi); font-size: 19px; }
+  .chain { display: flex; flex-wrap: wrap; gap: 14px; padding: 0; list-style: none; }
+  .chain li { padding: 14px 22px; border: 2px solid var(--border); border-radius: 999px; font: 400 22px/1 var(--mono); color: var(--text); }
+  .note { padding: 28px 36px; border-left: 6px solid var(--pink); background: var(--surface); border-radius: 0 18px 18px 0; font-size: 26px; line-height: 1.45; }
+  .note b { color: var(--hi); }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="top"><img src="../../../public/brand/logo-dark.svg" alt=""><span class="eyebrow">Release · <span>v0.1.0</span></span></div>
+  <header>
+    <h1>v0.1.0 <span class="grad">at a glance</span></h1>
+    <p class="lede">A headless CMS in one Rust binary, backed by one Postgres database, with an API generated from the content types you define.</p>
+  </header>
+
+  <section>
+    <h2 class="eyebrow">Get it</h2>
+    <div class="get">
+      <div class="box"><h3>A binary</h3><p>Linux x86_64 and arm64, both static. macOS on Intel and Apple silicon.</p></div>
+      <div class="box"><h3>A Docker image</h3><p><code>ghcr.io/tachyon-cms/tachyoncms:v0.1.0</code><br>Set <code>TACHYON_DATABASE_URL</code> and <code>TACHYON_PUBLIC_URL</code>. It serves on port 3000.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="eyebrow">What's in it</h2>
+    <div class="grid">
+      <div class="box"><h3>Content types, over the API or in a file</h3><p><code>tachyon schema export</code>, <code>diff</code> and <code>apply</code>. Renames keep your data.</p></div>
+      <div class="box"><h3>Queries that follow your links</h3><p><code>where[author.name][equals]=Ann</code>, cursors, and map points by distance.</p></div>
+      <div class="box"><h3>Only what you ask for</h3><p><code>select</code> and <code>populate</code> trim responses. Virtual and join fields.</p></div>
+      <div class="box"><h3>Sign-in, roles and API keys</h3><p>Argon2id, breached passwords refused, lockout, scoped keys you can rotate.</p></div>
+      <div class="box"><h3>Access rules down to a field</h3><p>Compiled to SQL per caller, so a hidden document can't be found by filtering.</p></div>
+      <div class="box"><h3>Errors that point at the problem</h3><p>RFC 9457 problem+json, the exact field (<code>links.0.url</code>), a request ID.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="eyebrow">Supply chain</h2>
+    <ul class="chain">
+      <li>SPDX SBOM per archive</li>
+      <li>cosign-signed checksums</li>
+      <li>build provenance</li>
+      <li>signed image</li>
+      <li>weekly Scorecard</li>
+      <li>DCO sign-off</li>
+    </ul>
+  </section>
+
+  <p class="note"><b>Pre-alpha.</b> The admin screen, rich text, drafts and media don't exist yet, so keep it off public networks for now.</p>
+</div>
+</body>
+</html>
