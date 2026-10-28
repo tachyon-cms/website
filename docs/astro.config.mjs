@@ -61,7 +61,11 @@ export default defineConfig({
               { label: 'Project', items: ['get-involved'] },
             ],
           },
-          { label: 'Tutorials', link: '/tutorials', items: ['tutorials'] },
+          {
+            label: 'Tutorials',
+            link: '/tutorials',
+            items: [{ label: 'Overview', slug: 'tutorials' }, 'tutorials/build-a-blog'],
+          },
           { label: 'Reference', link: '/reference', items: ['reference'] },
           { label: 'CLI', link: '/cli', items: ['cli'] },
         ]),
