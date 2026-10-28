@@ -24,20 +24,26 @@ const intros = {
   'tachyon schema apply': 'See [Schema files: Apply](/schema-files#apply).',
 };
 
-// Subcommand names from the "Commands:" section, minus clap's built-in `help`.
+// Subcommand names from the "Commands:" section, minus clap's built-in `help`. A command line is
+// indented exactly two spaces; wrapped description lines are indented further, so they never match.
 const subcommands = (help) => {
   const section = help.split(/^Commands:\n/m)[1];
   if (!section) return [];
   return section
     .split(/\n(?!\s)/)[0]
     .split('\n')
-    .map((line) => line.trim().split(/\s+/)[0])
+    .map((line) => line.match(/^  (\S+)(?:\s{2,}|$)/)?.[1])
     .filter((name) => name && name !== 'help');
 };
 
+// Every --help runs before any file is touched, so a failing binary leaves the pages as they were.
 const pages = [];
 const walk = (path) => {
-  const help = execFileSync(bin, [...path, '--help'], { encoding: 'utf8' }).trimEnd();
+  const help = execFileSync(bin, [...path, '--help'], { encoding: 'utf8' })
+    .split('\n')
+    .map((line) => line.trimEnd())
+    .join('\n')
+    .trimEnd();
   pages.push({ path, help });
   for (const sub of subcommands(help)) walk([...path, sub]);
 };
@@ -48,6 +54,7 @@ for (const file of readdirSync(outDir)) if (/^tachyon(-.+)?\.md$/.test(file)) rm
 
 pages.forEach(({ path, help }, order) => {
   const command = ['tachyon', ...path].join(' ');
+  if (!intros[command]) console.warn(`gen-cli: no intro for \`${command}\`; add one to intros in gen-cli.mjs`);
   const intro = intros[command] ? `${intros[command]}\n\n` : '';
   writeFileSync(
     join(outDir, `${['tachyon', ...path].join('-')}.md`),

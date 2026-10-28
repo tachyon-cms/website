@@ -14,7 +14,7 @@ Show what applying a schema file would change, without changing anything
 Usage: tachyon schema diff [OPTIONS] <FILE>
 
 Arguments:
-  <FILE>  
+  <FILE>
 
 Options:
       --config <CONFIG>   Config file. Every setting can also come from a TACHYON_* environment variable [default: tachyon.toml]

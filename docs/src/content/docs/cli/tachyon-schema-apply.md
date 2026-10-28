@@ -14,7 +14,7 @@ Apply a schema file. Changes that delete or retype data need --yes
 Usage: tachyon schema apply [OPTIONS] <FILE>
 
 Arguments:
-  <FILE>  
+  <FILE>
 
 Options:
       --config <CONFIG>   Config file. Every setting can also come from a TACHYON_* environment variable [default: tachyon.toml]
