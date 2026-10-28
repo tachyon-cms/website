@@ -158,3 +158,13 @@ test("form-action allows the site itself, so the signup form can post", () => {
   const r = run({ "index.html": page("<p>hi</p>") });
   assert.equal(directive(r.headers, "form-action"), "form-action 'self'");
 });
+
+// Browsers check a hash against the element's text as the DOM holds it. In HTML <style>
+// that is the bytes as written; inside SVG the parser decodes entities first.
+test("hashes the text the browser checks, in HTML and in SVG", () => {
+  const r = run({ "index.html": page("<style>a::after{content:'&amp;'}</style><svg><style>b::after{content:'&amp;'}</style></svg>") });
+  assert.equal(r.code, 0, r.stderr);
+  assert.ok(r.headers.includes(sha("a::after{content:'&amp;'}")), "HTML style is raw text");
+  assert.ok(r.headers.includes(sha("b::after{content:'&'}")), "SVG style is decoded");
+  assert.ok(!r.headers.includes(sha("b::after{content:'&amp;'}")), r.headers);
+});

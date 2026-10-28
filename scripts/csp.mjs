@@ -39,6 +39,8 @@ function* elements(node) {
 }
 
 const attr = (el, name) => el.attrs.find((a) => a.name === name)?.value;
+// The element's text as the DOM holds it, which is what the browser hashes: raw in HTML
+// <script> and <style>, entity-decoded inside SVG.
 const text = (el) => el.childNodes.map((c) => c.value ?? "").join("");
 const hash = (s) => `'sha256-${createHash("sha256").update(s).digest("base64")}'`;
 
