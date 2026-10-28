@@ -1,0 +1,87 @@
+---
+import PageHero from '../components/PageHero.astro';
+import Prose from '../components/Prose.astro';
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Privacy · TachyonCMS"
+  description="What tachyoncms.com keeps about you: your email address if you sign up and confirm, and nothing else. No analytics, no cookies."
+  path="/privacy"
+>
+  <PageHero
+    eyebrow="Privacy"
+    title="Your email address, if you give it. That's all."
+    lede="No analytics, no cookies, no tracking pixels, no ad scripts. Here's what does happen, piece by piece."
+  >
+    <p class="notice">Last updated <time datetime="2026-10-28">28 October 2026</time>.</p>
+  </PageHero>
+
+  <div class="privacy">
+    <Prose>
+      <h2>Reading the site</h2>
+      <p>
+        Reading these pages sets no cookies and runs no analytics. The fonts and scripts come from tachyoncms.com itself,
+        not from anyone else's servers, apart from the signup check described below.
+      </p>
+      <p>
+        One thing is stored, in your own browser rather than with us: if you switch to the light theme, the site remembers
+        that in your browser's local storage, so the next page doesn't flash dark. It never leaves your machine. The docs
+        at docs.tachyoncms.com do the same for your theme and for small layout choices, such as which sidebar sections are
+        open.
+      </p>
+      <p>
+        The site is hosted on Cloudflare. Like any host, Cloudflare handles your IP address and the usual request details
+        to serve each page. See <a href="https://www.cloudflare.com/privacypolicy/">Cloudflare's privacy policy</a>.
+      </p>
+
+      <h2>Signing up for email</h2>
+      <p>The signup forms ask for one thing: your email address. Here's what happens to it.</p>
+      <ol>
+        <li>
+          <strong>A check that you're a person.</strong> When you start on a form, the page loads Cloudflare Turnstile,
+          and not before. Turnstile looks at signals from your browser to decide you aren't a bot, under{' '}
+          <a href="https://www.cloudflare.com/turnstile-privacy-policy/">Cloudflare's Turnstile privacy addendum</a>. When
+          you submit, our server sends Cloudflare Turnstile's answer and your IP address to confirm it.
+        </li>
+        <li>
+          <strong>A confirmation email.</strong> We send it through <a href="https://resend.com/legal/privacy-policy"
+            >Resend</a
+          >, which keeps a record of the emails it sends, as mail services do. The link inside carries your address,
+          signed so nobody else can confirm it for you, and it expires after 48 hours. Until you click it, your address
+          isn't on any list, and our code never writes it to a log.
+        </li>
+        <li>
+          <strong>Confirmed.</strong> Once you click, your address is saved as a contact in Resend, in the one list every
+          signup form joins. We use it only to write when there's a release or news of the admin.
+        </li>
+      </ol>
+      <p>
+        Nothing else goes with it: no name, no location, no record of which pages you read. We don't sell the list or
+        hand it to anyone. Resend holds it for us, and that's all.
+      </p>
+
+      <h2>Getting off the list</h2>
+      <p>
+        Write to <a href="mailto:hello@tachyoncms.com">hello@tachyoncms.com</a> from the address you signed up with, and
+        I'll delete it from Resend. The same address works for asking what we hold about you, which is at most your email
+        address and when you confirmed it.
+      </p>
+
+      <h2>If this changes</h2>
+      <p>
+        This page will say so before the site changes. Its history is public, in the{' '}
+        <a href="https://github.com/tachyon-cms/website/commits/main/src/pages/privacy.astro">website's repository</a>.
+      </p>
+    </Prose>
+  </div>
+</Base>
+
+<style>
+  .privacy {
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+  .privacy :global(.prose h2:first-child) {
+    margin-top: 0;
+  }
+</style>

@@ -1,0 +1,69 @@
+---
+import PageHero from '../components/PageHero.astro';
+import Prose from '../components/Prose.astro';
+import Base from '../layouts/Base.astro';
+---
+
+<Base
+  title="Trademark · TachyonCMS"
+  description="How you can use the TachyonCMS name and logo: freely to talk about the project, never in a way that makes your thing look like ours."
+  path="/trademark"
+>
+  <PageHero
+    eyebrow="Trademark"
+    title="Use the name to talk about us, not to be us"
+    lede="The code is yours under the MIT License. The name and the logo are how people know what's really TachyonCMS, so they come with a few plain rules."
+  >
+    <p class="notice">Last updated <time datetime="2026-10-28">28 October 2026</time>.</p>
+  </PageHero>
+
+  <div class="trademark">
+    <Prose>
+      <h2>What's covered</h2>
+      <p>
+        The name <strong>TachyonCMS</strong>, and the logo and mark you can download from the{' '}
+        <a href="/brand">brand page</a>. The MIT License covers the code. It doesn't cover the name or the logo, which is
+        why this page exists.
+      </p>
+      <p>
+        For now I look after them. Once TachyonCMS has maintainers from more than one organization, the plan in{' '}
+        <a href="https://github.com/tachyon-cms/tachyoncms/blob/main/GOVERNANCE.md">GOVERNANCE.md</a> is to move the project,
+        its trademark and its domains to a neutral foundation.
+      </p>
+
+      <h2>Go ahead, no need to ask</h2>
+      <ul>
+        <li>Write, post, talk or teach about TachyonCMS, and use the logo to illustrate it.</li>
+        <li>Say your site, plugin, starter or service works with TachyonCMS or is built on it.</li>
+        <li>Link to tachyoncms.com or the repository with the logo or the mark.</li>
+        <li>Run it, modify it and fork it, for anything, as the MIT License allows.</li>
+      </ul>
+
+      <h2>Please don't</h2>
+      <ul>
+        <li>
+          Name your product, service, company or domain so it looks like TachyonCMS itself: "TachyonCMS Cloud", say, or
+          tachyoncms-hosting.com.
+        </li>
+        <li>Suggest the project endorses, sponsors or runs your thing when it doesn't.</li>
+        <li>Ship a modified version under the TachyonCMS name. Forks are welcome; give yours a name of its own.</li>
+        <li>Change the logo's colours or shape, or blend it into your own logo.</li>
+      </ul>
+
+      <h2>Not sure?</h2>
+      <p>
+        Ask at <a href="mailto:legal@tachyoncms.com">legal@tachyoncms.com</a>. Most answers will be yes, and a quick email
+        now beats a rename later.
+      </p>
+    </Prose>
+  </div>
+</Base>
+
+<style>
+  .trademark {
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+  .trademark :global(.prose h2:first-child) {
+    margin-top: 0;
+  }
+</style>

@@ -1,0 +1,62 @@
+---
+import PageHero from '../components/PageHero.astro';
+import Prose from '../components/Prose.astro';
+import Base from '../layouts/Base.astro';
+
+const poll = 'https://github.com/tachyon-cms/tachyoncms/discussions/38';
+const options = ['Astro', 'Next.js', 'SvelteKit', 'Nuxt', 'Remix / React Router', 'Something else'];
+---
+
+<Base
+  title="Starters · TachyonCMS"
+  description="The first TachyonCMS starter will be a working site you can clone and deploy. Which framework it uses is up to a vote."
+  path="/starters"
+>
+  <PageHero
+    eyebrow="Starters"
+    title="A site you clone, wired up and ready to deploy"
+    lede="There are no starters yet. The first will be a working site connected to TachyonCMS, and you get to pick the framework it's built in."
+  >
+    <p class="roadmap">On the roadmap</p>
+  </PageHero>
+
+  <div class="starters">
+    <Prose>
+      <h2>Vote for your front end</h2>
+      <p>
+        I'll build the first starter for whichever framework most of you would actually use. The poll is open in{' '}
+        <a href={poll}>Discussion #38</a>, with these on the ballot:
+      </p>
+      <ul>{options.map((o) => <li>{o}</li>)}</ul>
+      <p>
+        Yours isn't there? Pick "Something else" and say which in a comment.
+      </p>
+      <p><a class="btn" href={poll}>Vote in the poll</a></p>
+      <h2>Until then</h2>
+      <p>
+        TachyonCMS speaks plain HTTP and JSON, so any front end that can call <code>fetch</code> can read from it today. The{' '}
+        <a href="https://docs.tachyoncms.com/querying">querying docs</a> show the requests a starter would make.
+      </p>
+    </Prose>
+  </div>
+</Base>
+
+<style>
+  .starters {
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+  .starters :global(.prose h2:first-child) {
+    margin-top: 0;
+  }
+  .roadmap {
+    display: inline-block;
+    margin: 1.5rem 0 0;
+    padding: 0.35rem 0.8rem;
+    font: 600 0.8125rem/1.2 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c-on-grad);
+    background: var(--c-grad);
+    border-radius: 999px;
+  }
+</style>

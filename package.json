@@ -14,7 +14,8 @@
     "test": "vitest run --dir test && node --test scripts/*.test.mjs",
     "test:e2e": "playwright test",
     "typecheck": "tsc -p functions/tsconfig.json",
-    "brand": "node brand/build.mjs"
+    "brand": "node brand/build.mjs",
+    "snapshot": "node --experimental-strip-types --disable-warning=ExperimentalWarning scripts/snapshot.ts"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
@@ -28,6 +29,8 @@
     "@types/react-dom": "19.3.0",
     "astro": "7.4.2",
     "fontkit": "2.0.4",
+    "micromark": "4.0.3",
+    "micromark-extension-gfm": "3.0.0",
     "parse5": "8.0.1",
     "react": "19.3.1",
     "react-dom": "19.3.1",

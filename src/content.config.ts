@@ -11,7 +11,7 @@ export const collections = {
   blog: defineCollection({
     // BLOG_DIR lets scripts/published.test.mjs build from a copy with a future post
     // in it, so the test never writes into src.
-    loader: glob({ pattern: '*.md', base: process.env.BLOG_DIR ?? './src/content/blog' }),
+    loader: glob({ pattern: '*.md', base: process.env.BLOG_DIR || './src/content/blog' }),
     schema: z.object({
       title: z.string(),
       description: z.string(),

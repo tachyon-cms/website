@@ -1,0 +1,112 @@
+---
+import PageHero from '../components/PageHero.astro';
+import Prose from '../components/Prose.astro';
+import Base from '../layouts/Base.astro';
+
+const repo = 'https://github.com/tachyon-cms/tachyoncms';
+---
+
+<Base
+  title="FAQ · TachyonCMS"
+  description="Straight answers on TachyonCMS: is it production ready, what's the license, is there a CLA, how to report a security issue, and where the admin stands."
+  path="/faq"
+>
+  <PageHero
+    eyebrow="FAQ"
+    title="Questions, answered straight"
+    lede="The things people ask first. Something missing? Ask in Discussions, or write to hello@tachyoncms.com."
+  />
+
+  <div class="faq">
+    <Prose>
+      <h2 id="production">Is it production ready?</h2>
+      <p>
+        No. TachyonCMS is pre-alpha. The content API, sign-in and access rules work today. The admin screen, rich text,
+        drafts and media don't exist yet, so keep it off public networks for now, and expect the occasional breaking change
+        between 0.x releases.
+      </p>
+
+      <h2 id="license">What's the license?</h2>
+      <p>
+        <a href={`${repo}/blob/main/LICENSE`}>MIT</a>. Use it, change it and ship it, commercially or not. It stays open
+        source, and <a href={`${repo}/blob/main/GOVERNANCE.md`}>GOVERNANCE.md</a> says so in writing.
+      </p>
+
+      <h2 id="cla">Do I have to sign a CLA to contribute?</h2>
+      <p>
+        No, and you never will. Nobody asks you to assign copyright either: you keep it. What you do instead is sign off
+        each commit under the <a href="https://developercertificate.org/">Developer Certificate of Origin</a>, which is one
+        flag: <code>git commit -s</code>. Because copyright stays spread across everyone who contributed, no single person or
+        company can take the project closed.
+      </p>
+
+      <h2 id="security">How do I report a security issue?</h2>
+      <p>
+        Privately, please, never in a public issue. Use{' '}
+        <a href={`${repo}/security/advisories/new`}>GitHub's private vulnerability reporting</a>, or email{' '}
+        <a href="mailto:security@tachyoncms.com">security@tachyoncms.com</a> if you can't use GitHub. You'll get an
+        acknowledgement within 3 working days. Fixes land on <code>main</code> and ship in the next 0.x release; older 0.x
+        releases don't get backports. <a href={`${repo}/blob/main/SECURITY.md`}>SECURITY.md</a> has the details, and{' '}
+        <a href="/security">the security page</a> covers how releases are signed.
+      </p>
+
+      <h2 id="admin">Where's the admin?</h2>
+      <p>
+        It isn't built yet. Today you work with TachyonCMS through its HTTP API and the <code>tachyon</code> command line.
+        The admin comes after rich text and blocks, drafts and scheduling, media, live preview and authoring tools, and the
+        bar for it is that anyone who has used WordPress can pick it up without training.{' '}
+        <a href="/roadmap">The roadmap</a> has the order, and <a href="/editors">the editors page</a> will email you when it's
+        ready.
+      </p>
+
+      <h2 id="runs-on">What does it run on?</h2>
+      <p>
+        One binary and one Postgres database. <a href="/releases">Releases</a> come as binaries for Linux (x86_64, arm64,
+        static) and macOS (Intel, Apple silicon), and as a Docker image at{' '}
+        <code>ghcr.io/tachyon-cms/tachyoncms</code>. Postgres is the only database it supports.
+      </p>
+
+      <h2 id="graphql">Is there GraphQL?</h2>
+      <p>
+        Not yet. The API is REST and JSON. GraphQL is one of the options in{' '}
+        <a href={`${repo}/discussions/39`}>the poll on what comes next</a>, so if you need it, vote.
+      </p>
+
+      <h2 id="fast">How fast is it?</h2>
+      <p>
+        There are no numbers on this site, on purpose. It's Rust, and published content is read from a single row, which is
+        why it should be quick. That's an argument from how it's built, not a number. I'll publish reproducible
+        benchmarks against the popular CMSs, method and all, before I quote one.
+      </p>
+
+      <h2 id="hosted">Is there a hosted version?</h2>
+      <p>No. You run it yourself, wherever a binary or a container can run next to Postgres.</p>
+
+      <h2 id="who">Who's behind it?</h2>
+      <p>
+        Me, James Conway (<a href="https://github.com/jamesconwaydev">@jamesconwaydev</a>). I started TachyonCMS, and while
+        the project is small I make the final call, in public. The <a href="/community">community page</a> has how that
+        opens up as more people join.
+      </p>
+
+      <h2 id="contact">How do I get in touch?</h2>
+      <ul>
+        <li>Questions and ideas: <a href={`${repo}/discussions`}>GitHub Discussions</a></li>
+        <li>Anything else: <a href="mailto:hello@tachyoncms.com">hello@tachyoncms.com</a></li>
+        <li>Security: <a href="mailto:security@tachyoncms.com">security@tachyoncms.com</a></li>
+        <li>Code of Conduct reports: <a href="mailto:conduct@tachyoncms.com">conduct@tachyoncms.com</a></li>
+        <li>The name and logo: <a href="mailto:legal@tachyoncms.com">legal@tachyoncms.com</a></li>
+        <li>Sponsoring: <a href="mailto:sponsors@tachyoncms.com">sponsors@tachyoncms.com</a></li>
+      </ul>
+    </Prose>
+  </div>
+</Base>
+
+<style>
+  .faq {
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+  .faq :global(.prose h2:first-child) {
+    margin-top: 0;
+  }
+</style>
