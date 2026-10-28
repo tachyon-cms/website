@@ -110,7 +110,8 @@ export async function subscribe(request: Request, env: Env): Promise<Response> {
   if (!sent.ok) {
     // Resend's error name says what kind of failure it was, such as `validation_error`. Its
     // message can quote the address, so it never reaches the log.
-    const { name } = (await sent.json().catch(() => ({}))) as { name?: unknown };
+    // The body may be anything, even the JSON literal null.
+    const name: unknown = ((await sent.json().catch(() => null)) as { name?: unknown } | null)?.name;
     console.error('signup: sending the confirmation email failed', sent.status, typeof name === 'string' ? name : 'unknown');
     return redirect(request, '/signup-problem');
   }
