@@ -16,7 +16,7 @@ const page = (body) => `<!doctype html><html><head><title>t</title></head>\n<bod
 const fakeName = "zorblaxcms";
 const fakeHash = createHash("sha256").update(fakeName).digest("hex");
 
-function run(pages, hashes = fakeHash) {
+function run(pages, hashes = `${fakeName.length}:${fakeHash}`) {
   const dir = mkdtempSync(join(tmpdir(), "claims-"));
   const dist = join(dir, "dist");
   for (const [name, html] of Object.entries(pages)) {
@@ -78,6 +78,30 @@ test("fails on a word whose hash is listed", () => {
   assert.doesNotMatch(r.out, new RegExp(fakeName, "i"));
 });
 
+test("finds the hashed name inside longer words and package names", () => {
+  for (const text of [`${fakeName}cms`, `See ${fakeName}cms.com today`, `npm i @${fakeName}cms/next`, `${fakeName.toUpperCase()}s`]) {
+    const r = run({ "index.html": page(`<p>${text}</p>`) });
+    assert.equal(r.code, 1, text);
+    assert.match(r.out, /hashed name/, text);
+    assert.doesNotMatch(r.out, new RegExp(fakeName, "i"), text);
+  }
+});
+
+test("fails on the other spellings of faster", () => {
+  for (const text of ["10× faster.", "3 times faster than it was."]) {
+    const r = run({ "index.html": page(`<p>${text}</p>`) });
+    assert.equal(r.code, 1, text);
+    assert.match(r.out, /benchmark number/, text);
+  }
+});
+
+test("checks .xml text, CDATA included", () => {
+  const r = run({ "rss.xml": `<?xml version="1.0"?><rss><channel><item>\n<description><![CDATA[<p>A seamless feed.</p>]]></description></item><title>Robust</title></channel></rss>` });
+  assert.equal(r.code, 1);
+  assert.match(r.out, /rss\.xml:2: banned word "seamless"/);
+  assert.match(r.out, /banned word "Robust"/);
+});
+
 test("checks .txt files as text", () => {
   const r = run({ "llms.txt": "line one\nA revolutionary CMS.\n" });
   assert.equal(r.code, 1);
@@ -88,5 +112,5 @@ test("the real hashes file holds only sha256 hex lines", () => {
   const lines = readFileSync(new URL("./claims.hashes", import.meta.url), "utf8")
     .split("\n").filter((l) => l && !l.startsWith("#"));
   assert.ok(lines.length >= 1);
-  for (const l of lines) assert.match(l, /^[0-9a-f]{64}$/);
+  for (const l of lines) assert.match(l, /^\d+:[0-9a-f]{64}$/);
 });

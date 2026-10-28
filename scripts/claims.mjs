@@ -2,15 +2,18 @@
 //
 //   node scripts/claims.mjs <dir>...
 //
-// Scans the visible text of every .html file (text outside script and style,
+// Scans the visible text of every .html and .xml file (text outside script and style,
 // plus alt, title, aria-label, placeholder and meta content) and every .txt
 // file. Exits 1 and prints file:line for:
 //   - a banned word from the writing rules ("navigate" and "landscape" are
 //     banned only when figurative, which a script can't tell, so they are
 //     checked by hand);
 //   - a benchmark-style number such as "4ms", "10x faster" or "40% faster";
-//   - any word whose lowercase SHA-256 is listed in scripts/claims.hashes
-//     (or the file named by CLAIMS_HASHES). The word itself is never printed.
+//   - any word containing a name whose lowercase SHA-256 is listed in
+//     scripts/claims.hashes (or the file named by CLAIMS_HASHES), one
+//     "length:hex" line per name. Every substring of that length in every word
+//     is hashed, so "<name>cms", "<name>cms.com" and "@<name>cms/next" all
+//     match. The name itself is never printed.
 
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
@@ -40,14 +43,20 @@ const banned = new RegExp(
     ")\\b",
   "gi",
 );
-const benchmark = /\b\d+(?:\.\d+)?\s?(?:ms\b|x faster\b|% faster\b)/gi;
+const benchmark = /\b\d+(?:\.\d+)?\s?(?:ms\b|x faster\b|× faster\b|% faster\b|times faster\b)/gi;
 const hidden = new Set(["script", "style", "template"]);
 const attrs = new Set(["alt", "title", "aria-label", "placeholder"]);
 
 const hashFile = process.env.CLAIMS_HASHES ?? new URL("./claims.hashes", import.meta.url);
-const hashes = new Set(
-  readFileSync(hashFile, "utf8").split("\n").map((l) => l.trim()).filter((l) => l && !l.startsWith("#")),
-);
+// length -> set of hex hashes of the names of that length.
+const hashes = new Map();
+for (const line of readFileSync(hashFile, "utf8").split("\n").map((l) => l.trim())) {
+  if (!line || line.startsWith("#")) continue;
+  const m = line.match(/^(\d+):([0-9a-f]{64})$/);
+  if (!m) throw new Error(`claims.hashes: bad line "${line}", want length:sha256hex`);
+  if (!hashes.has(+m[1])) hashes.set(+m[1], new Set());
+  hashes.get(+m[1]).add(m[2]);
+}
 
 // Yields [text, line] for each run of visible text in an HTML document.
 function* htmlText(html) {
@@ -70,14 +79,19 @@ function check(text, line, report) {
   for (const m of text.matchAll(banned)) report(at(m.index), `banned word "${m[0]}"`);
   for (const m of text.matchAll(benchmark)) report(at(m.index), `benchmark number "${m[0]}"`);
   for (const m of text.matchAll(/[\p{L}\p{N}]+/gu)) {
-    const h = createHash("sha256").update(m[0].toLowerCase()).digest("hex");
-    if (hashes.has(h)) report(at(m.index), "hashed name");
+    const word = m[0].toLowerCase();
+    const hit = [...hashes].some(([len, set]) => {
+      for (let i = 0; i + len <= word.length; i++) {
+        if (set.has(createHash("sha256").update(word.slice(i, i + len)).digest("hex"))) return true;
+      }
+    });
+    if (hit) report(at(m.index), "hashed name");
   }
 }
 
 function* files(dir) {
   for (const e of readdirSync(dir, { withFileTypes: true, recursive: true })) {
-    if (e.isFile() && /\.(html|txt)$/.test(e.name)) yield join(e.parentPath, e.name);
+    if (e.isFile() && /\.(html|txt|xml)$/.test(e.name)) yield join(e.parentPath, e.name);
   }
 }
 
@@ -97,6 +111,8 @@ for (const dir of dirs) {
       console.log(`${name}:${line}: ${what}`);
     };
     if (file.endsWith(".txt")) check(src, 1, report);
+    // The HTML parser reads CDATA as a comment; unwrap it so feed content is checked.
+    else if (file.endsWith(".xml")) for (const [t, l] of htmlText(src.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1"))) check(t, l, report);
     else for (const [text, line] of htmlText(src)) check(text, line, report);
   }
 }
