@@ -83,11 +83,11 @@ test('every signup form promises the same list', async ({ page }) => {
   for (const path of ['/', '/editors', '/product/admin']) {
     await page.goto(path);
     for (const fine of await page.locator('form.signup .fine').allTextContents()) {
-      expect(fine).toContain('releases and news of the admin');
+      expect(fine).toContain("write only when there's a release or news of the admin");
     }
   }
   await page.goto('/confirmed');
-  await expect(page.locator('main')).toContainText('releases and news of the admin');
+  await expect(page.locator('main')).toContainText("write only when there's a release or news of the admin");
 });
 
 test('nothing runs off the side of a phone', async ({ page }) => {
