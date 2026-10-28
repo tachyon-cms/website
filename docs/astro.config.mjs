@@ -3,7 +3,32 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
 import starlightLinksValidator from 'starlight-links-validator';
-import { fonts } from '../brand/fonts.mjs';
+import { docsFonts } from '../brand/fonts.mjs';
+
+// Starlight fetches the Pagefind UI (about 95 KB of script) as soon as the page is idle,
+// which Lighthouse counts against mobile first paint. This loads it when a reader reaches
+// for search instead: hovering or focusing the button, clicking it, or pressing Ctrl/Cmd+K.
+const idleSearch =
+  /const onIdle = window\.requestIdleCallback \|\| \(\(cb\) => setTimeout\(cb, 1\)\);\s*onIdle\(async \(\) => \{/;
+const searchOnDemand = {
+  name: 'search-on-demand',
+  transform(code, id) {
+    if (!/@astrojs\/starlight\/.*Search\.astro\?astro&type=script/.test(id)) return;
+    if (!idleSearch.test(code)) throw new Error('search-on-demand: Starlight Search changed; update the patch');
+    return code.replace(
+      idleSearch,
+      `let started;
+      const onDemand = (load) => {
+        const go = () => {
+          started ??= load().then(() => dialog.open && this.querySelector('input')?.focus());
+        };
+        for (const type of ['pointerenter', 'focus', 'click']) openBtn.addEventListener(type, go);
+        window.addEventListener('keydown', (e) => (e.metaKey || e.ctrlKey) && e.key === 'k' && go());
+      };
+      onDemand(async () => {`,
+    );
+  },
+};
 
 export default defineConfig({
   site: 'https://docs.tachyoncms.com',
@@ -13,7 +38,8 @@ export default defineConfig({
   // Directory output: Starlight writes .html into every link under format 'file'.
   // drop-trailing-slash serves reference/index.html at /reference all the same.
   build: { format: 'directory' },
-  fonts,
+  fonts: docsFonts,
+  vite: { plugins: [searchOnDemand] },
   integrations: [
     starlight({
       title: 'TachyonCMS',
@@ -71,7 +97,16 @@ export default defineConfig({
             link: '/reference',
             items: [
               { label: 'Overview', slug: 'reference' },
-              'reference/http-api',
+              {
+                label: 'HTTP API',
+                items: [
+                  { label: 'Overview', slug: 'reference/http-api' },
+                  'reference/http-api/auth',
+                  'reference/http-api/users-and-roles',
+                  'reference/http-api/collections',
+                  'reference/http-api/documents',
+                ],
+              },
               'reference/field-types',
               'reference/filters',
               'reference/config',

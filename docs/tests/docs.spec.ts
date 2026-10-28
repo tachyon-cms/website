@@ -69,6 +69,10 @@ test('a reference page marks the Reference tab current and shows only the Refere
   expect(hrefs).toEqual([
     '/reference',
     '/reference/http-api',
+    '/reference/http-api/auth',
+    '/reference/http-api/users-and-roles',
+    '/reference/http-api/collections',
+    '/reference/http-api/documents',
     '/reference/field-types',
     '/reference/filters',
     '/reference/config',
@@ -105,6 +109,21 @@ test('search opens with Cmd/Ctrl+K', async ({ page }) => {
   await expect(page.getByRole('dialog')).toBeVisible();
 });
 
+test('search loads its UI only when asked, then finds pages', async ({ page }) => {
+  const ui: string[] = [];
+  page.on('request', (r) => r.url().includes('/ui-core.') && ui.push(r.url()));
+  await page.goto('/');
+  await page.waitForLoadState('load');
+  await page.waitForTimeout(500);
+  expect(ui).toEqual([]);
+  await page.keyboard.press('ControlOrMeta+k');
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByRole('textbox', { name: 'Search' })).toBeFocused();
+  await dialog.getByRole('textbox', { name: 'Search' }).fill('access rules');
+  await expect(dialog.getByRole('link', { name: /access rules/i }).first()).toBeVisible();
+  expect(ui).toHaveLength(1);
+});
+
 test('"Edit page" points at the website repo', async ({ page }) => {
   await page.goto('/reference');
   await expect(page.getByRole('link', { name: /edit page/i })).toHaveAttribute(
@@ -125,7 +144,7 @@ test('dark is the default even when the OS prefers light, and the toggle switche
 
 test('no horizontal overflow on a phone', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const link of [...topics.map((t) => t.link), '/access-rules', '/deploy/docker', '/tutorials/build-a-blog', '/reference/http-api', '/reference/field-types', '/reference/errors', '/cli/tachyon-schema-apply']) {
+  for (const link of [...topics.map((t) => t.link), '/access-rules', '/deploy/docker', '/tutorials/build-a-blog', '/reference/http-api', '/reference/http-api/documents', '/reference/field-types', '/reference/errors', '/cli/tachyon-schema-apply']) {
     await page.goto(link);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow, link).toBeLessThanOrEqual(0);

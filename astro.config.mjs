@@ -20,4 +20,7 @@ export default defineConfig({
   // drops the pages marked noindex, which only make sense mid-signup.
   integrations: [sitemap({ filter: (page) => !noindex.some((p) => page.endsWith(p)) })],
   fonts,
+  // One stylesheet for the whole site: a page waits on one request, not one per component.
+  // Safe because every :global() rule is anchored to a scoped class.
+  vite: { build: { cssCodeSplit: false } },
 });
