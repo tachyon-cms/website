@@ -149,6 +149,8 @@ describe('confirm', () => {
     expect(html).toContain('method="post"');
     expect(html).toContain(`value="${token}"`);
     expect(page.headers.get('Content-Security-Policy')).toContain("frame-ancestors 'none'");
+    // The function page has no Astro build behind it, so it links a plain static stylesheet.
+    expect(html).toContain('<link rel="stylesheet" href="/signup.css">');
     const bad = await showConfirm(new Request('https://tachyoncms.com/confirm/?token=x'), env);
     expect(where(bad)).toBe('/link-expired');
   });

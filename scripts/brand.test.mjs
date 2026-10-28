@@ -23,3 +23,13 @@ test("public/ logos match brand/build.mjs output", (t) => {
     ids.add(id);
   }
 });
+
+// server/signup.ts serves its confirm page outside the Astro build, so public/signup.css
+// copies colours by value. Each must still be one of the tokens.
+test("public/signup.css uses only brand token colours", () => {
+  const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8").toLowerCase();
+  const tokens = read("../src/brand/tokens.css");
+  const colours = read("../public/signup.css").match(/#[0-9a-f]{6}\b/g) ?? [];
+  assert.ok(colours.length > 0, "found no colours in public/signup.css");
+  for (const hex of colours) assert.ok(tokens.includes(hex), `${hex} is not a brand token`);
+});

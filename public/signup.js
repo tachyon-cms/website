@@ -10,7 +10,7 @@ function load() {
     window.onTurnstileLoad = () => {
       window.turnstile.render(slot, {
         sitekey: slot.dataset.sitekey,
-        theme: 'dark',
+        theme: document.documentElement.dataset.theme === 'light' ? 'light' : 'dark',
         appearance: 'interaction-only',
         callback: resolve,
       });

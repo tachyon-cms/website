@@ -1,0 +1,48 @@
+---
+// Long-form text: policies, posts, release notes. Styles the plain elements Markdown emits.
+---
+
+<div class="prose"><slot /></div>
+
+<style>
+  .prose {
+    max-width: 42rem;
+    color: var(--c-muted);
+  }
+  .prose :global(:where(h2, h3)) {
+    color: var(--c-text);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 2.5rem 0 0.75rem;
+  }
+  .prose :global(h2) {
+    font-size: 1.625rem;
+  }
+  .prose :global(h3) {
+    font-size: 1.25rem;
+  }
+  .prose :global(:where(p, ul, ol, blockquote, pre)) {
+    margin: 0 0 1.25rem;
+  }
+  .prose :global(strong) {
+    color: var(--c-text);
+  }
+  .prose :global(code) {
+    font: 0.9em var(--font-mono);
+    color: var(--c-hi);
+  }
+  .prose :global(pre) {
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: 10px;
+  }
+  .prose :global(pre code) {
+    color: var(--c-text);
+  }
+  .prose :global(blockquote) {
+    padding-left: 1rem;
+    border-left: 3px solid var(--c-violet);
+  }
+</style>

@@ -1,17 +1,30 @@
 ---
 import { Font } from 'astro:assets';
 import '../brand/tokens.css';
-import '../styles/site.css';
+import Seo from '../components/Seo.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { initTheme } from '../scripts/theme';
 
 interface Props {
   title: string;
   description?: string;
+  /** The page's own path, such as "/roadmap", for its canonical URL. */
+  path: string;
+  /** A social card image, relative to the site. */
+  image?: string;
   /** Pages that only make sense mid-signup stay out of search results. */
   noindex?: boolean;
 }
-const { title, description = 'TachyonCMS is an open-source CMS written in Rust, built in public.', noindex = false } =
-  Astro.props;
-const canonical = new URL(Astro.url.pathname, Astro.site);
+const {
+  title,
+  description = 'TachyonCMS is an open-source CMS written in Rust, built in public.',
+  path,
+  image,
+  noindex,
+} = Astro.props;
+// Inlined so it runs before first paint; scripts/csp.mjs hashes it like any inline script.
+const themeScript = `(${initTheme.toString()})();`;
 ---
 
 <!doctype html>
@@ -19,35 +32,95 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
+    <script is:inline set:html={themeScript} />
+    <Seo title={title} description={description} path={path} image={image} noindex={noindex} />
     <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#08090c" />
+    <meta name="theme-color" content="#07060c" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <Font cssVariable="--font-sans" preload={[{ weight: 400 }]} />
     <Font cssVariable="--font-mono" />
-    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonical} />
     <slot name="head" />
   </head>
   <body>
-    <header class="brand">
-      <a href="/" aria-label="TachyonCMS home">
-        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
-          <path d="M6 7h20v4h-8v15h-4V11H6z" />
-          <path class="streak" d="M2 15h8v2H2zM0 20h10v2H0z" />
-        </svg>
-        <span>TachyonCMS</span>
-      </a>
-    </header>
-    <slot />
-    <footer>
-      <p>
-        MIT licensed · <a href="https://github.com/tachyon-cms/tachyoncms">Source on GitHub</a> · © 2026 TachyonCMS
-      </p>
-    </footer>
+    <a class="skip" href="#main">Skip to content</a>
+    <SiteHeader />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
   </body>
 </html>
+
+<style is:global>
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--c-bg);
+    color: var(--c-text);
+    font: 400 1.0625rem/1.65 var(--font-sans);
+  }
+  main {
+    flex: 1;
+    width: 100%;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  a {
+    color: var(--c-soft);
+    text-underline-offset: 3px;
+  }
+  :focus-visible {
+    outline: 2px solid var(--c-hi);
+    outline-offset: 3px;
+  }
+  h1,
+  h2,
+  h3 {
+    color: var(--c-text);
+  }
+  p {
+    margin: 0 0 1.25rem;
+  }
+  .skip {
+    position: absolute;
+    left: 16px;
+    top: -4rem;
+    z-index: 10;
+    padding: 0.6rem 1rem;
+    color: var(--c-on-grad);
+    background: var(--c-grad);
+    border-radius: 999px;
+  }
+  .skip:focus {
+    top: 1rem;
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0s !important;
+      animation-delay: 0s !important;
+      transition-duration: 0s !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>

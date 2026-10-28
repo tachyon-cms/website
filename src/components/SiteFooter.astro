@@ -1,0 +1,133 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+
+const groups = [
+  {
+    title: 'Product',
+    links: [
+      ['/why', 'Why TachyonCMS'],
+      ['/editors', 'For editors'],
+      ['/product/content-modelling', 'Content modelling'],
+      ['/product/querying', 'Querying'],
+      ['/product/access-control', 'Access control'],
+      ['/product/sign-in', 'Sign-in'],
+      ['/product/schema-as-code', 'Schema as code'],
+      ['/product/admin', 'Admin (planned)'],
+      ['/security', 'Security'],
+      ['/compare', 'Compare'],
+    ],
+  },
+  {
+    title: 'Project',
+    links: [
+      ['/roadmap', 'Roadmap'],
+      ['/releases', 'Releases'],
+      ['/blog', 'Blog'],
+      ['/community', 'Community'],
+      ['/starters', 'Starters (planned)'],
+      ['/faq', 'FAQ'],
+      ['https://docs.tachyoncms.com', 'Docs'],
+      ['https://github.com/tachyon-cms/tachyoncms', 'GitHub'],
+    ],
+  },
+  {
+    title: 'About',
+    links: [
+      ['/brand', 'Brand'],
+      ['/privacy', 'Privacy'],
+      ['/trademark', 'Trademark'],
+    ],
+  },
+  {
+    title: 'Contact',
+    links: [
+      ['mailto:hello@tachyoncms.com', 'hello@tachyoncms.com'],
+      ['mailto:security@tachyoncms.com', 'security@tachyoncms.com'],
+      ['mailto:conduct@tachyoncms.com', 'conduct@tachyoncms.com'],
+      ['mailto:legal@tachyoncms.com', 'legal@tachyoncms.com'],
+      ['mailto:sponsors@tachyoncms.com', 'sponsors@tachyoncms.com'],
+    ],
+  },
+];
+---
+
+<footer class="site-footer">
+  <div class="inner">
+    <nav aria-label="Site map">
+      {
+        groups.map(({ title, links }) => (
+          <div>
+            <h2>{title}</h2>
+            <ul>
+              {links.map(([href, label]) => (
+                <li>
+                  <a href={href}>{label}</a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))
+      }
+    </nav>
+    <div class="base">
+      <p>MIT licensed and built in public. © 2026 TachyonCMS</p>
+      <ThemeToggle />
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: 6rem;
+    border-top: 1px solid var(--c-border);
+    font-size: 0.9375rem;
+  }
+  .inner {
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 3rem 16px 2rem;
+  }
+  nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    gap: 2rem;
+  }
+  h2 {
+    margin: 0 0 0.75rem;
+    font: 600 0.8125rem/1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-soft);
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  li + li {
+    margin-top: 0.4rem;
+  }
+  a {
+    color: var(--c-muted);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+  a:hover {
+    color: var(--c-text);
+    text-decoration: underline;
+  }
+  .base {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--c-border);
+  }
+  .base p {
+    margin: 0;
+    color: var(--c-muted);
+  }
+</style>

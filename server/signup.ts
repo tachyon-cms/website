@@ -123,7 +123,7 @@ function confirmPage(token: string): string {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex">
 <title>Confirm your email · TachyonCMS</title>
-<link rel="stylesheet" href="/site.css">
+<link rel="stylesheet" href="/signup.css">
 </head>
 <body>
 <main class="notice">

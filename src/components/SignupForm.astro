@@ -1,0 +1,91 @@
+---
+// The markup public/signup.js drives: form.signup holding a .cf-turnstile slot with
+// the site key. The script loads Turnstile only once someone starts on the form.
+interface Props {
+  source: 'home' | 'editors';
+}
+const { source } = Astro.props;
+const id = `signup-email-${source}`;
+
+// Public by design: the site key only identifies the widget. Cloudflare's always-pass test
+// key stands in locally; a production build without the real one fails rather than ship it.
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? (import.meta.env.CF_PAGES ? undefined : '1x00000000000000000000AA');
+if (!siteKey) throw new Error('PUBLIC_TURNSTILE_SITE_KEY must be set for a Cloudflare Pages build');
+---
+
+<form class="signup" method="post" action="/api/subscribe">
+  <label for={id}>Tell me when it launches</label>
+  <div class="row">
+    <input id={id} name="email" type="email" autocomplete="email" required placeholder="you@example.com" />
+    <button type="submit">Notify me</button>
+  </div>
+  <div class="trap" aria-hidden="true">
+    <label for={`${id}-trap`}>Leave this empty</label>
+    <input id={`${id}-trap`} name="website" type="text" tabindex="-1" autocomplete="off" />
+  </div>
+  <div class="cf-turnstile" data-sitekey={siteKey}></div>
+  <p class="fine">We'll send one email to confirm your address, then write only about the launch. One click unsubscribes.</p>
+</form>
+<script is:inline src="/signup.js" defer></script>
+
+<style>
+  .signup {
+    max-width: 36rem;
+    padding: 1.5rem;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: 14px;
+  }
+  label {
+    display: block;
+    margin-bottom: 0.75rem;
+    font-weight: 600;
+  }
+  .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  input[type='email'] {
+    flex: 1 1 14rem;
+    min-width: 0;
+    padding: 0.8rem 1rem;
+    font: inherit;
+    color: var(--c-text);
+    background: var(--c-bg);
+    border: 1px solid var(--c-border);
+    border-radius: 999px;
+  }
+  input[type='email']::placeholder {
+    color: var(--c-muted);
+  }
+  button {
+    padding: 0.8rem 1.4rem;
+    font: inherit;
+    font-weight: 600;
+    color: var(--c-on-grad);
+    background: var(--c-grad);
+    border: 0;
+    border-radius: 999px;
+    cursor: pointer;
+  }
+  button:hover {
+    filter: brightness(1.1);
+  }
+  .fine {
+    margin: 0.9rem 0 0;
+    font-size: 0.875rem;
+    color: var(--c-muted);
+  }
+  .cf-turnstile:not(:empty) {
+    margin-top: 0.9rem;
+  }
+  /* Hidden from people, still in the form for bots that fill every field. */
+  .trap {
+    position: absolute;
+    left: -10000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+</style>
