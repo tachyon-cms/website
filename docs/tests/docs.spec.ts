@@ -60,6 +60,23 @@ test('a tutorial marks the Tutorials tab current and shows only the Tutorials si
   await expect(sidebar.locator('a[aria-current="page"]')).toHaveAttribute('href', '/tutorials/build-a-blog');
 });
 
+test('a reference page marks the Reference tab current and shows only the Reference sidebar', async ({ page }) => {
+  await page.goto('/reference/http-api');
+  await expect(tabs(page).locator('[aria-current]')).toHaveCount(1);
+  await expect(tabs(page).getByRole('link', { name: 'Reference', exact: true })).toHaveAttribute('aria-current', 'true');
+  const sidebar = page.getByRole('navigation', { name: 'Main' });
+  const hrefs = await sidebar.getByRole('link').evaluateAll((links) => links.map((a) => a.getAttribute('href')));
+  expect(hrefs).toEqual([
+    '/reference',
+    '/reference/http-api',
+    '/reference/field-types',
+    '/reference/filters',
+    '/reference/config',
+    '/reference/errors',
+  ]);
+  await expect(sidebar.locator('a[aria-current="page"]')).toHaveAttribute('href', '/reference/http-api');
+});
+
 test('search opens with Cmd/Ctrl+K', async ({ page }) => {
   await page.goto('/');
   // The shortcut is wired up by a module script; wait for it before pressing.
@@ -88,7 +105,7 @@ test('dark is the default even when the OS prefers light, and the toggle switche
 
 test('no horizontal overflow on a phone', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const link of [...topics.map((t) => t.link), '/access-rules', '/deploy/docker', '/tutorials/build-a-blog']) {
+  for (const link of [...topics.map((t) => t.link), '/access-rules', '/deploy/docker', '/tutorials/build-a-blog', '/reference/http-api', '/reference/field-types', '/reference/errors']) {
     await page.goto(link);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow, link).toBeLessThanOrEqual(0);

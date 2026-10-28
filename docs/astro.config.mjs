@@ -66,7 +66,18 @@ export default defineConfig({
             link: '/tutorials',
             items: [{ label: 'Overview', slug: 'tutorials' }, 'tutorials/build-a-blog'],
           },
-          { label: 'Reference', link: '/reference', items: ['reference'] },
+          {
+            label: 'Reference',
+            link: '/reference',
+            items: [
+              { label: 'Overview', slug: 'reference' },
+              'reference/http-api',
+              'reference/field-types',
+              'reference/filters',
+              'reference/config',
+              'reference/errors',
+            ],
+          },
           { label: 'CLI', link: '/cli', items: ['cli'] },
         ]),
         // Fails the build on a broken internal link or #anchor.
