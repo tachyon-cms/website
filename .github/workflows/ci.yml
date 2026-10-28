@@ -91,7 +91,15 @@ jobs:
       - name: Lighthouse (mobile)
         run: npx -y @lhci/cli@0.15.1 autorun --config=lighthouserc.mobile.json
       - name: Lighthouse (desktop)
+        if: ${{ !cancelled() }}
         run: npx -y @lhci/cli@0.15.1 autorun --config=lighthouserc.json
+      - name: Keep the reports when a score misses
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse-reports
+          path: .lighthouseci
+          retention-days: 7
 
   # The CLI pages are committed; they must match the pinned release's --help.
   # Its own job: it runs a downloaded binary, so it gets no token, no npm install and no cache.
