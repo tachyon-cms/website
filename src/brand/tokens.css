@@ -15,6 +15,7 @@
   --c-hi: #f0abfc;
   --c-soft: #c3a6ff;
   --c-ok: #4ade80;
+  /* Text on --c-grad buttons, in both themes. */
   --c-on-grad: #ffffff;
   --c-grad: linear-gradient(90deg, var(--c-violet), var(--c-pink));
 }

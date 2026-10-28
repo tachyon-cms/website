@@ -1,6 +1,6 @@
 // Draws the TachyonCMS mark and logo and writes them to public/:
 //
-//   node brand/build.mjs
+//   node brand/build.mjs [outDir]    (outDir defaults to public/)
 //
 // The mark is a "T" with speed lines, filled with the violet-to-pink gradient.
 // The wordmark is "TachyonCMS" set in Instrument Sans 700 and converted to
@@ -8,12 +8,13 @@
 // <linearGradient>, never <style> or style="", because the CSP refuses both.
 
 import { mkdirSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
 import * as fontkit from "fontkit";
 import { optimize } from "svgo";
 
 const require = createRequire(import.meta.url);
-const out = (path) => new URL(`../public/${path}`, import.meta.url);
 
 // Graphics need 3:1 on their background (WCAG 1.4.11); scripts/contrast.test.mjs
 // checks every stop below against the theme it is drawn for.
@@ -30,8 +31,10 @@ const MARK = [
   '<rect x="6" y="23" width="7.5" height="2" rx="1"/>',
 ].join("");
 
-const gradient = ({ from, to }) =>
-  `<defs><linearGradient id="g" x1="1" y1="7" x2="27" y2="26" gradientUnits="userSpaceOnUse">` +
+// Each file gets its own gradient id, so two of them inlined on one page don't
+// paint with each other's gradient.
+const gradient = (id, { from, to }) =>
+  `<defs><linearGradient id="${id}" x1="1" y1="7" x2="27" y2="26" gradientUnits="userSpaceOnUse">` +
   `<stop offset="0" stop-color="${from}"/><stop offset="1" stop-color="${to}"/></linearGradient></defs>`;
 
 // fontkit lays the text out with the font's own kerning; each glyph's outline is
@@ -50,21 +53,31 @@ function wordmark(text, x, baseline, capHeight) {
 
 function svg(width, height, body) {
   const raw = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">${body}</svg>`;
-  return optimize(raw, { multipass: true, floatPrecision: 2 }).data + "\n";
+  const plugins = [{ name: "preset-default", params: { overrides: { cleanupIds: false } } }];
+  return optimize(raw, { multipass: true, floatPrecision: 2, plugins }).data + "\n";
 }
 
 // The T's top and baseline (7 and 26) set the wordmark's cap height and baseline.
 const word = wordmark("TachyonCMS", 34, 26, 19);
 const logoWidth = Math.ceil(word.width + 1);
+const mark = (id, t) => `${gradient(id, t)}<g fill="url(#${id})">${MARK}</g>`;
 
-mkdirSync(out("brand"), { recursive: true });
-for (const [name, t] of Object.entries(themes)) {
-  const mark = `${gradient(t)}<g fill="url(#g)">${MARK}</g>`;
-  writeFileSync(out(`brand/mark-${name}.svg`), svg(32, 32, mark));
-  writeFileSync(out(`brand/logo-${name}.svg`), svg(logoWidth, 32, `${mark}<path fill="${t.text}" d="${word.d}"/>`));
+export function build(dir) {
+  mkdirSync(join(dir, "brand"), { recursive: true });
+  for (const [name, t] of Object.entries(themes)) {
+    writeFileSync(join(dir, `brand/mark-${name}.svg`), svg(32, 32, mark(`tc-mark-${name}`, t)));
+    writeFileSync(
+      join(dir, `brand/logo-${name}.svg`),
+      svg(logoWidth, 32, `${mark(`tc-logo-${name}`, t)}<path fill="${t.text}" d="${word.d}"/>`),
+    );
+  }
+  // Browser tabs can be light or dark, so the favicon carries its own dark tile.
+  writeFileSync(
+    join(dir, "favicon.svg"),
+    svg(32, 32, `<rect width="32" height="32" rx="7" fill="#07060c"/>${mark("tc-favicon", themes.dark)}`),
+  );
 }
-// Browser tabs can be light or dark, so the favicon carries its own dark tile.
-writeFileSync(
-  out("favicon.svg"),
-  svg(32, 32, `${gradient(themes.dark)}<rect width="32" height="32" rx="7" fill="#07060c"/><g fill="url(#g)">${MARK}</g>`),
-);
+
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  build(process.argv[2] ?? fileURLToPath(new URL("../public", import.meta.url)));
+}

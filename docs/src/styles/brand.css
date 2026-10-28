@@ -19,6 +19,7 @@
   --sl-color-gray-4: #6f6391;
   --sl-color-gray-5: var(--c-border);
   --sl-color-gray-6: var(--c-surface);
+  --sl-color-gray-7: var(--c-surface);
   --sl-color-black: var(--c-bg);
 }
 

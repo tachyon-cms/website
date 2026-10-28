@@ -75,6 +75,7 @@ for (const [name, { theme, sl, link, invert }] of Object.entries(docsThemes)) {
     ["--sl-color-white", "--sl-color-black"], ["--sl-color-gray-1", "--sl-color-black"],
     ["--sl-color-gray-2", "--sl-color-black"], ["--sl-color-gray-3", "--sl-color-black"],
     ["--sl-color-gray-2", "--sl-color-gray-6"], ["--sl-color-gray-3", "--sl-color-gray-6"],
+    ["--sl-color-gray-2", "--sl-color-gray-7"], ["--sl-color-gray-3", "--sl-color-gray-7"],
     ["--sl-color-accent-high", "--sl-color-accent-low"],
     [link, "--sl-color-black"], [link, "--sl-color-gray-6"], [invert, link],
   ];
