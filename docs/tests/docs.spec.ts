@@ -1,0 +1,70 @@
+import { expect, test } from '@playwright/test';
+
+const topics = [
+  { label: 'Docs', link: '/' },
+  { label: 'Tutorials', link: '/tutorials' },
+  { label: 'Reference', link: '/reference' },
+  { label: 'CLI', link: '/cli' },
+];
+
+const tabs = (page: import('@playwright/test').Page) => page.getByRole('navigation', { name: 'Topics' });
+
+test('each topic tab links to its topic root', async ({ page }) => {
+  await page.goto('/');
+  for (const { label, link } of topics) {
+    await expect(tabs(page).getByRole('link', { name: label, exact: true })).toHaveAttribute('href', link);
+  }
+});
+
+for (const { label, link } of topics) {
+  test(`the ${label} tab is the current one on ${link}`, async ({ page }) => {
+    await page.goto(link);
+    await expect(tabs(page).locator('[aria-current]')).toHaveCount(1);
+    await expect(tabs(page).getByRole('link', { name: label, exact: true })).toHaveAttribute('aria-current', 'page');
+  });
+}
+
+test('a page under /reference shows only the Reference sidebar', async ({ page }) => {
+  await page.goto('/reference');
+  const hrefs = await page
+    .getByRole('navigation', { name: 'Main' })
+    .getByRole('link')
+    .evaluateAll((links) => links.map((a) => a.getAttribute('href')));
+  expect(hrefs.length).toBeGreaterThan(0);
+  for (const href of hrefs) expect(href).toMatch(/^\/reference(\/|$)/);
+});
+
+test('search opens with Cmd/Ctrl+K', async ({ page }) => {
+  await page.goto('/');
+  // The shortcut is wired up by a module script; wait for it before pressing.
+  await page.waitForLoadState('load');
+  await page.keyboard.press('ControlOrMeta+k');
+  await expect(page.getByRole('dialog')).toBeVisible();
+});
+
+test('"Edit page" points at the website repo', async ({ page }) => {
+  await page.goto('/reference');
+  await expect(page.getByRole('link', { name: /edit page/i })).toHaveAttribute(
+    'href',
+    /^https:\/\/github\.com\/tachyon-cms\/website\/edit\/main\/docs\//,
+  );
+});
+
+test('dark is the default even when the OS prefers light, and the toggle switches', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.locator('[data-theme-toggle]:visible').click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.goto('/cli');
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+});
+
+test('no horizontal overflow on a phone', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const { link } of topics) {
+    await page.goto(link);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow, link).toBeLessThanOrEqual(0);
+  }
+});

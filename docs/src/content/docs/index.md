@@ -1,6 +1,6 @@
 ---
 title: TachyonCMS docs
-description: Documentation for TachyonCMS.
+description: Install, run and configure TachyonCMS.
 ---
 
-The TachyonCMS documentation lives here.
+These pages cover installing, running and configuring TachyonCMS.

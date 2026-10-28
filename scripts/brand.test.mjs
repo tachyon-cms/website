@@ -24,6 +24,12 @@ test("public/ logos match brand/build.mjs output", (t) => {
   }
 });
 
+// Starlight serves the docs favicon from docs/public, so it keeps a copy of the site's.
+test("docs/public/favicon.svg matches the site's", () => {
+  const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
+  assert.equal(read("../docs/public/favicon.svg"), read("../public/favicon.svg"), "copy public/favicon.svg to docs/public/");
+});
+
 // server/signup.ts serves its confirm page outside the Astro build, so public/signup.css
 // copies colours by value. Each must still be one of the tokens.
 test("public/signup.css uses only brand token colours", () => {

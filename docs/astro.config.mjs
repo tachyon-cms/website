@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
+import starlightSidebarTopics from 'starlight-sidebar-topics';
 import { fonts } from '../brand/fonts.mjs';
 
 export default defineConfig({
@@ -8,15 +9,39 @@ export default defineConfig({
   output: 'static',
   // Matches the Worker's html_handling: drop-trailing-slash (wrangler.jsonc).
   trailingSlash: 'never',
-  build: { format: 'file' },
+  // Directory output: Starlight writes .html into every link under format 'file'.
+  // drop-trailing-slash serves reference/index.html at /reference all the same.
+  build: { format: 'directory' },
   fonts,
   integrations: [
     starlight({
       title: 'TachyonCMS',
+      logo: {
+        dark: '../public/brand/logo-dark.svg',
+        light: '../public/brand/logo-light.svg',
+        replacesTitle: true,
+      },
       customCss: ['./src/styles/brand.css'],
-      // Adds the <Font> tags; Starlight has no other hook into the head for them.
-      components: { Head: './src/components/Head.astro' },
+      components: {
+        // Adds the <Font> tags; Starlight has no other hook into the head for them.
+        Head: './src/components/Head.astro',
+        // The topics render as tabs in the header, so the sidebar drops the plugin's topic list.
+        Header: './src/components/TopicTabs.astro',
+        Sidebar: '@astrojs/starlight/components/Sidebar.astro',
+        // Dark by default whatever the OS prefers, with the site's light toggle.
+        ThemeProvider: './src/components/ThemeProvider.astro',
+        ThemeSelect: './src/components/ThemeSelect.astro',
+      },
       editLink: { baseUrl: 'https://github.com/tachyon-cms/website/edit/main/docs/' },
+      plugins: [
+        // Every page lives under one of these four roots. Each topic gets its own sidebar.
+        starlightSidebarTopics([
+          { label: 'Docs', link: '/', items: ['index'] },
+          { label: 'Tutorials', link: '/tutorials', items: ['tutorials'] },
+          { label: 'Reference', link: '/reference', items: ['reference'] },
+          { label: 'CLI', link: '/cli', items: ['cli'] },
+        ]),
+      ],
     }),
   ],
 });

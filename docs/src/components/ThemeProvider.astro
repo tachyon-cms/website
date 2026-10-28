@@ -1,0 +1,9 @@
+---
+// Replaces Starlight's provider, which follows the OS. Dark is the default here, as on
+// the site, and a saved choice applies before first paint. scripts/csp.mjs hashes it.
+import { initTheme } from '../../../src/scripts/theme';
+
+const themeScript = `(${initTheme.toString()})();`;
+---
+
+<script is:inline set:html={themeScript} />
