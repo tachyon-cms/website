@@ -1,0 +1,185 @@
+---
+// A page built from one entry in the features collection: the hero, then whatever
+// the page puts in its default slot (a diagram or a code sample), then the entry's
+// copy, the docs it hands over to, and the v0.1.0 sources its facts came from.
+import { getEntry, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Icon from './Icon.astro';
+import PageHero from './PageHero.astro';
+import Prose from './Prose.astro';
+
+interface Props {
+  /** The entry's id, which is its file name in src/content/features. */
+  id: string;
+  /** The page's short name: the eyebrow, and the first half of the <title>. */
+  name: string;
+  path: string;
+  /** Docs pages to hand over to, as [slug, label]. The slug follows docs.tachyoncms.com/. */
+  docs?: [string, string][];
+}
+const { id, name, path, docs = [] } = Astro.props;
+const entry = await getEntry('features', id);
+if (!entry) throw new Error(`FeaturePage: no feature called ${id}`);
+const { Content } = await render(entry);
+const { title, summary, status, sources } = entry.data;
+
+const repo = 'https://github.com/tachyon-cms/tachyoncms';
+const sourceHref = (s: string) => (s.startsWith('https://') ? s : `${repo}/blob/v0.1.0/${s}`);
+const sourceLabel = (s: string) => s.replace(/^https:\/\/(www\.)?/, '').replace('#', ' § ');
+
+const product = [
+  ['/product/content-modelling', 'Content modelling'],
+  ['/product/querying', 'Querying'],
+  ['/product/access-control', 'Access control'],
+  ['/product/sign-in', 'Sign-in'],
+  ['/product/schema-as-code', 'Schema as code'],
+  ['/product/admin', 'The admin'],
+  ['/security', 'Security'],
+];
+const inProduct = product.some(([href]) => href === path);
+---
+
+<Base title={`${name} · TachyonCMS`} description={summary} path={path}>
+  {
+    inProduct && (
+      <nav class="product-nav" aria-label="Product">
+        {product.map(([href, label]) => (
+          <a href={href} aria-current={href === path ? 'page' : undefined}>
+            {label}
+          </a>
+        ))}
+      </nav>
+    )
+  }
+  <PageHero eyebrow={name} title={title} lede={summary}>
+    {status === 'headed' && <p class="roadmap">On the roadmap</p>}
+  </PageHero>
+
+  <div class="feature">
+    {Astro.slots.has('default') && <div class="sample"><slot /></div>}
+    <Prose><Content /></Prose>
+    <slot name="after" />
+    {
+      docs.length > 0 && (
+        <section class="docs" aria-labelledby="docs-title">
+          <h2 id="docs-title">In the docs</h2>
+          <ul>
+            {docs.map(([slug, label]) => (
+              <li>
+                <a href={`https://docs.tachyoncms.com/${slug}`}>
+                  {label} <Icon name="FiArrowRight" size={16} />
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+    <section class="sources" aria-labelledby="sources-title">
+      <h2 id="sources-title">{status === 'today' ? 'Checked against v0.1.0' : 'Where this comes from'}</h2>
+      <p>
+        Every claim on this page comes from one of these. If one's out of date,{' '}
+        <a href="https://github.com/tachyon-cms/tachyoncms/issues">tell me in an issue</a>.
+      </p>
+      <ul>
+        {
+          sources.map((s) => (
+            <li>
+              <a href={sourceHref(s)}>{sourceLabel(s)}</a>
+            </li>
+          ))
+        }
+      </ul>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .product-nav {
+    display: flex;
+    gap: 0.4rem;
+    margin: 1.5rem -16px 0;
+    padding: 0 16px 0.4rem;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .product-nav a {
+    flex: none;
+    padding: 0.4rem 0.85rem;
+    font-size: 0.875rem;
+    color: var(--c-muted);
+    text-decoration: none;
+    border: 1px solid var(--c-border);
+    border-radius: 999px;
+  }
+  .product-nav a:hover {
+    color: var(--c-text);
+    border-color: var(--c-soft);
+  }
+  .product-nav a[aria-current='page'] {
+    color: var(--c-text);
+    background: var(--c-surface);
+    border-color: var(--c-soft);
+  }
+  .roadmap {
+    display: inline-block;
+    margin: 1.5rem 0 0;
+    padding: 0.35rem 0.8rem;
+    font: 600 0.8125rem/1.2 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c-on-grad);
+    background: var(--c-grad);
+    border-radius: 999px;
+  }
+  .feature {
+    display: grid;
+    gap: 3rem;
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+  .docs,
+  .sources {
+    max-width: 42rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--c-border);
+  }
+  .docs h2,
+  .sources h2 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .docs ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+  }
+  .docs a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.55rem 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: 999px;
+  }
+  .docs a:hover {
+    border-color: var(--c-soft);
+  }
+  .sources p {
+    font-size: 0.9375rem;
+    color: var(--c-muted);
+  }
+  .sources li {
+    padding: 0.3rem 0;
+    font: 0.8125rem/1.5 var(--font-mono);
+    overflow-wrap: anywhere;
+  }
+</style>

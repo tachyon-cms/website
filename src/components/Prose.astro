@@ -41,6 +41,25 @@
   .prose :global(pre code) {
     color: var(--c-text);
   }
+  .prose :global(table) {
+    width: 100%;
+    margin: 0 0 1.25rem;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+  .prose :global(:where(th, td)) {
+    padding: 0.6rem 0.75rem 0.6rem 0;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--c-border);
+  }
+  .prose :global(th) {
+    color: var(--c-text);
+  }
+  .prose :global(td:first-child) {
+    color: var(--c-text);
+    white-space: nowrap;
+  }
   .prose :global(blockquote) {
     padding-left: 1rem;
     border-left: 3px solid var(--c-violet);

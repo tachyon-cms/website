@@ -1,0 +1,62 @@
+---
+import FeaturePage from '../../components/FeaturePage.astro';
+import Exchange from '../../components/diagrams/Exchange.astro';
+---
+
+<FeaturePage
+  id="sign-in"
+  name="Sign-in"
+  path="/product/sign-in"
+  docs={[
+    ['sign-in', 'Signing in'],
+    ['api-keys', 'API keys'],
+    ['roles', 'Roles'],
+    ['reference/config', 'Every setting'],
+  ]}
+>
+  <Exchange
+    id="keys"
+    loop={9500}
+    caption="Real requests to TachyonCMS v0.1.0. Responses are trimmed, and the new key is cut short."
+    panes={[
+      {
+        head: 'A key for the website, shown once',
+        lines: [
+          { text: 'POST /api/auth/keys', at: 0, class: 'q' },
+          { text: 'Authorization: Bearer tcs_…', at: 0, class: 'q' },
+          { text: '{ "name": "website",', at: 0 },
+          { text: '  "scopes": ["articles:read"] }', at: 0 },
+          { text: '', at: 900 },
+          { text: '{ "key": "tcy_uhffr46z_…",', at: 900, class: 'mark' },
+          { text: '  "scopes": ["articles:read"],', at: 900 },
+          { text: '  "expiresAt": null, … }', at: 900 },
+        ],
+      },
+      {
+        head: 'The key tries to do more',
+        lines: [
+          { text: 'POST /api/articles', at: 2200, class: 'q' },
+          { text: 'Authorization: Bearer tcy_uhffr46z_…', at: 2200, class: 'q' },
+          { text: "403 You don't have permission to do this.", at: 2900, class: 'warn' },
+          { text: '', at: 3800 },
+          { text: 'POST /api/auth/keys', at: 3800, class: 'q' },
+          { text: 'Authorization: Bearer tcy_uhffr46z_…', at: 3800, class: 'q' },
+          { text: '403 Manage API keys from a signed-in', at: 4500, class: 'warn' },
+          { text: '    session, not with another key.', at: 4500, class: 'warn' },
+        ],
+      },
+      {
+        head: 'A password from a breach',
+        lines: [
+          { text: 'POST /api/users', at: 5600, class: 'q' },
+          { text: '{ "password": "password1234", … }', at: 5600 },
+          { text: '', at: 6300 },
+          { text: '422 { "errors": [{', at: 6300, class: 'warn' },
+          { text: '  "message": "This password has appeared', at: 6300, class: 'mark' },
+          { text: '    in a data breach. Choose another.",', at: 6300, class: 'mark' },
+          { text: '  "path": "password" }], … }', at: 6300 },
+        ],
+      },
+    ]}
+  />
+</FeaturePage>

@@ -1,0 +1,36 @@
+---
+// Panes of code side by side: a request, what came back, and so on. Lines with
+// `at` play in like the home page diagrams; without JS they simply show.
+import Code, { type Line } from './Code.astro';
+import Diagram from './Diagram.astro';
+
+interface Props {
+  id: string;
+  caption: string;
+  panes: { head: string; lines: Line[] }[];
+  loop?: number;
+}
+const { id, caption, panes, loop = 8000 } = Astro.props;
+---
+
+<Diagram id={id} loop={loop} caption={caption}>
+  <div class="exchange">
+    {
+      panes.map(({ head, lines }) => (
+        <div class="pane">
+          <p class="pane-head">{head}</p>
+          <Code lines={lines} />
+        </div>
+      ))
+    }
+  </div>
+</Diagram>
+
+<style>
+  .exchange {
+    display: grid;
+    gap: 0.9rem;
+    align-items: start;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr));
+  }
+</style>

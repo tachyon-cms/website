@@ -1,0 +1,25 @@
+---
+import FeaturePage from '../../components/FeaturePage.astro';
+import SignupForm from '../../components/SignupForm.astro';
+---
+
+<FeaturePage id="admin" name="The admin" path="/product/admin">
+  <div slot="after" class="follow">
+    <SignupForm source="editors" />
+    <p>
+      Or <a href="https://github.com/tachyon-cms/tachyoncms">watch the repo</a> and see it take shape, one pull request
+      at a time.
+    </p>
+  </div>
+</FeaturePage>
+
+<style>
+  .follow {
+    display: grid;
+    gap: 1rem;
+  }
+  .follow p {
+    margin: 0;
+    color: var(--c-muted);
+  }
+</style>
