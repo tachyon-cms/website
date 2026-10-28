@@ -134,7 +134,8 @@ test("--allow-script adds the origin beside the hashes, never unsafe-inline", ()
   assert.equal(r.code, 0, r.stderr);
   const scriptSrc = directive(r.headers, "script-src");
   assert.ok(scriptSrc, r.headers);
-  assert.ok(scriptSrc.split(" ").includes(turnstile), scriptSrc);
+  // An exact source token, not a substring (a Set lookup also keeps CodeQL from reading it as one).
+  assert.ok(new Set(scriptSrc.split(" ")).has(turnstile), scriptSrc);
   assert.ok(scriptSrc.includes(sha("a()")), scriptSrc);
   assert.ok(!r.headers.includes("unsafe-inline"), r.headers);
 });
