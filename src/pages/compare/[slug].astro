@@ -17,10 +17,15 @@ const path = `/compare/${entry.id}`;
 const readme = 'https://github.com/tachyon-cms/tachyoncms/blob/v0.1.0/README.md';
 const day = checked.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 // Cells are plain strings; `backticks` mark code, as in Markdown.
-const code = (text: string) => text.split('`');
+const escape = (text: string) => text.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+const withCode = (text: string) =>
+  text
+    .split('`')
+    .map((part, i) => (i % 2 ? `<code>${escape(part)}</code>` : escape(part)))
+    .join('');
 ---
 
-<Base title={`TachyonCMS vs ${name}`} description={summary} path={path}>
+<Base title={`TachyonCMS and ${name} compared · TachyonCMS`} description={summary} path={path}>
   <PageHero eyebrow="Compare" title={`TachyonCMS and ${name}`} lede={summary} />
 
   <div class="compare">
@@ -43,10 +48,10 @@ const code = (text: string) => text.split('`');
             <tr>
               <th scope="row">{row.topic}</th>
               <td data-label="TachyonCMS v0.1.0">
-                {code(row.tachyon).map((part, i) => (i % 2 ? <code>{part}</code> : part))}
+                <Fragment set:html={withCode(row.tachyon)} />
               </td>
               <td data-label={name}>
-                {code(row.them).map((part, i) => (i % 2 ? <code>{part}</code> : part))}{' '}
+                <Fragment set:html={withCode(row.them)} />{' '}
                 <a class="src" href={row.source}>
                   Source<span class="sr-only">: {name}, {row.topic.toLowerCase()}</span>
                 </a>
@@ -60,7 +65,7 @@ const code = (text: string) => text.split('`');
     <Prose>
       <h2>Where TachyonCMS isn't there yet</h2>
       <ul>
-        {notYet.map((item) => <li>{code(item).map((part, i) => (i % 2 ? <code>{part}</code> : part))}</li>)}
+        {notYet.map((item) => <li><Fragment set:html={withCode(item)} /></li>)}
       </ul>
       <Content />
     </Prose>

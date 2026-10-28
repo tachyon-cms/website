@@ -1,11 +1,11 @@
 ---
 name: Sanity
-summary: "Sanity pairs an editor you shape in code with a content store it runs for you. TachyonCMS keeps everything in your own Postgres, and doesn't have an editor yet."
+summary: "Sanity pairs an editor you shape in code with its Content Lake, where your content is stored. TachyonCMS keeps everything in your own Postgres, and doesn't have an editor yet."
 checked: 2026-10-28
 rows:
   - topic: Where content lives
     tachyon: In your own PostgreSQL database, on a server you run.
-    them: Sanity stores it as JSON documents in its Content Lake.
+    them: In Sanity's Content Lake, which stores it as structured JSON documents.
     source: https://www.sanity.io/docs/content-lake
   - topic: Editing
     tachyon: No admin screen yet. You work over HTTP or with the `tachyon` command.
@@ -45,7 +45,7 @@ notYet:
 
 ## Who should pick which
 
-**Pick Sanity** if a team of editors needs to work in the same documents at once, in an editor you can bend to fit your content, and you're happy for that content to live on Sanity's service. The free plan goes a long way for a small team, and none of that collaboration exists in TachyonCMS.
+**Pick Sanity** if a team of editors needs to work in the same documents at once, in an editor you can bend to fit your content, and you're happy for that content to live in Sanity's Content Lake. The free plan goes a long way for a small team, and none of that collaboration exists in TachyonCMS.
 
 **Pick TachyonCMS** if the content has to sit in a database you run, every line of the stack has to be MIT, or you want custom roles and field-level rules on a free install. You'll be building against an API for now, because the admin is still on its way.
 

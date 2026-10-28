@@ -1,33 +1,43 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 
-// Each comparison cites the other product's own site for every claim about it.
-const products: Record<string, string[]> = {
-  wordpress: ['wordpress.org', 'developer.wordpress.org', 'wordpress.com'],
-  strapi: ['strapi.io', 'docs.strapi.io'],
-  contentful: ['www.contentful.com'],
-  sanity: ['www.sanity.io', 'github.com'],
-  directus: ['directus.com', 'github.com'],
+// Each comparison cites the other product's own site for every claim about it:
+// one of its hosts, or its own organisation on GitHub.
+const products: Record<string, { hosts: string[]; github: string }> = {
+  wordpress: { hosts: ['wordpress.org', 'developer.wordpress.org', 'wordpress.com'], github: '/WordPress/' },
+  strapi: { hosts: ['strapi.io', 'docs.strapi.io'], github: '/strapi/' },
+  contentful: { hosts: ['www.contentful.com'], github: '/contentful/' },
+  sanity: { hosts: ['www.sanity.io'], github: '/sanity-io/' },
+  directus: { hosts: ['directus.com'], github: '/directus/' },
 };
 
-const frontmatter = (slug: string) => {
-  const md = readFileSync(new URL(`../src/content/compare/${slug}.md`, import.meta.url), 'utf8');
-  return parse(md.split(/^---$/m)[1]);
-};
+const dir = new URL('../src/content/compare/', import.meta.url);
+const slugs = readdirSync(dir)
+  .filter((f) => f.endsWith('.md'))
+  .map((f) => f.slice(0, -3));
+const frontmatter = (slug: string) => parse(readFileSync(new URL(`${slug}.md`, dir), 'utf8').split(/^---$/m)[1]);
 
 const day = 24 * 60 * 60 * 1000;
 
-describe.each(Object.keys(products))('compare/%s', (slug) => {
+it('has a page for every product it knows, and no others', () => {
+  expect(slugs.sort()).toEqual(Object.keys(products).sort());
+});
+
+describe.each(slugs)('compare/%s', (slug) => {
   const page = frontmatter(slug);
+  const own = products[slug];
 
   it('cites the product’s own site for every row', () => {
+    expect(own, `unknown product ${slug}`).toBeDefined();
     expect(page.rows.length).toBeGreaterThan(0);
     for (const row of page.rows) {
       expect(row.topic && row.tachyon && row.them, JSON.stringify(row)).toBeTruthy();
       const url = new URL(row.source);
       expect(url.protocol).toBe('https:');
-      expect(products[slug], row.source).toContain(url.hostname);
+      const ok =
+        own.hosts.includes(url.hostname) || (url.hostname === 'github.com' && url.pathname.startsWith(own.github));
+      expect(ok, row.source).toBe(true);
     }
   });
 

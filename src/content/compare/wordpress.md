@@ -45,7 +45,7 @@ rows:
     source: https://wordpress.org/about/license/
   - topic: Hosting
     tachyon: You host it. Release binaries or a Docker image, beside your own Postgres. There's no hosted service.
-    them: Host it yourself, or on WordPress.com, which has a free plan and paid plans from US$4 a month.
+    them: Host it yourself, or on WordPress.com, which has a free plan and paid plans from US$4 a month billed yearly.
     source: https://wordpress.com/pricing/
 notYet:
   - There's no admin screen. If you can't send an HTTP request, you can't publish with TachyonCMS yet.

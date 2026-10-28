@@ -41,7 +41,7 @@ rows:
     source: https://github.com/directus/directus/blob/main/license
   - topic: Price
     tachyon: Free, for anyone. There's no paid tier.
-    them: Free for organisations under $5M in annual revenue with fewer than 50 employees. Paid plans start at $89 a month billed yearly, self-hosted or on Directus Cloud.
+    them: Free for organisations under $5M in annual revenue with fewer than 50 employees. Paid plans start at $89 a month billed yearly, and Directus Cloud adds $89 a month billed yearly on top.
     source: https://directus.com/pricing
 notYet:
   - There's no admin screen, so nobody who doesn't write code can edit content yet.
@@ -56,6 +56,6 @@ notYet:
 
 **Pick Directus** if you already have a SQL database and want an API and an editing app on top of it this afternoon. It takes six databases, the Data Studio is ready for editors, and versions, translations and extensions are all there. If your organisation fits under its free threshold, it costs nothing to self-host.
 
-**Pick TachyonCMS** if you want a plain MIT licence that's the same for every organisation, you're starting fresh on Postgres, and you want your content types kept as files in Git. You'll be calling an API, because the admin isn't built yet.
+**Pick TachyonCMS** if you want a plain MIT licence that's the same for every organisation, and you're starting fresh on Postgres. You'll be calling an API, because the admin isn't built yet.
 
 Moving an existing database? Directus is built for that. TachyonCMS isn't.

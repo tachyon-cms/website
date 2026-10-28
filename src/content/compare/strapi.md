@@ -64,6 +64,6 @@ notYet:
 
 **Pick Strapi** if you want an open-source headless CMS with an admin panel your editors can use this week. Media, drafts, translations and a plugin marketplace come free, and Strapi Cloud will host it if you'd rather not. If your team already lives in Node.js, it'll feel like home.
 
-**Pick TachyonCMS** if what you care about most is one Rust binary on Postgres, content types you keep as files in Git, and access rules down to a single field that land in the database query itself. Today, that's a developer's tool. Pick it if you can build against an API now and wait for the admin.
+**Pick TachyonCMS** if what you care about most is one Rust binary on Postgres and access rules down to a single field that land in the database query itself. Today, that's a developer's tool. Pick it if you can build against an API now and wait for the admin.
 
 Plenty of people will try both. That's fine by me.

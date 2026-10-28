@@ -33,7 +33,7 @@ rows:
     source: https://www.contentful.com/pricing/
   - topic: Limits
     tachyon: Whatever your server and database can take. There are no quotas.
-    them: Free has 10 users, 25 content types, 10,000 records and 100K API calls a month. Lite raises those.
+    them: Free has 10 users and 100K API calls a month, and its Starter Space holds 25 content types and 10,000 records. Lite raises those.
     source: https://www.contentful.com/pricing/
   - topic: Price
     tachyon: Free, under MIT. You pay for your own server and database.
