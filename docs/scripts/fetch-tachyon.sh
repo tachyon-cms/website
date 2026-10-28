@@ -12,7 +12,9 @@ target=${2:-x86_64-unknown-linux-musl}
 version=$(cat "$docs/cli-version.txt")
 name=tachyon_${version}_${target}
 base=https://github.com/tachyon-cms/tachyoncms/releases/download/v${version}
-pinned=$(grep "  $name.tar.gz\$" "$docs/cli-sha256.txt") || {
+# Exact match on the file name field: no regex, so the dots in the version are literal.
+pinned=$(awk -v f="$name.tar.gz" '$2 == f' "$docs/cli-sha256.txt")
+[ "$(printf '%s\n' "$pinned" | grep -c .)" = 1 ] || {
   echo "fetch-tachyon: no pinned sha256 for $name.tar.gz in docs/cli-sha256.txt" >&2
   exit 1
 }

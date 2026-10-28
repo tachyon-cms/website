@@ -28,8 +28,7 @@ export default defineConfig({
       timeout: 60_000,
     },
     {
-      // The local workerd can lag the deploy compatibility date; static assets do not care.
-      command: `npx wrangler dev -c docs/wrangler.jsonc --port ${docsPort} --compatibility-date 2026-10-01`,
+      command: `npx wrangler dev -c docs/wrangler.jsonc --port ${docsPort}`,
       url: `http://localhost:${docsPort}`,
       reuseExistingServer: !process.env.CI,
       timeout: 60_000,
