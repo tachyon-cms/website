@@ -10,23 +10,38 @@ import { docsFonts } from '../brand/fonts.mjs';
 // for search instead: hovering or focusing the button, clicking it, or pressing Ctrl/Cmd+K.
 const idleSearch =
   /const onIdle = window\.requestIdleCallback \|\| \(\(cb\) => setTimeout\(cb, 1\)\);\s*onIdle\(async \(\) => \{/;
+let searchPatched = false;
 const searchOnDemand = {
   name: 'search-on-demand',
+  apply: 'build',
   transform(code, id) {
     if (!/@astrojs\/starlight\/.*Search\.astro\?astro&type=script/.test(id)) return;
     if (!idleSearch.test(code)) throw new Error('search-on-demand: Starlight Search changed; update the patch');
+    searchPatched = true;
     return code.replace(
       idleSearch,
       `let started;
       const onDemand = (load) => {
         const go = () => {
-          started ??= load().then(() => dialog.open && this.querySelector('input')?.focus());
+          started ??= load()
+            .then(() => dialog.open && this.querySelector('input')?.focus())
+            .catch((err) => {
+              // Let the next attempt try again, say after a dropped connection.
+              started = undefined;
+              console.error('Search failed to load', err);
+            });
         };
         for (const type of ['pointerenter', 'focus', 'click']) openBtn.addEventListener(type, go);
         window.addEventListener('keydown', (e) => (e.metaKey || e.ctrlKey) && e.key === 'k' && go());
       };
       onDemand(async () => {`,
     );
+  },
+  // Astro builds the client in its own Vite pass; only that pass sees the Search script.
+  generateBundle() {
+    if (this.environment?.name === 'client' && !searchPatched) {
+      throw new Error('search-on-demand: Starlight Search script not found; update the patch');
+    }
   },
 };
 
