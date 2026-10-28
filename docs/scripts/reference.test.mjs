@@ -32,10 +32,13 @@ test('the http-api area pages have one section per endpoint between them', () =>
 });
 
 test('the http-api overview lists every endpoint once, linking to its section', () => {
-  const rows = [...section(page('http-api'), '## All endpoints').matchAll(/^\| \[`([^`]+)`\]\(\/reference\/http-api\/([a-z-]+)#[a-z0-9-]+\) \|/gm)];
+  const rows = [...section(page('http-api'), '## All endpoints').matchAll(/^\| \[`([^`]+)`\]\(\/reference\/http-api\/([a-z-]+)#([a-z0-9-]+)\) \|/gm)];
   assert.deepEqual(sorted(rows.map((m) => m[1])), sorted(routes));
-  for (const [, route, area] of rows) {
+  for (const [, route, area, fragment] of rows) {
     assert.ok(page(`http-api/${area}`).includes(`### \`${route}\``), `${route} is not on ${area}`);
+    // The heading's id, as the docs build slugs it: lowercase, punctuation dropped, spaces to dashes.
+    const slug = route.toLowerCase().replace(/[^a-z0-9 _-]/g, '').replace(/ /g, '-');
+    assert.equal(fragment, slug, route);
   }
 });
 
