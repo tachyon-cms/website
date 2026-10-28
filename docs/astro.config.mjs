@@ -2,6 +2,7 @@
 import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
+import starlightLinksValidator from 'starlight-links-validator';
 import { fonts } from '../brand/fonts.mjs';
 
 export default defineConfig({
@@ -36,11 +37,36 @@ export default defineConfig({
       plugins: [
         // Every page lives under one of these four roots. Each topic gets its own sidebar.
         starlightSidebarTopics([
-          { label: 'Docs', link: '/', items: ['index'] },
+          {
+            label: 'Docs',
+            link: '/',
+            items: [
+              { label: 'Start here', items: [{ label: 'Overview', slug: 'index' }, 'install', 'concepts'] },
+              {
+                label: 'Content',
+                items: [
+                  'content-types',
+                  'fields',
+                  'querying',
+                  'relationships',
+                  'joins-and-virtual-fields',
+                  'schema-files',
+                ],
+              },
+              { label: 'Users and access', items: ['sign-in', 'roles', 'api-keys', 'access-rules'] },
+              {
+                label: 'Running it',
+                items: ['configuration', 'deploy/docker', 'deploy/binary', 'security-model'],
+              },
+              { label: 'Project', items: ['get-involved'] },
+            ],
+          },
           { label: 'Tutorials', link: '/tutorials', items: ['tutorials'] },
           { label: 'Reference', link: '/reference', items: ['reference'] },
           { label: 'CLI', link: '/cli', items: ['cli'] },
         ]),
+        // Fails the build on a broken internal link or #anchor.
+        starlightLinksValidator(),
       ],
     }),
   ],

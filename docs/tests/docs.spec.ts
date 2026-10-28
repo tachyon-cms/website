@@ -34,6 +34,22 @@ test('a page under /reference shows only the Reference sidebar', async ({ page }
   for (const href of hrefs) expect(href).toMatch(/^\/reference(\/|$)/);
 });
 
+test('a nested Docs page marks the Docs tab current with aria-current="true"', async ({ page }) => {
+  await page.goto('/deploy/docker');
+  await expect(tabs(page).locator('[aria-current]')).toHaveCount(1);
+  await expect(tabs(page).getByRole('link', { name: 'Docs', exact: true })).toHaveAttribute('aria-current', 'true');
+});
+
+test('a nested Docs page shows only the Docs sidebar', async ({ page }) => {
+  await page.goto('/deploy/docker');
+  const sidebar = page.getByRole('navigation', { name: 'Main' });
+  const hrefs = await sidebar.getByRole('link').evaluateAll((links) => links.map((a) => a.getAttribute('href')));
+  expect(hrefs).toContain('/deploy/docker');
+  expect(hrefs).toContain('/access-rules');
+  for (const href of hrefs) expect(href).not.toMatch(/^\/(tutorials|reference|cli)(\/|$)/);
+  await expect(sidebar.locator('a[aria-current="page"]')).toHaveAttribute('href', '/deploy/docker');
+});
+
 test('search opens with Cmd/Ctrl+K', async ({ page }) => {
   await page.goto('/');
   // The shortcut is wired up by a module script; wait for it before pressing.
@@ -62,7 +78,7 @@ test('dark is the default even when the OS prefers light, and the toggle switche
 
 test('no horizontal overflow on a phone', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  for (const { link } of topics) {
+  for (const link of [...topics.map((t) => t.link), '/access-rules', '/deploy/docker']) {
     await page.goto(link);
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
     expect(overflow, link).toBeLessThanOrEqual(0);
