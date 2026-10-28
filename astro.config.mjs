@@ -1,5 +1,6 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
+import { fonts } from './brand/fonts.mjs';
 
 export default defineConfig({
   site: 'https://tachyoncms.com',
@@ -12,4 +13,5 @@ export default defineConfig({
   scopedStyleStrategy: 'class',
   // Syntax highlighting writes style="" attributes, which the CSP refuses.
   markdown: { syntaxHighlight: false },
+  fonts,
 });

@@ -9,7 +9,8 @@
   --accent-ink: #04130e;
   --glow: rgb(124 247 212 / 0.14);
   --radius: 10px;
-  --font: ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* server/signup.ts serves this file without the Astro font tags, so keep a stack. */
+  --font: var(--font-sans, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif);
 }
 
 *,

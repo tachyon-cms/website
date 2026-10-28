@@ -1,0 +1,39 @@
+/* Maps the Ultraviolet tokens onto Starlight's theme. Starlight's own values sit in
+ * a cascade layer, so these unlayered rules win. Its grays run from --sl-color-white
+ * (headings) through gray-1..7 to --sl-color-black (page background) and flip in
+ * the light theme. scripts/contrast.test.mjs checks the text pairings here. */
+@import '../../../src/brand/tokens.css';
+
+:root {
+  --sl-font: var(--font-sans);
+  --sl-font-mono: var(--font-mono);
+
+  --sl-color-accent-low: #2a1250;
+  --sl-color-accent: var(--c-violet);
+  --sl-color-accent-high: var(--c-soft);
+
+  --sl-color-white: #ffffff;
+  --sl-color-gray-1: var(--c-text);
+  --sl-color-gray-2: #d6ccf2;
+  --sl-color-gray-3: var(--c-muted);
+  --sl-color-gray-4: #6f6391;
+  --sl-color-gray-5: var(--c-border);
+  --sl-color-gray-6: var(--c-surface);
+  --sl-color-black: var(--c-bg);
+}
+
+[data-theme="light"] {
+  --sl-color-accent-low: #e4d8fd;
+  --sl-color-accent: var(--c-soft);
+  --sl-color-accent-high: #4c1d95;
+
+  --sl-color-white: #0c0818;
+  --sl-color-gray-1: var(--c-text);
+  --sl-color-gray-2: #2c2342;
+  --sl-color-gray-3: var(--c-muted);
+  --sl-color-gray-4: #8a80a6;
+  --sl-color-gray-5: var(--c-border);
+  --sl-color-gray-6: var(--c-surface);
+  --sl-color-gray-7: #f6f2fe;
+  --sl-color-black: var(--c-bg);
+}

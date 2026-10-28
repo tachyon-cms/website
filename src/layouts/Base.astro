@@ -1,4 +1,6 @@
 ---
+import { Font } from 'astro:assets';
+import '../brand/tokens.css';
 import '../styles/site.css';
 
 interface Props {
@@ -22,6 +24,8 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#08090c" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <Font cssVariable="--font-sans" preload={[{ weight: 400 }]} />
+    <Font cssVariable="--font-mono" />
     {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
