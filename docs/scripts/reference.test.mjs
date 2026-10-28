@@ -22,9 +22,21 @@ const tableNames = (text) => [...text.matchAll(/^\| `([^`]+)` \|/gm)].map((m) =>
 
 const sorted = (xs) => [...xs].sort();
 
-test('http-api has one section per endpoint', () => {
-  const headings = [...page('http-api').matchAll(/^### `([A-Z]+ \/api\/[^`]*)`$/gm)].map((m) => m[1]);
+const apiAreas = ['auth', 'users-and-roles', 'collections', 'documents'];
+
+test('the http-api area pages have one section per endpoint between them', () => {
+  const headings = apiAreas.flatMap((area) =>
+    [...page(`http-api/${area}`).matchAll(/^### `([A-Z]+ \/api\/[^`]*)`$/gm)].map((m) => m[1]),
+  );
   assert.deepEqual(sorted(headings), sorted(routes));
+});
+
+test('the http-api overview lists every endpoint once, linking to its section', () => {
+  const rows = [...section(page('http-api'), '## All endpoints').matchAll(/^\| \[`([^`]+)`\]\(\/reference\/http-api\/([a-z-]+)#[a-z0-9-]+\) \|/gm)];
+  assert.deepEqual(sorted(rows.map((m) => m[1])), sorted(routes));
+  for (const [, route, area] of rows) {
+    assert.ok(page(`http-api/${area}`).includes(`### \`${route}\``), `${route} is not on ${area}`);
+  }
 });
 
 test('field-types has a section per type, listing every option', () => {
