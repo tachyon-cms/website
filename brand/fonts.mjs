@@ -8,6 +8,10 @@ const family = (name, cssVariable, pkg, weights, fallbacks) => ({
   name,
   cssVariable,
   fallbacks,
+  // The metric-matched fallbacks name Arial and Courier New, which Linux and Android
+  // lack, so a late swap there shifts the layout. "optional" never swaps after first
+  // paint: a slow first visit keeps the fallback, and the next page has the font cached.
+  display: "optional",
   options: {
     variants: weights.map((weight) => ({
       weight,
