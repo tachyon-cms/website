@@ -9,13 +9,13 @@ sources:
   - README.md#who-can-do-what
 ---
 
-## The honest part first
+## Where things stand
 
 Today TachyonCMS is an API: something your developer talks to, not something you log in to. If you write the posts, plan the newsletter or keep the events page current, there's no screen for you yet.
 
 What there is, is a promise with a test attached. Someone who has only ever used WordPress should pick up the admin without training, from adding a new kind of content to scheduling a post for Friday morning.
 
-## What you'll be able to do
+## What it's being built to do
 
 - Save drafts, keep earlier versions, schedule a post and get a deleted one back from the Trash.
 - Keep your images in a media library, with image processing built in.
@@ -27,7 +27,7 @@ What there is, is a promise with a test attached. Someone who has only ever used
 
 A few things that will shape your day are in place now, because they live underneath the screen.
 
-Your developer already decides how your editing screen is laid out: fields grouped into tabs and sections you can fold away, a hint under a field that explains what goes there, a field that only appears when it's relevant.
+Your developer can already describe how your editing screen will be laid out: fields grouped into tabs and sections you can fold away, a hint under a field that explains what goes there, a field that only appears when it's relevant. The screen that shows it is still to come.
 
 Roles are already real. An Author writes and changes their own posts. An Editor looks after everyone's. And a rule can keep a field, say a salary, in front of HR and nobody else.
 

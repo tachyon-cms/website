@@ -24,7 +24,7 @@ sources:
 
 The workspace sets `unsafe_code = "forbid"`, so the compiler refuses any, in every crate.
 
-### No request values in the SQL text
+### No request values pasted into SQL
 
 Fixed queries are checked against the database schema at compile time. Filters and sorts, which change with every request, are built from a validated filter tree, and every value in them travels as a bound parameter.
 
@@ -64,6 +64,6 @@ Please don't open a public issue. Report it privately through [GitHub's vulnerab
 
 You'll hear back within 3 working days. Within about 14, we'll confirm whether it's a vulnerability and agree a timeline for the fix with you, and you'll be credited in the advisory unless you'd rather not be. [SECURITY.md](https://github.com/tachyon-cms/tachyoncms/blob/main/SECURITY.md) has the full policy.
 
-## One honest caveat
+## Early days, said plainly
 
 TachyonCMS is pre-alpha. The pieces above are real, but it hasn't had the years of use that find the bugs nobody thought of. Keep it off public networks for now.

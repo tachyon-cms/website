@@ -104,8 +104,8 @@ export async function subscribe(request: Request, env: Env): Promise<Response> {
     from: env.MAIL_FROM,
     to: [email],
     subject: 'Confirm your TachyonCMS updates',
-    text: `One click and you're on the list for releases and news about the admin:\n\n${link}\n\nDidn't ask for this? Ignore it and you won't hear from us again.`,
-    html: `<p>One click and you're on the list for releases and news about the admin: <a href="${escapeHtml(link.toString())}">Confirm my email</a>.</p><p>Didn't ask for this? Ignore it and you won't hear from us again.</p>`,
+    text: `One click and you're on the list for releases and news of the admin:\n\n${link}\n\nDidn't ask for this? Ignore it and you won't hear from us again.`,
+    html: `<p>One click and you're on the list for releases and news of the admin: <a href="${escapeHtml(link.toString())}">Confirm my email</a>.</p><p>Didn't ask for this? Ignore it and you won't hear from us again.</p>`,
   });
   if (!sent.ok) {
     // Resend's message names the cause, such as an unverified domain. Never log the address.
@@ -128,7 +128,7 @@ function confirmPage(token: string): string {
 <body>
 <main class="notice">
 <h1>One more click</h1>
-<p>Confirm, and we'll write only about releases and news about the admin.</p>
+<p>Confirm, and we'll write only with releases and news of the admin.</p>
 <form method="post" action="/confirm/">
 <input type="hidden" name="token" value="${escapeHtml(token)}">
 <button type="submit">Confirm my email</button>

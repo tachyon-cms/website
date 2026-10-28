@@ -11,6 +11,8 @@ sources:
   - crates/tachyon-db/src/query.rs
   - .github/workflows/release.yml
   - LICENSE
+  - README.md#first-run
+  - crates/tachyon-api/src/auth/routes.rs
 ---
 
 ## The choice you're usually handed
@@ -25,11 +27,11 @@ It's Rust on Axum and Tokio, one binary with Postgres beside it, and published c
 
 ## Safe, by default rather than by checklist
 
-There's no `unsafe` code; the compiler is told to refuse it. Every query is either checked at compile time or built from a validated filter tree with bound parameters. Access rules go into the SQL itself, so a hidden document never leaves the database. [Security](/security) has the rest, including how to check a release before you run it.
+There's no `unsafe` code; the compiler is told to refuse it. Fixed queries are checked at compile time, filters and sorts are built from a validated tree, and every value a request sends travels as a bound parameter. Access rules go into the SQL itself, so a hidden document never leaves the database. [Security](/security) has the rest, including how to check a release before you run it.
 
 ## Easy for editors, which is where it's headed
 
-The admin isn't built yet. The bar it has to clear is that someone who has only used WordPress picks it up without training. [For editors](/editors) is the honest version of that story: what's planned, and what's already underneath.
+The admin isn't built yet. The bar it has to clear is that someone who has only used WordPress picks it up without training. [For editors](/editors) tells that story from the editor's chair: what's planned, and what's already underneath.
 
 ## What you can run today
 

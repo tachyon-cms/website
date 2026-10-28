@@ -82,8 +82,8 @@ describe('subscribe', () => {
     expect(calls[1]?.url).toBe('https://api.resend.com/emails');
     // One list behind every form, so the email promises what each form's fine print does.
     expect(mail.subject).toBe('Confirm your TachyonCMS updates');
-    expect(mail.text).toContain('releases and news about the admin');
-    expect(mail.html).toContain('releases and news about the admin');
+    expect(mail.text).toContain('releases and news of the admin');
+    expect(mail.html).toContain('releases and news of the admin');
     expect(mail.to).toEqual(['ann@example.com']);
     expect(mail.from).toBe(env.MAIL_FROM);
     const link = new URL(mail.text.match(/https:\/\/\S+/)?.[0] ?? '');
@@ -152,7 +152,7 @@ describe('confirm', () => {
     const html = await page.text();
     expect(html).toContain('method="post"');
     expect(html).toContain(`value="${token}"`);
-    expect(html).toContain('releases and news about the admin');
+    expect(html).toContain('releases and news of the admin');
     expect(page.headers.get('Content-Security-Policy')).toContain("frame-ancestors 'none'");
     // The function page has no Astro build behind it, so it links a plain static stylesheet.
     expect(html).toContain('<link rel="stylesheet" href="/signup.css">');

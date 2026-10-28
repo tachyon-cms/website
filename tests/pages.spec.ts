@@ -13,6 +13,8 @@ const today = [
 // Pages about what isn't built yet. They have to say so where you can see it.
 const headed = ['/editors', '/product/admin'];
 const all = [...today.map((p) => p.path), ...headed, '/why', '/security'];
+// Pages that show working code, beyond the feature pages checked below.
+const withCode = ['/why', '/security'];
 
 for (const path of all) {
   test(`${path} has one h1, a title and lists its v0.1.0 sources`, async ({ page }) => {
@@ -21,6 +23,13 @@ for (const path of all) {
     expect(await page.title()).not.toBe('');
     const sources = page.locator('.sources a[href^="https://github.com/tachyon-cms/tachyoncms/blob/v0.1.0/"]');
     expect(await sources.count()).toBeGreaterThan(0);
+  });
+}
+
+for (const path of withCode) {
+  test(`${path} shows a code sample`, async ({ page }) => {
+    await page.goto(path);
+    expect(await page.locator('main pre').count()).toBeGreaterThan(0);
   });
 }
 
@@ -71,14 +80,14 @@ test('the editors page offers the admin signup', async ({ page }) => {
 });
 
 test('every signup form promises the same list', async ({ page }) => {
-  for (const path of ['/', '/editors']) {
+  for (const path of ['/', '/editors', '/product/admin']) {
     await page.goto(path);
     for (const fine of await page.locator('form.signup .fine').allTextContents()) {
-      expect(fine).toContain('releases and news about the admin');
+      expect(fine).toContain('releases and news of the admin');
     }
   }
   await page.goto('/confirmed');
-  await expect(page.locator('main')).toContainText('releases and news about the admin');
+  await expect(page.locator('main')).toContainText('releases and news of the admin');
 });
 
 test('nothing runs off the side of a phone', async ({ page }) => {
