@@ -14,6 +14,8 @@ interface Props {
   /** A social card image, relative to the site. */
   image?: string;
   imageAlt?: string;
+  /** A blog post's date, for the article meta tags. */
+  published?: Date;
   /** Pages that only make sense mid-signup stay out of search results. */
   noindex?: boolean;
 }
@@ -23,6 +25,7 @@ const {
   path,
   image,
   imageAlt,
+  published,
   noindex,
 } = Astro.props;
 // Inlined so it runs before first paint, after the meta tags it updates; scripts/csp.mjs hashes it like any inline script.
@@ -37,7 +40,7 @@ const themeScript = `(${initTheme.toString()})();`;
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#07060c" />
     <script is:inline set:html={themeScript} />
-    <Seo title={title} description={description} path={path} image={image} imageAlt={imageAlt} noindex={noindex} />
+    <Seo title={title} description={description} path={path} image={image} imageAlt={imageAlt} published={published} noindex={noindex} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title="TachyonCMS blog" href="/rss.xml" />
     <Font cssVariable="--font-sans" preload={[{ weight: 400 }]} />

@@ -27,6 +27,28 @@ const open = async (file, width, height) => {
   const page = await browser.newPage({ viewport: { width, height } });
   await page.goto(`file://${join(here, slug, file)}`);
   await page.evaluate(() => document.fonts.ready);
+  // Everything stays inside the .frame's content box: a chip running into the
+  // margin, or off the image, fails the render instead of shipping.
+  const over = await page.evaluate(() => {
+    const frame = document.querySelector('.frame');
+    if (!frame) return [];
+    const style = getComputedStyle(frame);
+    const box = frame.getBoundingClientRect();
+    const left = box.left + parseFloat(style.paddingLeft);
+    const right = box.right - parseFloat(style.paddingRight);
+    const bad = [...frame.querySelectorAll('*')]
+      .filter((el) => {
+        const r = el.getBoundingClientRect();
+        return r.width > 0 && (r.right > right + 0.5 || r.left < left - 0.5);
+      })
+      .map((el) => `<${el.tagName.toLowerCase()}> "${el.textContent.trim().slice(0, 40)}"`);
+    if (frame.scrollWidth > frame.clientWidth) bad.unshift('.frame scrolls sideways');
+    return bad;
+  });
+  if (over.length) {
+    await browser.close();
+    throw new Error(`${slug}/${file} overflows its frame:\n  ${over.join('\n  ')}`);
+  }
   return page;
 };
 

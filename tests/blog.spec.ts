@@ -8,6 +8,8 @@ test('/blog lists both launch posts and marks Blog in the nav', async ({ page })
   for (const path of posts) await expect(page.locator(`main a[href="${path}"]`)).toBeVisible();
   await expect(page.locator('header nav a[href="/blog"]')).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('main a[href="/rss.xml"]')).toBeVisible();
+  await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'website');
+  await expect(page.locator('meta[property="article:published_time"]')).toHaveCount(0);
 });
 
 test('the home page shows the latest posts', async ({ page }) => {
@@ -21,6 +23,8 @@ for (const path of posts) {
     await expect(page.locator('h1')).toHaveCount(1);
     const slug = path.split('/').pop();
     await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', `https://tachyoncms.com/media/blog/${slug}/card.png`);
+    await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'article');
+    await expect(page.locator('meta[property="article:published_time"]')).toHaveAttribute('content', '2026-10-28T00:00:00.000Z');
     await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
     const card = await page.request.get(`/media/blog/${slug}/card.png`);
     expect(card.ok()).toBe(true);

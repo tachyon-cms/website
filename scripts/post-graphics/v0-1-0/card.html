@@ -6,16 +6,16 @@
 <link rel="stylesheet" href="../shared.css">
 <style>
   body { width: 1200px; height: 630px; overflow: hidden; }
-  .frame { height: 100%; padding: 60px 72px; display: grid; grid-template-rows: auto 1fr auto; }
+  .frame { height: 100%; padding: 60px 72px; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto; }
   .top { display: flex; justify-content: space-between; align-items: center; }
   .top img { height: 40px; }
   h1 { align-self: center; font-size: 84px; line-height: 1.02; letter-spacing: -0.04em; font-weight: 700; }
   .bottom { display: grid; gap: 22px; }
   pre { padding: 22px 28px; font-size: 26px; color: var(--text); }
   pre span { color: var(--hi); }
-  ul { display: flex; gap: 14px; padding: 0; list-style: none; font: 400 19px/1 var(--mono); color: var(--muted); }
+  ul { display: flex; gap: 12px; padding: 0; list-style: none; font: 400 18px/1 var(--mono); color: var(--muted); }
   .eyebrow span { text-transform: none; }
-  li { white-space: nowrap; padding: 10px 16px; border: 2px solid var(--border); border-radius: 999px; }
+  li { white-space: nowrap; padding: 10px 14px; border: 2px solid var(--border); border-radius: 999px; }
   li b { color: var(--text); font-weight: 600; }
 </style>
 </head>

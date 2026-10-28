@@ -9,7 +9,9 @@ const source = z.string().regex(/^(https:\/\/\S+|[\w.][\w./-]*(#[\w-]+)?)$/, 'a 
 export const collections = {
   // Posts. One dated later than today waits for its day (src/lib/published.js).
   blog: defineCollection({
-    loader: glob({ pattern: '*.md', base: './src/content/blog' }),
+    // BLOG_DIR lets scripts/published.test.mjs build from a copy with a future post
+    // in it, so the test never writes into src.
+    loader: glob({ pattern: '*.md', base: process.env.BLOG_DIR ?? './src/content/blog' }),
     schema: z.object({
       title: z.string(),
       description: z.string(),

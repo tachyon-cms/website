@@ -2,7 +2,7 @@
 // blog index, the RSS feed, the sitemap and the home page's latest list.
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { cpSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { after, before, test } from 'node:test';
@@ -10,6 +10,7 @@ import { fileURLToPath } from 'node:url';
 import { isPublished } from '../src/lib/published.js';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
+const posts = join(root, 'src/content/blog');
 const post = (date) => ({ data: { date: new Date(date) } });
 
 test('a post dated today or earlier is published', () => {
@@ -22,32 +23,44 @@ test('a post dated later waits for its day', () => {
   assert.equal(isPublished(post('2026-11-08'), new Date('2026-11-07T23:59:59Z')), false);
 });
 
-// Build the real site, with one extra post dated tomorrow, into a temp dir.
 const future = 'zz-scheduled-fixture';
-const fixture = join(root, 'src/content/blog', `${future}.md`);
-const out = mkdtempSync(join(tmpdir(), 'tachyon-published-'));
-const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+const title = 'Scheduled fixture';
+
+test('no test fixture has leaked into the real posts', () => {
+  for (const name of readdirSync(posts)) {
+    assert.ok(!name.startsWith('zz-'), `${name} looks like a test fixture`);
+    assert.ok(!readFileSync(join(posts, name), 'utf8').includes(`title: ${title}`), `${name} has the fixture's title`);
+  }
+});
+
+// Build the real site from a copy of the posts plus one dated far in the future.
+// BLOG_DIR points the blog collection at the copy, so src is never written to.
+const tmp = mkdtempSync(join(tmpdir(), 'tachyon-published-'));
+const blogDir = join(tmp, 'blog');
+const out = join(tmp, 'dist');
 const read = (file) => readFileSync(join(out, file), 'utf8');
 
 before(() => {
-  writeFileSync(fixture, `---\ntitle: Scheduled fixture\ndescription: Not yet.\ndate: ${tomorrow}\n---\n\nTomorrow.\n`);
-  try {
-    execFileSync('npx', ['astro', 'build', '--outDir', out], { cwd: root, stdio: 'pipe' });
-  } finally {
-    rmSync(fixture);
-  }
+  cpSync(posts, blogDir, { recursive: true });
+  writeFileSync(join(blogDir, `${future}.md`), `---\ntitle: ${title}\ndescription: Not yet.\ndate: 2999-01-01\n---\n\nLater.\n`);
+  execFileSync('npx', ['astro', 'build', '--outDir', out], {
+    cwd: root,
+    stdio: 'pipe',
+    env: { ...process.env, BLOG_DIR: blogDir },
+  });
 });
-after(() => rmSync(out, { recursive: true, force: true }));
+after(() => rmSync(tmp, { recursive: true, force: true }));
 
 const places = { 'blog index': 'blog.html', 'RSS feed': 'rss.xml', sitemap: 'sitemap-0.xml', 'home latest list': 'index.html' };
 for (const [name, file] of Object.entries(places)) {
-  test(`the ${name} lists a published post and leaves out tomorrow's`, () => {
+  test(`the ${name} lists a published post and leaves out the future one`, () => {
     const text = read(file);
-    assert.match(text, /\/blog\/v0-1-0\b/);
+    assert.match(text, /\/blog\/[a-z0-9-]+/);
     assert.doesNotMatch(text, new RegExp(future));
+    assert.doesNotMatch(text, new RegExp(title));
   });
 }
 
-test("tomorrow's post has no page of its own yet", () => {
-  assert.throws(() => read(`blog/${future}.html`), { code: 'ENOENT' });
+test('the future post has no page of its own yet', () => {
+  assert.equal(existsSync(join(out, `blog/${future}.html`)), false);
 });
