@@ -105,6 +105,32 @@ const themeScript = `(${initTheme.toString()})();`;
   .skip:focus {
     top: 1rem;
   }
+  /* Call-to-action links: .btn for the gradient one, plus .ghost for the quiet one. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.4rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    color: var(--c-on-grad);
+    background: var(--c-grad);
+    border: 1px solid transparent;
+    border-radius: 999px;
+  }
+  .btn:hover {
+    filter: brightness(1.1);
+  }
+  .btn.ghost {
+    color: var(--c-text);
+    background: var(--c-surface);
+    border-color: var(--c-border);
+  }
+  .btn.ghost:hover {
+    filter: none;
+    border-color: var(--c-soft);
+  }
   .sr-only {
     position: absolute;
     width: 1px;

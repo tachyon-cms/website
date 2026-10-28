@@ -1,0 +1,43 @@
+---
+interface Props {
+  eyebrow: string;
+  title: string;
+  /** The h2's id, for the section's aria-labelledby. */
+  id: string;
+}
+const { eyebrow, title, id } = Astro.props;
+---
+
+<header class="section-head">
+  <p class="eyebrow">{eyebrow}</p>
+  <h2 id={id}>{title}</h2>
+  <slot />
+</header>
+
+<style>
+  .section-head {
+    max-width: 44rem;
+    margin-bottom: 2rem;
+  }
+  .eyebrow {
+    margin: 0 0 0.75rem;
+    font: 600 0.8125rem/1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-soft);
+  }
+  h2 {
+    margin: 0 0 1rem;
+    font-size: clamp(1.75rem, 4.5vw, 2.6rem);
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    text-wrap: balance;
+  }
+  .section-head > :global(p:not(.eyebrow)) {
+    font-size: 1.125rem;
+    color: var(--c-muted);
+  }
+  .section-head > :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>

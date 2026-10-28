@@ -1,0 +1,134 @@
+---
+import Icon from '../Icon.astro';
+import { formatStars, stars } from '../../lib/stars';
+
+const count = await stars();
+---
+
+<section id="top" class="hero" aria-labelledby="hero-title">
+  <div class="copy">
+    <p class="eyebrow">Open source · Rust · Postgres</p>
+    <h1 id="hero-title">Describe your content. Get the API back.</h1>
+    <p class="lede">
+      One Rust binary, one Postgres database, and a REST API built from the content types you define. Access rules
+      reach down to a single field. Schema changes can sit in a pull request like any other code. What's missing is the admin for your
+      editors. It's on the roadmap, and all of it is built in public.
+    </p>
+    <div class="actions">
+      <a class="btn" href="https://docs.tachyoncms.com/install">Get started <Icon name="FiArrowRight" /></a>
+      <a class="btn ghost" href="https://github.com/tachyon-cms/tachyoncms">
+        <Icon name="FiGithub" /> Star on GitHub{count !== null && <span class="count">{formatStars(count)}</span>}
+      </a>
+    </div>
+    <p class="status">
+      <a href="https://github.com/tachyon-cms/tachyoncms/releases/tag/v0.1.0">v0.1.0</a> is pre-alpha. The content
+      API, sign-in and access rules work; keep it off public networks for now.
+    </p>
+  </div>
+  <dl class="facts">
+    <div>
+      <dt>1 binary</dt>
+      <dd>Linux and macOS builds, or a Docker image.</dd>
+    </div>
+    <div>
+      <dt>1 database</dt>
+      <dd>Postgres, and nothing else to run beside it.</dd>
+    </div>
+    <div>
+      <dt>0 unsafe blocks</dt>
+      <dd>A lint forbids unsafe Rust in every crate.</dd>
+    </div>
+  </dl>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    display: grid;
+    gap: 2.5rem;
+    padding: clamp(3rem, 9vw, 6.5rem) 0 clamp(2.5rem, 6vw, 4.5rem);
+    isolation: isolate;
+  }
+  /* The glow sits behind the copy, never under a line of small text it could wash out. */
+  .hero::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    inset: -2rem -16px auto;
+    height: 34rem;
+    background:
+      radial-gradient(60% 70% at 15% 10%, color-mix(in srgb, var(--c-violet) 30%, transparent), transparent 70%),
+      radial-gradient(40% 50% at 85% 30%, color-mix(in srgb, var(--c-pink) 16%, transparent), transparent 70%);
+    pointer-events: none;
+  }
+  .eyebrow {
+    margin: 0 0 1.25rem;
+    font: 600 0.8125rem/1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-soft);
+  }
+  h1 {
+    max-width: 14ch;
+    margin: 0 0 1.5rem;
+    font-size: clamp(2.6rem, 8vw, 4.75rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+  }
+  .lede {
+    max-width: 38rem;
+    font-size: clamp(1.125rem, 2.2vw, 1.3rem);
+    color: var(--c-muted);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin: 2rem 0 1.25rem;
+  }
+  .count {
+    padding-left: 0.6rem;
+    margin-left: 0.15rem;
+    font: 600 0.875rem/1 var(--font-mono);
+    color: var(--c-muted);
+    border-left: 1px solid var(--c-border);
+  }
+  .status {
+    max-width: 34rem;
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--c-muted);
+  }
+  .facts {
+    display: grid;
+    gap: 1px;
+    margin: 0;
+    align-self: center;
+    background: var(--c-border);
+    border: 1px solid var(--c-border);
+    border-radius: 16px;
+    overflow: hidden;
+  }
+  .facts div {
+    padding: 1.1rem 1.4rem;
+    background: var(--c-surface);
+  }
+  dt {
+    font: 700 1.6rem/1.1 var(--font-sans);
+    letter-spacing: -0.02em;
+    color: var(--c-hi);
+  }
+  dd {
+    margin: 0.3rem 0 0;
+    font-size: 0.9375rem;
+    color: var(--c-muted);
+  }
+  @media (min-width: 60rem) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) 19rem;
+      align-items: center;
+    }
+  }
+</style>

@@ -1,0 +1,76 @@
+---
+// One access rule, two callers, one request. The rule is the README's blog
+// example; the responses are what v0.1.0 returned for it, trimmed to two fields.
+import Code from './Code.astro';
+import Diagram from './Diagram.astro';
+---
+
+<Diagram
+  id="rule-hides-draft"
+  loop={8500}
+  caption="Real responses from TachyonCMS v0.1.0, trimmed to each post's title and published flag."
+>
+  <div class="rhd">
+    <div class="pane rule">
+      <p class="pane-head">The rule, in the posts schema</p>
+      <Code
+        lines={[
+          { text: '"access": {', at: 0 },
+          { text: '  "read": { "or": [', at: 0 },
+          { text: '    { "published": true },', at: 400 },
+          { text: '    { "author": "$user.id" }', at: 800 },
+          { text: '  ] }', at: 800 },
+          { text: '}', at: 800 },
+        ]}
+      />
+    </div>
+    <div class="pane">
+      <p class="pane-head">Someone signed out</p>
+      <Code
+        lines={[
+          { text: 'GET /api/posts', at: 1500, class: 'q' },
+          { text: '{ "docs": [', at: 2300 },
+          { text: '    { "title": "Hello, world",', at: 2300 },
+          { text: '      "published": true }', at: 2300 },
+          { text: '] }', at: 2300 },
+          { text: '', at: 4200 },
+          { text: 'GET /api/posts/01a183e2-c02a-…', at: 4200, class: 'q' },
+          { text: '404 Not Found', at: 4800, class: 'warn' },
+        ]}
+      />
+    </div>
+    <div class="pane">
+      <p class="pane-head">Ann, the author</p>
+      <Code
+        lines={[
+          { text: 'GET /api/posts', at: 1500, class: 'q' },
+          { text: 'Authorization: Bearer tcs_…', at: 1500, class: 'q' },
+          { text: '{ "docs": [', at: 2300 },
+          { text: '    { "title": "Half-finished thoughts",', at: 3200, class: 'mark' },
+          { text: '      "published": false },', at: 3200, class: 'mark' },
+          { text: '    { "title": "Hello, world",', at: 2300 },
+          { text: '      "published": true }', at: 2300 },
+          { text: '] }', at: 2300 },
+        ]}
+      />
+    </div>
+  </div>
+</Diagram>
+
+<style>
+  .rhd {
+    display: grid;
+    gap: 0.9rem;
+  }
+  @media (min-width: 48rem) {
+    .rhd {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 1rem;
+    }
+    .rule {
+      grid-column: 1 / -1;
+      justify-self: center;
+      width: min(100%, 26rem);
+    }
+  }
+</style>

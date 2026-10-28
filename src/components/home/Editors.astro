@@ -1,0 +1,81 @@
+---
+import SignupForm from '../SignupForm.astro';
+import SectionHead from './SectionHead.astro';
+
+// From the roadmap in the TachyonCMS README. None of this exists yet.
+const coming = [
+  ['Drafts, versions and scheduled publishing', 'Milestone 4'],
+  ['A media library with image processing', 'Milestone 6'],
+  ['Live preview', 'Milestone 10'],
+  ['A WordPress importer', 'Milestone 11'],
+];
+---
+
+<section id="editors" class="band editors" aria-labelledby="editors-title">
+  <div class="text">
+    <SectionHead id="editors-title" eyebrow="For editors · On the roadmap" title="The admin isn't built yet. Here's the bar it has to clear.">
+      <p>
+        If you're the one publishing the Tuesday newsletter, TachyonCMS has nothing for you today. It's an API. Here's
+        where it's headed: an admin built alongside the core and held to one test. Someone who has only ever
+        used WordPress should pick it up without training, from adding a content type to scheduling a post.
+      </p>
+    </SectionHead>
+    <ul class="coming">
+      {
+        coming.map(([what, when]) => (
+          <li>
+            <span>{what}</span>
+            <span class="when">{when}</span>
+          </li>
+        ))
+      }
+    </ul>
+    <p class="links">
+      <a href="/roadmap">The whole roadmap</a> · <a href="https://github.com/tachyon-cms/tachyoncms">Watch the repo</a>
+    </p>
+  </div>
+  <div class="form">
+    <SignupForm source="home" />
+  </div>
+</section>
+
+<style>
+  .editors {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+  }
+  .coming {
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--c-border);
+  }
+  .coming li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--c-border);
+  }
+  .when {
+    font: 0.8125rem/1.8 var(--font-mono);
+    color: var(--c-muted);
+  }
+  .links {
+    margin: 0;
+    color: var(--c-muted);
+  }
+  @media (min-width: 60rem) {
+    .editors {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 3rem;
+    }
+    .form {
+      position: sticky;
+      top: 2rem;
+      margin-top: 2.6rem;
+    }
+  }
+</style>

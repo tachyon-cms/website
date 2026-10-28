@@ -1,0 +1,68 @@
+---
+import SectionHead from './SectionHead.astro';
+
+export interface PostLink {
+  title: string;
+  href: string;
+  date: Date;
+  summary: string;
+}
+interface Props {
+  /** Published posts only, newest first. The section renders nothing while this is empty. */
+  posts: PostLink[];
+}
+const posts = Astro.props.posts.slice(0, 3);
+const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+
+{
+  posts.length > 0 && (
+    <section id="latest" class="band" aria-labelledby="latest-title">
+      <SectionHead id="latest-title" eyebrow="From the blog" title="What's new" />
+      <ul>
+        {posts.map((p) => (
+          <li>
+            <time datetime={p.date.toISOString().slice(0, 10)}>{day.format(p.date)}</time>
+            <h3>
+              <a href={p.href}>{p.title}</a>
+            </h3>
+            <p>{p.summary}</p>
+          </li>
+        ))}
+      </ul>
+    </section>
+  )
+}
+
+<style>
+  ul {
+    display: grid;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  li {
+    padding: 1.4rem;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: 14px;
+  }
+  time {
+    font: 0.8125rem var(--font-mono);
+    color: var(--c-muted);
+  }
+  h3 {
+    margin: 0.5rem 0;
+    font-size: 1.2rem;
+  }
+  p {
+    margin: 0;
+    color: var(--c-muted);
+  }
+  @media (min-width: 56rem) {
+    ul {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

@@ -1,0 +1,100 @@
+---
+import Icon from '../Icon.astro';
+import SectionHead from './SectionHead.astro';
+---
+
+<section id="developers" class="band" aria-labelledby="developers-title">
+  <SectionHead id="developers-title" eyebrow="For developers" title="Fast because of how it's built, not because we said so.">
+    <p>
+      You've read enough landing pages that promise speed with a chart and no method. Here's the architecture instead,
+      and you can check every line of it.
+    </p>
+  </SectionHead>
+  <div class="cards">
+    <article>
+      <Icon name="FiZap" size={22} class="icon" />
+      <h3>Speed you can reason about</h3>
+      <p>
+        One Rust binary on Axum and Tokio, and Postgres beside it. That's the whole install. Each document sits in a
+        single row, its published fields in one JSONB column, so reading a post isn't a join across a table per field.
+      </p>
+      <p>
+        Numbers? Not yet. We'll publish reproducible benchmarks against the popular CMSs first, method and all, and
+        only then quote one.
+      </p>
+    </article>
+    <article>
+      <Icon name="FiLock" size={22} class="icon" />
+      <h3>Security that lives in the query</h3>
+      <p>
+        An access rule isn't a check bolted on after the fetch. It becomes part of the SQL for whoever's asking, so
+        nobody can find a hidden document by filtering for it. Filter values always travel as bound parameters.
+      </p>
+      <p>
+        Passwords are hashed with Argon2id, refused if they've turned up in a known breach, and five wrong ones in 15
+        minutes lock the account for 15 more. API keys carry scopes and can be rotated.
+      </p>
+    </article>
+    <article>
+      <Icon name="FiTool" size={22} class="icon" />
+      <h3>Built to be lived with</h3>
+      <p>
+        When a write fails, the error names the field: <code>seo.title</code>, <code>links.0.url</code>. Every error is
+        RFC 9457 problem+json with a request ID you'll find in the logs.
+      </p>
+      <p>
+        Content types export to a JSON file you can diff in a pull request. IDs are UUIDv7, deletes are soft, and
+        date-times are stored in UTC to the millisecond.
+      </p>
+    </article>
+  </div>
+  <p class="more">
+    <a href="https://docs.tachyoncms.com/concepts">How TachyonCMS fits together <Icon name="FiArrowRight" size={16} /></a>
+  </p>
+</section>
+
+<style>
+  .cards {
+    display: grid;
+    gap: 1rem;
+  }
+  article {
+    padding: 1.5rem;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: 16px;
+  }
+  article :global(.icon) {
+    color: var(--c-hi);
+  }
+  h3 {
+    margin: 0.9rem 0 0.75rem;
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+  }
+  article p {
+    font-size: 1rem;
+    color: var(--c-muted);
+  }
+  article p:last-child {
+    margin-bottom: 0;
+  }
+  code {
+    font: 0.9em var(--font-mono);
+    color: var(--c-text);
+  }
+  .more {
+    margin: 1.5rem 0 0;
+  }
+  .more a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 600;
+  }
+  @media (min-width: 56rem) {
+    .cards {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+</style>

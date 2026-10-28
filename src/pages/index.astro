@@ -1,33 +1,81 @@
 ---
-import PageHero from '../components/PageHero.astro';
-import SignupForm from '../components/SignupForm.astro';
+import RuleHidesDraft from '../components/diagrams/RuleHidesDraft.astro';
+import SchemaDiff from '../components/diagrams/SchemaDiff.astro';
+import SchemaToApi from '../components/diagrams/SchemaToApi.astro';
+import Closing from '../components/home/Closing.astro';
+import Contribute from '../components/home/Contribute.astro';
+import Developers from '../components/home/Developers.astro';
+import Editors from '../components/home/Editors.astro';
+import Hero from '../components/home/Hero.astro';
+import LatestPosts, { type PostLink } from '../components/home/LatestPosts.astro';
+import SectionHead from '../components/home/SectionHead.astro';
+import Trust from '../components/home/Trust.astro';
 import Base from '../layouts/Base.astro';
+
+// Filled from the blog collection, published posts only, once the blog exists.
+// Until then the section stays out of the page.
+const latestPosts: PostLink[] = [];
 ---
 
-<Base title="TachyonCMS · fast for the developer, easy for the editor" path="/">
-  <PageHero
-    title="Fast for the developer. Easy for the editor. No plugins holding it together."
-    lede="TachyonCMS is an open-source CMS written in Rust, and we're building it in public."
-  />
-  <div class="intro">
-    <p>
-      Pick a CMS today and you usually pick a side. One kind is a joy to code against and baffling to whoever
-      publishes the Tuesday newsletter. The other is easy to publish with, and you pay for that in plugins, patches
-      and page speed.
-    </p>
-    <p>
-      We don't think you should have to choose. The core already runs on Postgres. Your content types live in a file
-      you can review like code, and when something's wrong the API names the exact field. The editor's side comes
-      next. And speed? We'll publish the benchmarks before we quote you a single number.
-    </p>
-  </div>
-  <SignupForm source="home" />
+<Base
+  title="TachyonCMS · a headless CMS in one Rust binary"
+  description="Define your content types and get a REST API with access rules down to the field. One Rust binary, one Postgres database, open source."
+  path="/"
+>
+  <Hero />
+
+  <section id="how" class="band" aria-labelledby="how-title">
+    <SectionHead id="how-title" eyebrow="How it works" title="Write a content type. Read it back over HTTP.">
+      <p>
+        Send a collection to the server and its endpoints exist from that moment. Create, read, update and delete,
+        with filters, sorting and pages. There's no code to generate and nothing to restart.
+      </p>
+    </SectionHead>
+    <SchemaToApi />
+  </section>
+
+  <Developers />
+
+  <section id="rules" class="band" aria-labelledby="rules-title">
+    <SectionHead id="rules-title" eyebrow="Access rules" title="Same request, different answer. That's the rule working.">
+      <p>
+        Everyone reads what's published; authors also read their own drafts. You write that once, in the schema. Ann
+        asks for <code>/api/posts</code> and gets both her posts. Someone signed out asks the same thing and gets one,
+        and a guess at the draft's ID gets a 404. Your front end didn't filter a thing.
+      </p>
+    </SectionHead>
+    <RuleHidesDraft />
+  </section>
+
+  <Editors />
+
+  <section id="schema" class="band" aria-labelledby="schema-title">
+    <SectionHead id="schema-title" eyebrow="Schema as code" title="Rename a field without losing a word of it.">
+      <p>
+        Change <code>title</code> to <code>headline</code> in your schema file and ask what would happen. Leave out
+        the rename and TachyonCMS tells you plainly that it would delete the data. Say it's a rename, and every
+        document keeps its title under the new name.
+      </p>
+    </SectionHead>
+    <SchemaDiff />
+  </section>
+
+  <Trust />
+  <LatestPosts posts={latestPosts} />
+  <Contribute />
+  <Closing />
 </Base>
 
 <style>
-  .intro {
-    max-width: 40rem;
-    margin-bottom: 2.5rem;
-    color: var(--c-muted);
+  /* Every home section after the hero is a band with room around it. */
+  :global(main > .band) {
+    padding: clamp(3rem, 8vw, 5.5rem) 0;
+  }
+  :global(main > .band + .band) {
+    border-top: 1px solid var(--c-border);
+  }
+  code {
+    font: 0.9em var(--font-mono);
+    color: var(--c-text);
   }
 </style>
