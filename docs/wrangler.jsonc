@@ -1,5 +1,5 @@
 {
-  "$schema": "./node_modules/wrangler/config-schema.json",
+  "$schema": "../node_modules/wrangler/config-schema.json",
   "name": "tachyoncms-docs",
   "compatibility_date": "2026-10-28",
   "routes": [{ "pattern": "docs.tachyoncms.com", "custom_domain": true }],
