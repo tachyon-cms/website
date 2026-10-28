@@ -20,7 +20,7 @@ done
 
 if [ "$bad" -ne 0 ]; then
   echo
-  echo "Sign off each commit with 'git commit -s'. See CONTRIBUTING.md."
+  echo "Sign off each commit with 'git commit -s'. See https://github.com/tachyon-cms/tachyoncms/blob/main/CONTRIBUTING.md"
   exit 1
 fi
 echo "All commits are signed off."
