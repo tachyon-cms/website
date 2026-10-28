@@ -42,18 +42,20 @@ test('filters lists exactly the operators', () => {
   assert.deepEqual(sorted(tableNames(section(page('filters'), '## Operators'))), sorted(operators));
 });
 
-test('config lists every key with its environment variable', () => {
+test('config lists exactly the keys, each with its own variable', () => {
   const text = page('config');
-  for (const key of configKeys) {
-    const name = key.split('.').pop();
-    assert.match(text, new RegExp(`^\\| \`${name}\` \\|`, 'm'), key);
-    assert.ok(text.includes(`TACHYON_${key.replace('.', '__').toUpperCase()}`), key);
-  }
+  const rows = [
+    ...section(text, '## Top-level keys').matchAll(/^\| `([^`]+)` \| `([^`]+)` \|/gm),
+    ...section(text, '## `[auth]`').matchAll(/^\| `([^`]+)` \| `([^`]+)` \|/gm),
+  ];
+  const found = Object.fromEntries(rows.map((m) => [m[1], m[2]]));
+  const want = Object.fromEntries(
+    configKeys.map((k) => [k.split('.').pop(), `TACHYON_${k.replace('.', '__').toUpperCase()}`]),
+  );
+  assert.deepEqual(found, want);
 });
 
-test('errors lists every status and title', () => {
-  const text = page('errors');
-  for (const [status, title] of errors) {
-    assert.match(text, new RegExp(`^\\| \`${status}\` \\| ${title} \\|`, 'm'), `${status} ${title}`);
-  }
+test('errors lists exactly the statuses and titles', () => {
+  const rows = [...page('errors').matchAll(/^\| `(\d{3})` \| ([^|]+?) \|/gm)].map((m) => `${m[1]} ${m[2]}`);
+  assert.deepEqual(sorted(rows), sorted(errors.map(([status, title]) => `${status} ${title}`)));
 });

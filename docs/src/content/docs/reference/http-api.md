@@ -32,10 +32,10 @@ The **Who** row of each endpoint uses these terms:
 |---|---|
 | Anyone | No credentials needed. Read rules still decide what comes back. |
 | Signed in | A session, or an API key with the `admin` scope. Other keys get a `403`. |
-| Session | A session only. API keys get a `403`. |
+| Session | A session only. API keys are refused. |
 | `users` ability | A role with `users: true` (Admin by default). Keys also need the `admin` scope. A role with this ability can do everything an Admin can. |
 | `schemas` ability | A role with `schemas: true` (Admin by default). Keys also need the `admin` scope. |
-| Content | The role's `content` ability, the collection's [access rules](/access-rules) and, for a key, its [scopes](/api-keys#scopes). |
+| Content | The role's `content` ability, the collection's [access rules](/access-rules) and, for a key, its [scopes](/api-keys#scopes): `collection:read`, `collection:write`, `*:read`, `*:write` or `admin`. |
 
 Signed out, a refusal is a `401 Sign in first.`; signed in, it's a `403`.
 
@@ -999,7 +999,7 @@ Reads a global. Until it's first saved, it shows only its fields' defaults, with
 
 | | |
 |---|---|
-| Who | Content: anyone, unless a read rule says otherwise. A key needs a scope for the global's slug. |
+| Who | Content: anyone, unless a read rule says otherwise. A key needs `slug:read`, `slug:write`, `*:read`, `*:write` or `admin`. |
 | Query | `depth`, `select`, `populate`, as for [`GET /api/{collection}/{id}`](#get-apicollectionid) |
 | Returns | `200` and the global |
 | Errors | `400`; `401`, `403` a read rule or key scope refuses; `404` no such global |
@@ -1025,7 +1025,7 @@ Changes a global, saving it the first time. Fields merge as for a [document `PAT
 
 | | |
 |---|---|
-| Who | Content: a role whose `content` is `all` (Editor and Admin), or the global's update rule. A key needs `slug:write`. |
+| Who | Content: a role whose `content` is `all` (Editor and Admin), or the global's update rule. A key needs `slug:write`, `*:write` or `admin`. |
 | Body | The fields to change |
 | Returns | `200` and the global |
 | Errors | `401`; `403` the role, a rule, a field rule or a key scope refuses; `404`; `422` |
@@ -1049,7 +1049,7 @@ Lists the documents you may read, a page at a time.
 
 | | |
 |---|---|
-| Who | Content: anyone, unless a read rule says otherwise. A key needs `collection:read`, `collection:write` or a `*` scope. |
+| Who | Content: anyone, unless a read rule says otherwise. A key needs `collection:read`, `collection:write`, `*:read`, `*:write` or `admin`. |
 | Returns | `200` and a page |
 | Errors | `400` a bad parameter; `401`, `403` a read rule or key scope refuses, or a filter or sort on a field you can't read; `404` no such collection |
 
@@ -1104,7 +1104,7 @@ Creates a document.
 
 | | |
 |---|---|
-| Who | Content: a signed-in role whose `content` is `all` or `own`, subject to the create rule. A key needs `collection:write` or `*:write`. |
+| Who | Content: a signed-in role whose `content` is `all` or `own`, subject to the create rule. A key needs `collection:write`, `*:write` or `admin`. |
 | Body | The document's fields. Fields left out take their `default`. |
 | Returns | `201` and the document, with links filled in to depth 1. If a read rule hides it from you, only `{"id"}`. |
 | Errors | `401`; `403` the role, a rule, a field rule or a key scope refuses; `404` no such collection; `422` a value that doesn't validate, an unknown field, a link to a document that doesn't exist, or a `unique` value that's taken |
@@ -1173,7 +1173,7 @@ Changes a document. What you send is merged into what's stored: a field inside a
 
 | | |
 |---|---|
-| Who | Content: a role whose `content` is `all`, or `own` for documents you created, subject to the update rule. A key needs `collection:write` or `*:write`. |
+| Who | Content: a role whose `content` is `all`, or `own` for documents you created, subject to the update rule. A key needs `collection:write`, `*:write` or `admin`. |
 | Body | The fields to change |
 | Returns | `200` and the document, with links filled in to depth 1. If a read rule now hides it from you, only `{"id"}`. |
 | Errors | `401`; `403 You can only change documents you created.`, `403 An access rule doesn't let you change this document.`, or a field rule or key scope refuses; `404`; `409` the collection's fields changed during the request; `422` |
