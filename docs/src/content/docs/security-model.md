@@ -36,7 +36,7 @@ Sign-in itself takes JSON. A cross-site form can't send JSON, and a cross-site s
 
 - A key acts as its owner and can never do more than the owner's role and the access rules allow. Its scopes only narrow that.
 - Keys are made, rotated and revoked from a signed-in session, never with another key, so a leaked key can't mint more.
-- Only an Admin can make a key with the `admin` scope.
+- Only an Admin, or a role with the `users` ability, can make a key with the `admin` scope.
 - Without an `admin` scope, a key can't see content types, roles, accounts or sessions.
 
 ## Access rules
@@ -46,12 +46,13 @@ Sign-in itself takes JSON. A cross-site form can't send JSON, and a cross-site s
 - Filters can't probe what you can't see. Hidden documents never match, even through a relationship, and filtering or sorting on a field you can't read is a `403`, whatever else is wrong with the filter.
 - Updates and deletes are checked against the stored document inside the same database transaction as the write.
 - Admins pass every rule, so a rule can't lock everyone out.
+- A custom role with the `users` ability can make itself, or anyone, an Admin and mint `admin`-scoped keys. Grant it only to people you'd make Admin. See [Roles](/roles#abilities).
 
 The one known leak is [unique fields](/access-rules#known-limits): a duplicate value is refused even when the document holding it is hidden.
 
 ## Queries and input
 
-- Every database query is either checked against the schema at compile time or built from a validated filter tree with bound parameters. User input is never pasted into SQL.
+- Every database query is either checked against the schema at compile time or built from a validated filter tree. Request values are always bound parameters; index statements are built only from validated field names and server-generated IDs.
 - The Rust code forbids `unsafe` throughout the workspace.
 - Request bodies are limited to 10 MB, and requests to 30 seconds.
 - Queries are limited too: 100 query parameters, 50 filter conditions, nesting 5 deep, paths through 3 relationships, 100 documents per page and a population depth of 5.

@@ -13,7 +13,7 @@ The only setting without a default is `database_url`.
 
 ## A complete file
 
-This is `tachyon.example.toml` from the repository, with every setting at its default:
+This is `tachyon.example.toml` from the repository. The `[auth]` values are the defaults; `database_url` is a sample, since it has no default, and `breach_check_url` is left out ([see below](#auth)):
 
 ```toml
 # Copy to tachyon.toml. Every setting can also come from the environment:

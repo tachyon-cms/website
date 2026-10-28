@@ -149,7 +149,7 @@ curl -X PATCH localhost:3000/api/globals/site \
 }
 ```
 
-Anyone can read a global unless an access rule says otherwise. Changing one needs the Editor or Admin role. Globals can't have join fields or a `defaultPopulate`, since nothing links to a global.
+Anyone can read a global unless an access rule says otherwise. Changing one needs a role whose `content` ability is `all` (Editor and Admin by default). Globals can't have join fields or a `defaultPopulate`, since nothing links to a global.
 
 ## Change a content type
 

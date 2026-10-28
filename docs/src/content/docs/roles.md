@@ -91,9 +91,13 @@ curl localhost:3000/api/admin/roles -H "authorization: Bearer $TOKEN"
 | `schemas` | `true` to create and change content types. |
 | `users` | `true` to manage users and roles, and other people's sessions. |
 
+:::caution[`users: true` is as good as Admin]
+A role with the `users` ability can change anyone's role, its own included, to `admin`, and can make API keys with the `admin` scope. Treat it as Admin-equivalent, and give it only to people you'd make Admin.
+:::
+
 ## Add a role
 
-An Admin can add roles with `POST /api/admin/roles`. The slug uses lowercase letters, digits and underscores, starting with a letter:
+An Admin, or a role with the `users` ability, can add roles with `POST /api/admin/roles`. The slug uses lowercase letters, digits and underscores, starting with a letter:
 
 ```sh
 curl -X POST localhost:3000/api/admin/roles \
@@ -185,7 +189,7 @@ curl -X PATCH localhost:3000/api/users/01a18460-fc34-726a-859b-7c494b9f7192 \
 
 A few safeguards:
 
-- Only an Admin can change a role.
+- Only an Admin, or a role with the `users` ability, can change a role.
 - The last Admin can't be removed or given another role:
 
   ```json

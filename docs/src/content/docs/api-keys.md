@@ -49,7 +49,7 @@ curl -X POST localhost:3000/api/auth/keys \
 | `posts:read` | Reading one collection, here `posts`. |
 | `posts:write` | Creating, changing and deleting in one collection, which includes reading it. |
 | `*:read`, `*:write` | The same, for every collection. |
-| `admin` | Everything the owner can do: content types, users and roles too. Only an Admin can make an `admin` key. |
+| `admin` | Everything the owner can do: content types, users and roles too. Only an Admin, or a role with the `users` ability, can make an `admin` key. |
 
 A scope that doesn't fit the pattern is refused:
 

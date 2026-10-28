@@ -20,6 +20,8 @@ docker run --rm --network tachyon -p 127.0.0.1:3000:3000 \
   ghcr.io/tachyon-cms/tachyoncms:v0.1.0
 ```
 
+The last command stays in the foreground, so run the rest of this page in a second terminal. (Or add `-d` to run it in the background and read its output with `docker logs`.)
+
 TachyonCMS runs its database migrations, then logs one JSON line per event to stderr:
 
 ```json

@@ -108,11 +108,50 @@ Joined documents are populated like links: in full at the default `depth=1`, as 
 |---|---|
 | `collection` | The collection whose documents link here. |
 | `on` | The relationship field in that collection, such as `category` or `meta.category`. |
-| `where` | A filter that always applies, written like a `where` query: `{"draft": {"equals": "false"}}`. |
+| `where` | A filter that always applies, written like a `where` query. See [A join with a filter](#a-join-with-a-filter). |
 | `defaultLimit` | Documents per page. Defaults to 10. |
 | `defaultSort` | A field to sort by, `-` for descending. Defaults to newest first. |
 
 Globals can't have join fields, since nothing links to a global.
+
+### A join with a filter
+
+A join's `where` narrows it to some of the linking documents. In this separate, smaller run, `posts` has a `kind` select, and a category's `notes` join lists only its notes:
+
+```json
+{"name": "notes", "type": "join", "collection": "posts", "on": "category", "where": {"kind": {"equals": "note"}}}
+```
+
+The category has three posts, one of them an article. Only the two notes appear:
+
+```sh
+curl -g 'localhost:3000/api/categories/01a1847b-a927-7758-9cb2-e274b3b13cd6?populate[posts][title]=true&populate[posts][kind]=true'
+```
+
+```json
+{
+  "createdAt": "2026-10-28T21:47:39.175693Z",
+  "id": "01a1847b-a927-7758-9cb2-e274b3b13cd6",
+  "name": "Engineering",
+  "notes": {
+    "docs": [
+      {
+        "id": "01a1847b-a957-75bc-b9a1-f83019d31a7c",
+        "kind": "note",
+        "title": "A note on cursors"
+      },
+      {
+        "id": "01a1847b-a939-7415-b848-0e000dd2b6d1",
+        "kind": "note",
+        "title": "Why Postgres"
+      }
+    ],
+    "hasNextPage": false
+  },
+  "status": "published",
+  "updatedAt": "2026-10-28T21:47:39.175693Z"
+}
+```
 
 ### Join options per request
 
