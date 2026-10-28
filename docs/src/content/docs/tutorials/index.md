@@ -7,7 +7,7 @@ Each tutorial builds one thing with TachyonCMS v0.1.0, from an empty database to
 
 ## Build a blog
 
-[Build a blog](/tutorials/build-a-blog) takes about 20 minutes. You start TachyonCMS and Postgres with Docker, then:
+In [Build a blog](/tutorials/build-a-blog) you start TachyonCMS and Postgres with Docker, then:
 
 - add two authors who sign in with their own tokens;
 - create a `posts` collection with a slug, an author and a `published` flag;

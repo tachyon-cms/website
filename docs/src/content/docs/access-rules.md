@@ -3,7 +3,7 @@ title: Access rules
 description: Decide which documents and fields each person can read and change, with rules that live in the schema.
 ---
 
-[Roles](/roles) answer "who are you?". Most sites also need "which documents?": visitors see what's published, and authors edit their own posts and nobody else's. An access rule in the schema says that. Rules live in the schema, so they export and apply with it like any other change.
+[Roles](/roles) answer "who are you?". Most sites also need "which documents?": visitors see what's published, and authors see their own drafts as well. An access rule in the schema says that. Rules live in the schema, so they export and apply with it like any other change.
 
 ## Where rules go
 
@@ -41,14 +41,13 @@ The profile field has to store one value or a list of them. Virtual and join fie
 
 ## A blog with drafts
 
-Everyone reads what's published. Authors also read their own drafts, and change only their own posts. This adds a `published` checkbox to `posts` and gives it a collection rule (the other `posts` fields are left out here):
+Everyone reads what's published, and authors also read their own drafts. This adds a `published` checkbox to `posts` and gives it a read rule (the other `posts` fields are left out here):
 
 ```json
 {
   "slug": "posts",
   "access": {
-    "read": {"or": [{"published": true}, {"author": "$user.id"}]},
-    "update": {"author": "$user.id"}
+    "read": {"or": [{"published": true}, {"author": "$user.id"}]}
   },
   "fields": [
     {"name": "title", "type": "text", "required": true},
@@ -58,7 +57,7 @@ Everyone reads what's published. Authors also read their own drafts, and change 
 }
 ```
 
-The rule compares the `author` field with the caller, so a post belongs to whoever its `author` names. Authors set it when they write:
+The rule compares the `author` field with the caller, so a draft shows to whoever its `author` names. Authors set it when they write:
 
 ```sh
 curl -X POST localhost:3000/api/posts \
@@ -116,12 +115,12 @@ curl -g 'localhost:3000/api/posts?select[title]=true&select[published]=true' \
 }
 ```
 
-She can read the published post, but the update rule stops her changing it: a `403` with the detail `An access rule doesn't let you change this document.`
+She can read the published post, but she didn't create it, so her role stops her changing it: a `403` with the detail `You can only change documents you created.`
 
-`create` and `delete` have no rule here, so the role table still decides them.
+`create`, `update` and `delete` have no rule here, so the [role table](/roles#built-in-roles) still decides them. That's deliberate. An Author's "own" means the user who created the document, which TachyonCMS records itself. `author` is whatever the client sends, and a create rule can't compare it with the caller, so any post can name any user as its author. A rule like `"update": {"author": "$user.id"}` would replace the creator check with that field, and hand edit rights to whoever a post names. To stop a byline being reassigned after the fact, give `author` a field rule such as `"access": {"update": {"role": "admin"}}`, as the [Build a blog](/tutorials/build-a-blog) tutorial does.
 
 :::caution[Rules bind Editors too]
-With these rules, Editors also see only published posts and their own drafts, and change only posts they wrote. To keep them working on everything, add `{"role": "editor"}` to the read rule's `or`, and make the update rule `{"or": [{"role": "editor"}, {"author": "$user.id"}]}`.
+With this rule, Editors also see only published posts and their own drafts, and a draft they can't see is one they can't change. To let them work on every post, add `{"role": "editor"}` to the read rule's `or`.
 :::
 
 ## Field rules

@@ -25,7 +25,7 @@ Need a reviewer, or an HR role? Add your own beside these four.
 
 ## Rules for which documents
 
-Roles answer "who are you?". Most sites also need "which documents?": visitors see what's published, authors edit their own posts and nobody else's. That's what a rule says.
+Roles answer "who are you?". Most sites also need "which documents?": visitors see what's published, and authors see their own drafts too. That's what a rule says.
 
 You can put one on a collection (read, create, update, delete), on a global (read, update) or on a field at any depth, inside groups, lists and tabs too. A rule is `true` or `false`, a role or a list of roles, `{"signedIn": true}`, an `and` or an `or`, or a filter written exactly the way `where` takes it. A filter can compare with the person asking, through `$user.id`, `$user.role` or a field from their profile such as `$user.team`.
 
