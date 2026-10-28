@@ -6,11 +6,9 @@ interface Props {
 }
 const { source } = Astro.props;
 const id = `signup-email-${source}`;
-// What the list is for depends on where the form sits.
-const copy = {
-  home: { label: 'Get release news', about: 'new releases' },
-  editors: { label: 'Tell me when the admin is ready', about: 'the admin' },
-}[source];
+// The label fits where the form sits. There's one list behind every form, so the
+// promise in the fine print is the same everywhere, and matches server/signup.ts.
+const label = { home: 'Get release news', editors: 'Tell me when the admin is ready' }[source];
 // One script tag per page, however many forms: it binds every form.signup.
 const firstForm = !Astro.locals.signupScript;
 Astro.locals.signupScript = true;
@@ -22,7 +20,7 @@ if (!siteKey) throw new Error('PUBLIC_TURNSTILE_SITE_KEY must be set for a Cloud
 ---
 
 <form class="signup" method="post" action="/api/subscribe">
-  <label for={id}>{copy.label}</label>
+  <label for={id}>{label}</label>
   <div class="row">
     <input id={id} name="email" type="email" autocomplete="email" required placeholder="you@example.com" />
     <button type="submit">Notify me</button>
@@ -32,7 +30,7 @@ if (!siteKey) throw new Error('PUBLIC_TURNSTILE_SITE_KEY must be set for a Cloud
     <input id={`${id}-trap`} name="website" type="text" tabindex="-1" autocomplete="off" />
   </div>
   <div class="cf-turnstile" data-sitekey={siteKey}></div>
-  <p class="fine">We'll send one email to confirm your address, then write only about {copy.about}. One click unsubscribes.</p>
+  <p class="fine">We'll send one email to confirm your address, then write only about releases and news about the admin. One click unsubscribes.</p>
 </form>
 {firstForm && <script is:inline src="/signup.js" defer />}
 
