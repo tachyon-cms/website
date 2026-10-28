@@ -80,10 +80,12 @@ test('the editors page offers the admin signup', async ({ page }) => {
 });
 
 test('every signup form promises the same list', async ({ page }) => {
-  for (const path of ['/', '/editors', '/product/admin']) {
+  for (const path of ['/', '/editors', '/product/admin', '/releases']) {
     await page.goto(path);
     for (const fine of await page.locator('form.signup .fine').allTextContents()) {
       expect(fine).toContain("write only when there's a release or news of the admin");
+      // Unsubscribing is by the link in an update or by email (see /privacy), not promised as one click.
+      expect(fine).not.toContain('One click');
     }
   }
   await page.goto('/confirmed');

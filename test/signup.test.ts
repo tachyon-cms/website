@@ -110,8 +110,24 @@ describe('subscribe', () => {
     const log = vi.spyOn(console, 'error').mockImplementation(() => {});
     const res = await subscribe(post('/api/subscribe', { email: 'a@b.co', 'cf-turnstile-response': 't' }), env);
     expect(where(res)).toBe('/signup-problem');
-    expect(log).toHaveBeenCalledWith('signup: sending the confirmation email failed', 403, '{}');
+    expect(log).toHaveBeenCalledWith('signup: sending the confirmation email failed', 403, 'unknown');
     expect(JSON.stringify(log.mock.calls)).not.toContain('a@b.co');
+  });
+
+  it("logs only the name of Resend's error, never its message, which can quote the address", async () => {
+    for (const [body, name] of [
+      ['{"statusCode":422,"name":"validation_error","message":"Invalid `to` field: a@b.co"}', 'validation_error'],
+      ['<html>bad gateway a@b.co</html>', 'unknown'],
+    ]) {
+      vi.stubGlobal('fetch', async (input: string) =>
+        String(input).includes('turnstile') ? Response.json({ success: true }) : new Response(body, { status: 422 }),
+      );
+      const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+      await subscribe(post('/api/subscribe', { email: 'a@b.co', 'cf-turnstile-response': 't' }), env);
+      expect(log).toHaveBeenCalledWith('signup: sending the confirmation email failed', 422, name);
+      expect(JSON.stringify(log.mock.calls)).not.toContain('a@b.co');
+      log.mockRestore();
+    }
   });
 
   it('names settings that are missing instead of calling out with them', async () => {

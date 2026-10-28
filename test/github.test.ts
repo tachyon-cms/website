@@ -69,4 +69,22 @@ describe('release notes', () => {
     expect(html).toContain('<h3>Get it</h3>');
     expect(html).toContain('<a href="https://github.com/tachyon-cms/tachyoncms/commits/v0.1.0">');
   });
+
+  it('turns images into links, since the CSP only loads images from this site', () => {
+    const html = renderNotes('![The admin](https://example.com/a.png)\n\n[![Badge](https://example.com/b.svg)](https://example.com/ci)');
+    expect(html).not.toContain('<img');
+    expect(html).toContain('<a href="https://example.com/a.png">The admin</a>');
+    expect(html).toContain('<a href="https://example.com/ci">Badge</a>');
+    expect(html).not.toMatch(/<a [^>]*>[^<]*<a /);
+  });
+
+  it('demotes the footnotes heading and keeps footnote ids unique per release', () => {
+    const md = 'Hi[^1]\n\n[^1]: Note.';
+    const a = renderNotes(md, 'v0.1.0-');
+    const b = renderNotes(md, 'v0.2.0-');
+    expect(a).not.toMatch(/<h2/);
+    expect(a).toMatch(/<h3[^>]*>Footnotes<\/h3>/);
+    const ids = (html: string) => [...html.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
+    expect(ids(a).filter((id) => ids(b).includes(id))).toEqual([]);
+  });
 });

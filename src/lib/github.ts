@@ -76,11 +76,16 @@ export const fetchContributors = (fetcher: typeof fetch = fetch, token = process
 /**
  * Release notes to HTML. micromark escapes raw HTML and drops javascript: and other
  * unsafe link targets by default, and emits no style="" attributes, so the output is
- * safe under the CSP. Headings move down a level to sit under the release's own <h2>.
+ * safe under the CSP. Three changes on top:
+ * - headings move down a level to sit under the release's own <h2>, the footnotes one too;
+ * - images become links to the image, because the CSP loads images only from this site;
+ * - footnote ids take `prefix`, so several releases on one page don't share ids.
  */
-export function renderNotes(markdown: string): string {
-  return micromark(markdown, { extensions: [gfm()], htmlExtensions: [gfmHtml()] }).replace(
-    /<(\/?)h([1-5])>/g,
-    (_, slash: string, level: string) => `<${slash}h${Number(level) + 1}>`,
-  );
+export function renderNotes(markdown: string, prefix = 'notes-'): string {
+  const img = /<img src="([^"]*)" alt="([^"]*)"(?: title="[^"]*")? \/>/;
+  return micromark(markdown, { extensions: [gfm()], htmlExtensions: [gfmHtml({ clobberPrefix: prefix })] })
+    .replace(/<(\/?)h([1-5])((?:\s[^>]*)?)>/g, (_, slash: string, level: string, attrs: string) => `<${slash}h${Number(level) + 1}${attrs}>`)
+    .replaceAll('footnote-label', `${prefix}footnote-label`)
+    .replace(new RegExp(`(<a [^>]*>)${img.source}</a>`, 'g'), (_, open: string, src: string, alt: string) => `${open}${alt || src}</a>`)
+    .replace(new RegExp(img.source, 'g'), (_, src: string, alt: string) => `<a href="${src}">${alt || src}</a>`);
 }

@@ -2,13 +2,14 @@
 // The markup public/signup.js drives: form.signup holding a .cf-turnstile slot with
 // the site key. The script loads Turnstile only once someone starts on the form.
 interface Props {
-  source: 'home' | 'editors';
+  /** What the form is for, which sets its label. Every form joins the same list. */
+  source: 'news' | 'editors';
 }
 const { source } = Astro.props;
 const id = `signup-email-${source}`;
 // The label fits where the form sits. There's one list behind every form, so the
 // promise in the fine print is the same everywhere, and matches server/signup.ts.
-const label = { home: 'Get release news', editors: 'Tell me when the admin is ready' }[source];
+const label = { news: 'Get release news', editors: 'Tell me when the admin is ready' }[source];
 // One script tag per page, however many forms: it binds every form.signup.
 const firstForm = !Astro.locals.signupScript;
 Astro.locals.signupScript = true;
@@ -30,7 +31,7 @@ if (!siteKey) throw new Error('PUBLIC_TURNSTILE_SITE_KEY must be set for a Cloud
     <input id={`${id}-trap`} name="website" type="text" tabindex="-1" autocomplete="off" />
   </div>
   <div class="cf-turnstile" data-sitekey={siteKey}></div>
-  <p class="fine">We'll send one email to confirm your address, then write only when there's a release or news of the admin. One click unsubscribes.</p>
+  <p class="fine">We'll send one email to confirm your address, then write only when there's a release or news of the admin. Unsubscribe any time.</p>
 </form>
 {firstForm && <script is:inline src="/signup.js" defer />}
 

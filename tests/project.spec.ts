@@ -31,7 +31,8 @@ test('releases shows the v0.1.0 notes, rendered from Markdown', async ({ page })
   await expect(page.locator('main h2', { hasText: 'v0.1.0' })).toBeVisible();
   await expect(page.locator('main h3', { hasText: 'Verify a download' })).toBeVisible();
   await expect(page.locator('main pre code')).toContainText('cosign verify-blob');
-  await expect(page.locator('main a[href="https://github.com/tachyon-cms/tachyoncms/releases/tag/v0.1.0"]')).toBeVisible();
+  // Once beside the date, and again after the notes, where a reader who got to the end looks.
+  await expect(page.locator('main a[href="https://github.com/tachyon-cms/tachyoncms/releases/tag/v0.1.0"]')).toHaveCount(2);
 });
 
 test('community lists contributors and the no-CLA promise', async ({ page }) => {

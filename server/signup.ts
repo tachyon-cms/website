@@ -108,8 +108,10 @@ export async function subscribe(request: Request, env: Env): Promise<Response> {
     html: `<p>Confirm with one click, and we'll write only when there's a release or news of the admin: <a href="${escapeHtml(link.toString())}">Confirm my email</a>.</p><p>Didn't ask for this? Ignore it and you won't hear from us again.</p>`,
   });
   if (!sent.ok) {
-    // Resend's message names the cause, such as an unverified domain. Never log the address.
-    console.error('signup: sending the confirmation email failed', sent.status, await sent.text());
+    // Resend's error name says what kind of failure it was, such as `validation_error`. Its
+    // message can quote the address, so it never reaches the log.
+    const { name } = (await sent.json().catch(() => ({}))) as { name?: unknown };
+    console.error('signup: sending the confirmation email failed', sent.status, typeof name === 'string' ? name : 'unknown');
     return redirect(request, '/signup-problem');
   }
   return redirect(request, '/check-your-inbox');
