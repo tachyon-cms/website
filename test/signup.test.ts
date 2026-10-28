@@ -76,7 +76,7 @@ describe('subscribe', () => {
     const calls = fakeNetwork();
     const res = await subscribe(post('/api/subscribe', { email: 'Ann@Example.com', 'cf-turnstile-response': 't' }), env);
     expect(res.status).toBe(303);
-    expect(where(res)).toBe('/check-your-inbox/');
+    expect(where(res)).toBe('/check-your-inbox');
     expect(calls[0]?.body).toMatchObject({ secret: 'ts_secret', response: 't', remoteip: '203.0.113.9' });
     const mail = calls[1]?.body as { to: string[]; from: string; text: string };
     expect(calls[1]?.url).toBe('https://api.resend.com/emails');
@@ -91,13 +91,13 @@ describe('subscribe', () => {
   it('stores nothing and sends nothing for bots, bad addresses or a failed check', async () => {
     const calls = fakeNetwork({ human: false });
     const trap = await subscribe(post('/api/subscribe', { email: 'a@b.co', website: 'spam' }), env);
-    expect(where(trap)).toBe('/check-your-inbox/');
+    expect(where(trap)).toBe('/check-your-inbox');
     const bad = await subscribe(post('/api/subscribe', { email: 'nope', 'cf-turnstile-response': 't' }), env);
-    expect(where(bad)).toBe('/signup-problem/');
+    expect(where(bad)).toBe('/signup-problem');
     const robot = await subscribe(post('/api/subscribe', { email: 'a@b.co', 'cf-turnstile-response': 't' }), env);
-    expect(where(robot)).toBe('/signup-problem/');
+    expect(where(robot)).toBe('/signup-problem');
     const missing = await subscribe(post('/api/subscribe', { email: 'a@b.co' }), env);
-    expect(where(missing)).toBe('/signup-problem/');
+    expect(where(missing)).toBe('/signup-problem');
     expect(calls.filter((c) => c.url.includes('resend'))).toEqual([]);
   });
 
@@ -105,7 +105,7 @@ describe('subscribe', () => {
     fakeNetwork({ resend: () => 403 });
     const log = vi.spyOn(console, 'error').mockImplementation(() => {});
     const res = await subscribe(post('/api/subscribe', { email: 'a@b.co', 'cf-turnstile-response': 't' }), env);
-    expect(where(res)).toBe('/signup-problem/');
+    expect(where(res)).toBe('/signup-problem');
     expect(log).toHaveBeenCalledWith('signup: sending the confirmation email failed', 403, '{}');
     expect(JSON.stringify(log.mock.calls)).not.toContain('a@b.co');
   });
@@ -115,7 +115,7 @@ describe('subscribe', () => {
     const log = vi.spyOn(console, 'error').mockImplementation(() => {});
     const broken = { ...env, TURNSTILE_SECRET_KEY: '', RESEND_API_KEY: undefined } as unknown as Env;
     const res = await subscribe(post('/api/subscribe', { email: 'a@b.co', 'cf-turnstile-response': 't' }), broken);
-    expect(where(res)).toBe('/signup-problem/');
+    expect(where(res)).toBe('/signup-problem');
     expect(log).toHaveBeenCalledWith('signup: settings missing', ['TURNSTILE_SECRET_KEY', 'RESEND_API_KEY']);
     expect(calls).toEqual([]);
   });
@@ -135,7 +135,7 @@ describe('subscribe', () => {
     );
     const log = vi.spyOn(console, 'error').mockImplementation(() => {});
     const res = await subscribe(post('/api/subscribe', { email: 'a@b.co', 'cf-turnstile-response': 't' }), env);
-    expect(where(res)).toBe('/signup-problem/');
+    expect(where(res)).toBe('/signup-problem');
     expect(log).toHaveBeenCalledWith('signup: human check failed', ['invalid-input-secret'], 'tachyoncms.com');
   });
 });
@@ -150,14 +150,14 @@ describe('confirm', () => {
     expect(html).toContain(`value="${token}"`);
     expect(page.headers.get('Content-Security-Policy')).toContain("frame-ancestors 'none'");
     const bad = await showConfirm(new Request('https://tachyoncms.com/confirm/?token=x'), env);
-    expect(where(bad)).toBe('/link-expired/');
+    expect(where(bad)).toBe('/link-expired');
   });
 
   it('adds a new contact to the launch segment', async () => {
     const calls = fakeNetwork();
     const token = await signToken('ann@example.com', env.SIGNING_SECRET);
     const res = await confirm(post('/confirm/', { token }), env);
-    expect(where(res)).toBe('/confirmed/');
+    expect(where(res)).toBe('/confirmed');
     expect(calls).toEqual([
       {
         url: 'https://api.resend.com/contacts',
@@ -171,7 +171,7 @@ describe('confirm', () => {
     const calls = fakeNetwork({ resend: (c) => (c.method === 'POST' && c.url.endsWith('/contacts') ? 409 : 200) });
     const token = await signToken('ann@example.com', env.SIGNING_SECRET);
     const res = await confirm(post('/confirm/', { token }), env);
-    expect(where(res)).toBe('/confirmed/');
+    expect(where(res)).toBe('/confirmed');
     expect(calls.slice(1).map((c) => `${c.method} ${c.url}`)).toEqual([
       'PATCH https://api.resend.com/contacts/ann%40example.com',
       'POST https://api.resend.com/contacts/ann%40example.com/segments/seg_1',
@@ -181,7 +181,7 @@ describe('confirm', () => {
   it('refuses forged tokens without calling Resend', async () => {
     const calls = fakeNetwork();
     const res = await confirm(post('/confirm/', { token: 'forged.token' }), env);
-    expect(where(res)).toBe('/link-expired/');
+    expect(where(res)).toBe('/link-expired');
     expect(calls).toEqual([]);
   });
 });

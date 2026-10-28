@@ -6,7 +6,7 @@ The website for [TachyonCMS](https://github.com/tachyon-cms/tachyoncms). For now
 
 - **Pages** are static [Astro](https://astro.build) in `src/pages`, sharing one stylesheet at `public/site.css`.
 - **Signup** runs on Cloudflare Pages Functions (`functions/`, logic in `server/`). A visitor passes Cloudflare Turnstile, gets a signed confirmation link by email through Resend, and joins the launch segment only after clicking it. Unconfirmed addresses aren't stored anywhere.
-- **Security headers** for static pages live in `public/_headers`; the functions set the same ones in `server/signup.ts`.
+- **Security headers** for static pages live in `headers.base` (`docs/headers.base` for the docs). The build adds a content security policy hashed from its own output (`scripts/csp.mjs`) and writes `dist/_headers`. The functions set the same headers in `server/signup.ts`, and `test/headers.test.ts` keeps the two in step.
 
 ## Working on it
 

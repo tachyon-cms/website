@@ -12,14 +12,20 @@ export function normalizeEmail(input: unknown): string | null {
   return /^[^@]+@[^@]+\.[^@.]+$/.test(email) ? email : null;
 }
 
-/** Security headers for every response a function writes. Static files get theirs from `_headers`. */
+/**
+ * Security headers for every response a function writes. Static files get theirs from
+ * `headers.base`, and test/headers.test.ts keeps the two the same. The policy differs:
+ * these pages run no scripts, so it allows only the stylesheet and posting back here.
+ */
 export function secured(response: Response): Response {
   const h = response.headers;
   h.set('Strict-Transport-Security', 'max-age=63072000; includeSubDomains; preload');
   h.set('X-Content-Type-Options', 'nosniff');
+  h.set('X-Frame-Options', 'DENY');
   h.set('Referrer-Policy', 'strict-origin-when-cross-origin');
-  h.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), interest-cohort=()');
+  h.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
   h.set('Cross-Origin-Opener-Policy', 'same-origin');
+  h.set('Cross-Origin-Resource-Policy', 'same-origin');
   h.set(
     'Content-Security-Policy',
     "default-src 'none'; style-src 'self'; img-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
@@ -82,15 +88,15 @@ function missingSettings(env: Env): boolean {
 
 /** POST /api/subscribe: checks the visitor is human and emails a confirmation link. */
 export async function subscribe(request: Request, env: Env): Promise<Response> {
-  if (missingSettings(env)) return redirect(request, '/signup-problem/');
+  if (missingSettings(env)) return redirect(request, '/signup-problem');
   const form = await request.formData().catch(() => null);
-  if (!form) return redirect(request, '/signup-problem/');
+  if (!form) return redirect(request, '/signup-problem');
   // Bots fill every field; people never see this one.
-  if (form.get('website')) return redirect(request, '/check-your-inbox/');
+  if (form.get('website')) return redirect(request, '/check-your-inbox');
   const email = normalizeEmail(form.get('email'));
-  if (!email) return redirect(request, '/signup-problem/');
+  if (!email) return redirect(request, '/signup-problem');
   if (!(await humanCheck(env, request, form.get('cf-turnstile-response')))) {
-    return redirect(request, '/signup-problem/');
+    return redirect(request, '/signup-problem');
   }
   const link = new URL('/confirm/', request.url);
   link.searchParams.set('token', await signToken(email, env.SIGNING_SECRET));
@@ -104,9 +110,9 @@ export async function subscribe(request: Request, env: Env): Promise<Response> {
   if (!sent.ok) {
     // Resend's message names the cause, such as an unverified domain. Never log the address.
     console.error('signup: sending the confirmation email failed', sent.status, await sent.text());
-    return redirect(request, '/signup-problem/');
+    return redirect(request, '/signup-problem');
   }
-  return redirect(request, '/check-your-inbox/');
+  return redirect(request, '/check-your-inbox');
 }
 
 function confirmPage(token: string): string {
@@ -135,31 +141,31 @@ function confirmPage(token: string): string {
 /** GET /confirm/: a button, not the confirmation itself, because mail scanners open links. */
 export async function showConfirm(request: Request, env: Env): Promise<Response> {
   const token = new URL(request.url).searchParams.get('token') ?? '';
-  if (!(await verifyToken(token, env.SIGNING_SECRET))) return redirect(request, '/link-expired/');
+  if (!(await verifyToken(token, env.SIGNING_SECRET))) return redirect(request, '/link-expired');
   return secured(new Response(confirmPage(token), { headers: { 'Content-Type': 'text/html; charset=utf-8' } }));
 }
 
 /** POST /confirm/: adds the address to the launch segment. */
 export async function confirm(request: Request, env: Env): Promise<Response> {
-  if (missingSettings(env)) return redirect(request, '/signup-problem/');
+  if (missingSettings(env)) return redirect(request, '/signup-problem');
   const form = await request.formData().catch(() => null);
   const token = form?.get('token');
   const email = typeof token === 'string' ? await verifyToken(token, env.SIGNING_SECRET) : null;
-  if (!email) return redirect(request, '/link-expired/');
+  if (!email) return redirect(request, '/link-expired');
 
   const created = await resend(env, '/contacts', 'POST', {
     email,
     unsubscribed: false,
     segments: [{ id: env.RESEND_SEGMENT_ID }],
   });
-  if (created.ok) return redirect(request, '/confirmed/');
+  if (created.ok) return redirect(request, '/confirmed');
   // Already a contact (perhaps from an earlier signup): subscribe them and add the segment.
   const contact = `/contacts/${encodeURIComponent(email)}`;
   const updated = await resend(env, contact, 'PATCH', { unsubscribed: false });
   const joined = await resend(env, `${contact}/segments/${encodeURIComponent(env.RESEND_SEGMENT_ID)}`, 'POST');
   if (!updated.ok || !joined.ok) {
     console.error('signup: saving the contact failed', created.status, updated.status, joined.status);
-    return redirect(request, '/signup-problem/');
+    return redirect(request, '/signup-problem');
   }
-  return redirect(request, '/confirmed/');
+  return redirect(request, '/confirmed');
 }
