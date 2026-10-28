@@ -1,4 +1,5 @@
 import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parse } from 'yaml';
 
@@ -12,11 +13,12 @@ const products: Record<string, { hosts: string[]; github: string }> = {
   directus: { hosts: ['directus.com'], github: '/directus/' },
 };
 
-const dir = new URL('../src/content/compare/', import.meta.url);
+// A path, not a URL: the Workers and Node typings each declare their own URL.
+const dir = join(import.meta.dirname, '../src/content/compare');
 const slugs = readdirSync(dir)
   .filter((f) => f.endsWith('.md'))
   .map((f) => f.slice(0, -3));
-const frontmatter = (slug: string) => parse(readFileSync(new URL(`${slug}.md`, dir), 'utf8').split(/^---$/m)[1]);
+const frontmatter = (slug: string) => parse(readFileSync(join(dir, `${slug}.md`), 'utf8').split(/^---$/m)[1]);
 
 const day = 24 * 60 * 60 * 1000;
 

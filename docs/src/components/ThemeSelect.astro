@@ -4,3 +4,10 @@ import ThemeToggle from '../../../src/components/ThemeToggle.astro';
 ---
 
 <ThemeToggle />
+
+<style>
+  /* Without JS the toggle couldn't do anything, so it isn't shown. */
+  :global(html:not([data-theme-js]) [data-theme-toggle]) {
+    display: none;
+  }
+</style>

@@ -68,3 +68,14 @@ test('no horizontal overflow on a phone', async ({ page }) => {
     expect(overflow, link).toBeLessThanOrEqual(0);
   }
 });
+
+test.describe('without JS', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('the theme toggle is hidden, since it could not work', async ({ page }) => {
+    await page.goto('/');
+    const toggles = await page.locator('[data-theme-toggle]').all();
+    expect(toggles.length).toBeGreaterThan(0);
+    for (const toggle of toggles) await expect(toggle).toBeHidden();
+  });
+});
