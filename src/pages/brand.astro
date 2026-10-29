@@ -1,4 +1,5 @@
 ---
+import { readFileSync } from 'node:fs';
 import tokens from '../brand/tokens.css?raw';
 import PageHero from '../components/PageHero.astro';
 import Prose from '../components/Prose.astro';
@@ -21,11 +22,23 @@ const roles: [string, string][] = [
 const colours = roles.map(([token, role]) => ({ token, role, hex: values[token] }));
 if (colours.some((c) => !c.hex)) throw new Error('brand: a colour is missing from src/brand/tokens.css');
 
+// Each preview's width and height come from the file itself, so a redrawn logo can't
+// leave the page reserving the wrong space: an SVG's viewBox, a PNG's IHDR chunk.
+function size(file: string): [number, number] {
+  const data = readFileSync(`public/brand/${file}`);
+  if (file.endsWith('.png')) return [data.readUInt32BE(16), data.readUInt32BE(20)];
+  const box = data.toString().match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
+  if (!box) throw new Error(`brand: no viewBox in public/brand/${file}`);
+  return [Number(box[1]), Number(box[2])];
+}
 const logos = [
-  { file: 'logo.svg', label: 'Logo', type: 'SVG', width: 353, height: 64 },
-  { file: 'mark.svg', label: 'Mark', type: 'SVG', width: 64, height: 64 },
-  { file: 'avatar-1024.png', label: 'Avatar, 1024 px square', type: 'PNG', width: 1024, height: 1024 },
-];
+  { file: 'logo.svg', label: 'Logo', type: 'SVG' },
+  { file: 'mark.svg', label: 'Mark', type: 'SVG' },
+  { file: 'avatar-1024.png', label: 'Avatar, 1024 px square', type: 'PNG' },
+].map((l) => {
+  const [width, height] = size(l.file);
+  return { ...l, width, height };
+});
 ---
 
 <Base
@@ -39,7 +52,7 @@ const logos = [
     lede="Writing about TachyonCMS, or putting it on a slide? Everything you need is here, and all of it is free to use for that."
   />
 
-  <div class="brand">
+  <div class="brand-page">
     <section aria-labelledby="logos">
       <h2 id="logos">Logo and mark</h2>
       <ul class="logos">
@@ -125,7 +138,7 @@ const logos = [
 </Base>
 
 <style>
-  .brand {
+  .brand-page {
     display: grid;
     gap: clamp(2.5rem, 6vw, 4rem);
     padding-bottom: clamp(3rem, 8vw, 5rem);

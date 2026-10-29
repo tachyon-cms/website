@@ -66,6 +66,21 @@ test('brand offers every logo file as a download', async ({ page }) => {
   await expect(page.locator('main')).toContainText('Geist Mono');
 });
 
+test('brand sizes each logo preview to the file it shows', async ({ page }) => {
+  await page.goto('/brand');
+  // The page's own wrapper isn't a .brand: that's the header's link.
+  await expect(page.locator('main .brand')).toHaveCount(0);
+  for (const img of await page.locator('main .tile img').all()) {
+    const src = (await img.getAttribute('src'))!;
+    const attrs = [await img.getAttribute('width'), await img.getAttribute('height')].map(Number);
+    // An SVG's size is its viewBox; a PNG's is its pixels.
+    const natural = src.endsWith('.svg')
+      ? (await (await page.request.get(src)).text()).match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/)!.slice(1).map(Number)
+      : await img.evaluate(async (el: HTMLImageElement) => (await el.decode(), [el.naturalWidth, el.naturalHeight]));
+    expect(attrs, src).toEqual(natural);
+  }
+});
+
 test('privacy names what the signup sends where', async ({ page }) => {
   await page.goto('/privacy');
   for (const text of ['Turnstile', 'Resend', 'no cookies', 'local storage', 'Cloudflare']) {

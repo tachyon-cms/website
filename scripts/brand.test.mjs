@@ -59,11 +59,13 @@ test("docs/public/favicon.svg matches the site's", () => {
   assert.equal(read("docs/public/favicon.svg"), read("public/favicon.svg"), "copy public/favicon.svg to docs/public/");
 });
 
-// server/signup.ts serves its confirm page outside the Astro build, so public/signup.css
-// copies colours by value. Each must still be one of the tokens.
-test("public/signup.css uses only brand token colours", () => {
-  const tokens = read("src/brand/tokens.css").toLowerCase();
-  const colours = read("public/signup.css").toLowerCase().match(/#[0-9a-f]{6}\b/g) ?? [];
-  assert.ok(colours.length > 0, "found no colours in public/signup.css");
-  for (const hex of colours) assert.ok(tokens.includes(hex), `${hex} is not a brand token`);
-});
+// server/signup.ts serves its confirm page outside the Astro build, and brand/card.html
+// renders outside it too, so both copy colours by value. Each must still be a token.
+for (const file of ["public/signup.css", "brand/card.html"]) {
+  test(`${file} uses only brand token colours`, () => {
+    const tokens = read("src/brand/tokens.css").toLowerCase();
+    const colours = read(file).toLowerCase().match(/#[0-9a-f]{6}\b/g) ?? [];
+    assert.ok(colours.length > 0, `found no colours in ${file}`);
+    for (const hex of colours) assert.ok(tokens.includes(hex), `${hex} is not a brand token`);
+  });
+}

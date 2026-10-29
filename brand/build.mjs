@@ -35,8 +35,8 @@ const MARK =
 // The path is written by hand, not with fontkit's toSVG(), which rounds every
 // coordinate to two decimals; svgo does the one rounding, below.
 const SVG_COMMANDS = { moveTo: "M", lineTo: "L", quadraticCurveTo: "Q", bezierCurveTo: "C", closePath: "Z" };
+const font = fontkit.openSync(require.resolve("@fontsource/inter/files/inter-latin-600-normal.woff2"));
 function wordmark(text, x, baseline, fontSize, tracking) {
-  const font = fontkit.openSync(require.resolve("@fontsource/inter/files/inter-latin-600-normal.woff2"));
   const scale = fontSize / font.unitsPerEm;
   const run = font.layout(text);
   let d = "";
@@ -60,7 +60,8 @@ function svg(width, height, body) {
 // The header sets the mark at 26 px beside 17 px text with a 10 px gap; this is the
 // same lockup scaled to the 64-unit mark, with the cap height centred on the strokes.
 const fontSize = (64 * 17) / 26;
-const word = wordmark("TachyonCMS", 64 + (64 * 10) / 26, 32 + (fontSize * 0.727) / 2, fontSize, -0.02);
+const capHeight = (fontSize * font.capHeight) / font.unitsPerEm;
+const word = wordmark("TachyonCMS", 64 + (64 * 10) / 26, 32 + capHeight / 2, fontSize, -0.02);
 const logoWidth = Math.ceil(word.width + 2);
 
 export function build(dir) {
@@ -80,15 +81,18 @@ async function renderPngs(dir) {
     ["avatar", 1024, "avatar-1024.png"],
     ["social", 1280, "social-preview.png"],
   ];
-  for (const [kind, width, file] of shots) {
-    const height = kind === "social" ? width / 2 : width;
-    const page = await browser.newPage({ viewport: { width, height } });
-    await page.goto(`${card}#${kind}`);
-    await page.evaluate(() => document.fonts.ready);
-    await page.screenshot({ path: join(dir, "brand", file) });
-    await page.close();
+  try {
+    for (const [kind, width, file] of shots) {
+      const height = kind === "social" ? width / 2 : width;
+      const page = await browser.newPage({ viewport: { width, height } });
+      await page.goto(`${card}#${kind}`);
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({ path: join(dir, "brand", file) });
+      await page.close();
+    }
+  } finally {
+    await browser.close();
   }
-  await browser.close();
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
