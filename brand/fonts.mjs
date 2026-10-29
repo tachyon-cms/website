@@ -23,7 +23,7 @@ const family = (name, cssVariable, pkg, weights, fallbacks) => ({
 
 export const fonts = [
   family("Inter", "--font-sans", "inter", [400, 500, 600, 700], ["system-ui", "sans-serif"]),
-  family("Geist Mono", "--font-mono", "geist-mono", [400, 500], ["ui-monospace", "monospace"]),
+  family("Geist Mono", "--font-mono", "geist-mono", [400], ["ui-monospace", "monospace"]),
 ];
 
 // The docs load three files, not six: Lighthouse counts every font a long page
