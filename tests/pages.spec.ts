@@ -132,3 +132,36 @@ test('compare pages fit a phone', async ({ page }) => {
     expect(overflow, path).toBeLessThanOrEqual(0);
   }
 });
+
+test.describe('the still header', () => {
+  for (const path of all) {
+    test(`${path} opens on the still header, with no canvas`, async ({ page }) => {
+      await page.goto(path);
+      const hero = page.locator('.page-hero');
+      await expect(hero).toHaveCount(1);
+      await expect(hero.locator('h1')).toHaveCount(1);
+      // Four frozen streaks on the grid rows, each a tail and a glowing head.
+      const streaks = hero.locator('svg.streaks');
+      await expect(streaks).toHaveAttribute('aria-hidden', 'true');
+      await expect(streaks.locator('rect')).toHaveCount(4);
+      await expect(streaks.locator('circle')).toHaveCount(4);
+      await expect(page.locator('canvas')).toHaveCount(0);
+    });
+  }
+
+  test('it stays put: nothing in it animates', async ({ page }) => {
+    await page.goto('/security');
+    const moving = await page.locator('.page-hero, .page-hero *').evaluateAll((els) =>
+      els.filter((el) => getComputedStyle(el).animationName !== 'none').length,
+    );
+    expect(moving).toBe(0);
+  });
+});
+
+test('every page is dark', async ({ page }) => {
+  for (const path of ['/', ...all]) {
+    await page.goto(path);
+    expect(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), path).toBe('rgb(12, 13, 13)');
+  }
+});
+
