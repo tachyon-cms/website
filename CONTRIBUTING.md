@@ -32,6 +32,12 @@ npm audit --audit-level=moderate
 
 CI also runs Lighthouse on mobile and desktop and needs 100 in every category. To run it locally after both builds: `npx lhci autorun --config=lighthouserc.mobile.json`, then the same with `lighthouserc.json`.
 
+## Docs previews
+
+Each push to a branch in this repo, other than `main`, uploads the docs as a Cloudflare Worker version without deploying it. The preview URL is in the summary of the run of the Preview docs workflow. Pull requests from forks don't get a preview.
+
+Preview URLs are public. Anyone with the link can open one. Cloudflare sends `noindex`, so search engines leave them out. A preview stays up after its branch is deleted or merged. Don't push docs that must stay private, such as an unannounced release, to a branch in this repo.
+
 ## Sign off your commits
 
 Every commit needs a `Signed-off-by` line for its author's email, which certifies the [Developer Certificate of Origin](https://developercertificate.org/). Add it with `git commit -s`. The DCO check fails a pull request with an unsigned commit.

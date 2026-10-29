@@ -4,6 +4,18 @@ name: Preview docs
 # deploying it, so docs.tachyoncms.com doesn't change, and puts the version's
 # preview URL in the job summary. Never on pull_request: a fork's PR must not
 # reach the Cloudflare secrets. Never on main: deploy-docs.yml ships main.
+#
+# Trust split. The branch's code is unreviewed, so it never runs next to the
+# Cloudflare token:
+# - build runs the branch's npm ci and docs build with no secrets, and hands on
+#   only the built static files as an artifact.
+# - upload has the secrets but checks out nothing and installs nothing from the
+#   branch. It runs a pinned wrangler with install scripts off, and takes the
+#   Worker config from main, so a branch can't change the Worker's name or add
+#   bindings to its preview.
+#
+# Preview URLs are public (Cloudflare sends noindex) and stay up after the
+# branch is deleted. See CONTRIBUTING.md.
 on:
   push:
     branches-ignore: [main]
@@ -16,8 +28,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  preview:
+  build:
     if: github.repository == 'tachyon-cms/website'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # From the root: the docs are a workspace and import ../scripts/csp.mjs.
+      - run: npm ci
+      - run: npm run build:docs
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: docs-dist
+          path: docs/dist
+          if-no-files-found: error
+          retention-days: 1
+
+  upload:
+    if: github.repository == 'tachyon-cms/website'
+    needs: build
     runs-on: ubuntu-latest
     steps:
       # Without the Cloudflare secrets, skip with a notice instead of failing.
@@ -33,19 +67,21 @@ jobs:
             echo "::notice::CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not set, so no docs preview was made."
           fi
       - if: steps.secrets.outputs.ready == 'true'
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
-          persist-credentials: false
+          name: docs-dist
+          path: preview/dist
+      # The config comes from main, not the branch, and the Worker's name with it.
       - if: steps.secrets.outputs.ready == 'true'
-        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version-file: .nvmrc
-          cache: npm
-      # From the root: the docs are a workspace and import ../scripts/csp.mjs.
-      - if: steps.secrets.outputs.ready == 'true'
-        run: npm ci
-      - if: steps.secrets.outputs.ready == 'true'
-        run: npm run build:docs
+        name: Take the Worker config from main
+        id: config
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          gh api "repos/$REPO/contents/docs/wrangler.jsonc?ref=main" -H "Accept: application/vnd.github.raw" > preview/wrangler.jsonc
+          name=$(sed '/^[[:space:]]*\/\//d' preview/wrangler.jsonc | jq -er .name)
+          echo "name=$name" >> "$GITHUB_OUTPUT"
       # `versions upload` doesn't change the Worker's settings, so turn preview URLs
       # on here. docs/wrangler.jsonc sets preview_urls too, so a main deploy keeps
       # them on; the workers.dev route stays off.
@@ -54,23 +90,26 @@ jobs:
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WORKER: ${{ steps.config.outputs.name }}
         run: |
           curl -fsS -X POST \
-            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/tachyoncms-docs/subdomain" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/$WORKER/subdomain" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             -H "Content-Type: application/json" \
             -H "Cloudflare-Workers-Script-Api-Date: 2025-08-01" \
             --data '{"enabled":false,"previews_enabled":true}' > /dev/null
       - if: steps.secrets.outputs.ready == 'true'
         name: Upload a preview version
+        working-directory: preview
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           WRANGLER_SEND_METRICS: 'false'
           WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler.ndjson
+          npm_config_ignore_scripts: 'true'
           BRANCH: ${{ github.ref_name }}
         run: |
-          npx wrangler versions upload -c docs/wrangler.jsonc --message "$BRANCH ${GITHUB_SHA::7}"
+          npx --yes wrangler@4.155.0 versions upload -c wrangler.jsonc --message "$BRANCH ${GITHUB_SHA::7}"
           url=$(jq -r 'select(.type == "version-upload") | .preview_url // empty' "$WRANGLER_OUTPUT_FILE_PATH")
           if [ -z "$url" ]; then
             echo "::error::wrangler uploaded the version but gave no preview URL."

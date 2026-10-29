@@ -1,5 +1,5 @@
 // Every PNG under public/media and public/brand is in the current look: no pixel of
-// the old violet and pink palette, or of the old pink "T" mark. Re-render with
+// the old purple palette, its background or the old pink "T" mark. Re-render with
 // `node scripts/post-graphics/render.mjs <slug>` (or `npm run brand`) to fix it.
 
 import { test } from "node:test";
@@ -47,10 +47,25 @@ export function decode(png) {
   return { width, height, channels, pixels: out };
 }
 
-// The old palette's violet (#8b5cf6), pink (#ec4899) and lilac (#f0abfc, #c3a6ff) all
-// have red well above green. The new palette is greys and blues, where red never
-// leads green by more than a hair, even anti-aliased.
-const isOldLook = (r, g, b) => r - g > 40 && b - g > 40;
+// Every colour in the old palette, from the near-black background to the pink, is a
+// purple: red and blue both above green. Every token in the new palette has red
+// below green, and blending or anti-aliasing two such colours can't lift red past
+// green, so one purple pixel means part of the old look survived.
+const isOldLook = (r, g, b) => r > g && b > g;
+const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+
+test("the rule catches every old palette colour", () => {
+  // From scripts/post-graphics/shared.css before the redesign.
+  for (const hex of ["#07060c", "#140d24", "#2b1d4a", "#e9e3ff", "#a99cc9", "#8b5cf6", "#ec4899", "#f0abfc", "#c3a6ff"]) {
+    assert.ok(isOldLook(...rgb(hex)), hex);
+  }
+});
+
+test("the rule passes every brand token", () => {
+  const tokens = readFileSync(new URL("src/brand/tokens.css", root), "utf8").match(/#[0-9a-f]{6}\b/gi);
+  assert.ok(tokens.length >= 10);
+  for (const hex of tokens) assert.ok(!isOldLook(...rgb(hex)), hex);
+});
 
 function* pngs(dir) {
   for (const entry of readdirSync(dir, { withFileTypes: true })) {
@@ -66,7 +81,7 @@ test("there are media PNGs to check", () => assert.ok(files.length >= 4));
 
 for (const url of files) {
   const name = url.pathname.slice(root.pathname.length);
-  test(`${name} has no pixels in the old violet and pink palette`, () => {
+  test(`${name} has no pixels in the old purple palette`, () => {
     const { pixels, channels } = decode(readFileSync(url));
     let old = 0;
     for (let i = 0; i < pixels.length; i += channels) if (isOldLook(pixels[i], pixels[i + 1], pixels[i + 2])) old++;
