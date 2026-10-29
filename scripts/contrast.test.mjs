@@ -98,12 +98,35 @@ const sl = block(":root", docs);
 const colour = (v) => (sl[v].startsWith("var(") ? t[sl[v].slice(4, -1)] : sl[v]);
 // A docs colour with a token's value must name the token, or moving the token
 // leaves the docs behind.
-test("the docs name a token rather than repeat its value", () => {
-  const values = Object.fromEntries(Object.entries(t).map(([k, v]) => [v.toLowerCase(), k]));
-  for (const [name, value] of Object.entries(sl)) {
-    const token = values[value.toLowerCase()];
-    assert.equal(token, undefined, `${name} repeats ${token}; write var(${token})`);
+// Colours compare in one spelling, so #FFF, #ffffff and rgb(255 255 255) match.
+export function normalise(colour) {
+  const c = colour.trim().toLowerCase();
+  let m = c.match(/^#([0-9a-f])([0-9a-f])([0-9a-f])([0-9a-f])?$/);
+  if (m) return normalise("#" + m.slice(1).filter(Boolean).map((d) => d + d).join(""));
+  m = c.match(/^rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)\s*(?:[,/]\s*([\d.]+)(%?))?\s*\)$/);
+  if (m) {
+    const hex = m.slice(1, 4).map((n) => Number(n).toString(16).padStart(2, "0")).join("");
+    const a = m[4] === undefined ? 1 : Number(m[4]) / (m[5] ? 100 : 1);
+    return normalise(`#${hex}${a === 1 ? "" : Math.round(a * 255).toString(16).padStart(2, "0")}`);
   }
+  // Opaque eight-digit hex is plain hex.
+  return /^#[0-9a-f]{8}$/.test(c) && c.endsWith("ff") ? c.slice(0, 7) : c;
+}
+// Every docs colour that repeats a token's value, as [docs name, token name].
+export function repeats(tokens, docsColours) {
+  const values = new Map(Object.entries(tokens).map(([k, v]) => [normalise(v), k]));
+  return Object.entries(docsColours).filter(([, v]) => values.has(normalise(v))).map(([k, v]) => [k, values.get(normalise(v))]);
+}
+test("colours normalise to one spelling", () => {
+  for (const c of ["#fff", "#FFF", "#ffffff", "#FFFFFFFF", "rgb(255 255 255)", "rgb(255, 255, 255)", "rgba(255,255,255,1)"]) {
+    assert.equal(normalise(c), "#ffffff", c);
+  }
+  assert.equal(normalise("rgb(255 255 255 / 0.04)"), normalise("#ffffff0a"));
+  assert.notEqual(normalise("rgb(255 255 255 / 0.04)"), "#ffffff");
+  assert.deepEqual(repeats({ "--c-white": "#ffffff" }, { "--sl-x": "#fff", "--sl-y": "#fffffe" }), [["--sl-x", "--c-white"]]);
+});
+test("the docs name a token rather than repeat its value", () => {
+  for (const [name, token] of repeats(t, sl)) assert.fail(`${name} repeats ${token}; write var(${token})`);
 });
 test("the docs have no light theme", () => assert.doesNotMatch(docs, /data-theme/));
 const docsPairs = [
