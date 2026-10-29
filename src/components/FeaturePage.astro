@@ -52,12 +52,12 @@ const inProduct = product.some(([href]) => href === path);
     )
   }
   <PageHero eyebrow={name} title={title} lede={summary}>
-    {status === 'headed' && <p class="roadmap">On the roadmap</p>}
+    {status === 'headed' && <p class="pill roadmap">On the roadmap</p>}
   </PageHero>
 
   {Astro.slots.has('default') && <div class="sample"><slot /></div>}
   <div class="body">
-    <Prose><Content /></Prose>
+    <Prose split><Content /></Prose>
     <slot name="after" />
   </div>
   <div class="refs">
@@ -135,11 +135,10 @@ const inProduct = product.some(([href]) => href === path);
     position: relative;
     z-index: 1;
     flex: none;
-    padding: 14px 8px 13px;
+    padding: 14px 8px;
     font-size: 14px;
     color: var(--c-muted);
     text-decoration: none;
-    border-bottom: 1px solid transparent;
   }
   /* Drawn inside the tab: the row scrolls, and a scroller clips anything past its edges. */
   .product-nav a:focus-visible {
@@ -150,17 +149,20 @@ const inProduct = product.some(([href]) => href === path);
   }
   .product-nav a[aria-current='page'] {
     color: var(--c-text);
-    border-bottom-color: var(--c-blue);
+  }
+  /* Under the label only, not its padding, so the first tab's rule starts on the
+   * page edge with everything else. */
+  .product-nav a[aria-current='page']::after {
+    content: '';
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    bottom: 0;
+    height: 1px;
+    background: var(--c-blue);
   }
   .roadmap {
-    display: inline-block;
     margin: 28px 0 0;
-    padding: 4px 11px;
-    font: 400 12px/1.4 var(--font-mono);
-    color: var(--c-blue-soft);
-    background: var(--c-blue-deep);
-    border: 1px solid color-mix(in srgb, var(--c-blue) 35%, transparent);
-    border-radius: 999px;
   }
   /* minmax(0, 1fr): a long line of code scrolls inside its block rather than
    * widening the column past the screen. */
@@ -176,40 +178,8 @@ const inProduct = product.some(([href]) => href === path);
     gap: 48px;
     padding: 72px 0 24px;
   }
-  /* Wide, each h2 takes the left column beside its first paragraph, and the
-   * text reads down the right at a comfortable measure. */
+  /* Wide, whatever follows the copy lines up with its right-hand column. */
   @media (min-width: 64rem) {
-    .body :global(.prose) {
-      display: grid;
-      grid-template-columns: minmax(0, 17rem) minmax(0, 42rem);
-      column-gap: 4rem;
-      max-width: none;
-    }
-    .body :global(.prose > *) {
-      grid-column: 2;
-    }
-    .body :global(.prose > h2) {
-      grid-column: 1;
-      font-size: 1.375rem;
-    }
-    .body :global(.prose > h3) {
-      margin-top: 2rem;
-      font-size: 1.0625rem;
-      letter-spacing: -0.01em;
-    }
-    .body :global(.prose > :is(h2, h2 + *)) {
-      margin-top: 0;
-      padding-top: 2rem;
-      border-top: 1px solid var(--c-line);
-    }
-    .body :global(.prose > :is(h2, h2 + *):not(:first-child, h2:first-child + *)) {
-      margin-top: 2.5rem;
-    }
-    /* The hero's line already sits above the first one. */
-    .body :global(.prose > :is(h2:first-child, h2:first-child + *)) {
-      padding-top: 0;
-      border-top: 0;
-    }
     .body > :global(:not(.prose)) {
       margin-left: calc(17rem + 4rem);
       max-width: 42rem;

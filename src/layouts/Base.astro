@@ -163,6 +163,17 @@ const {
         border-color 0.15s ease;
     }
   }
+  /* A status beside a title: "On the roadmap", "Under way", "Pre-release". */
+  .pill {
+    display: inline-block;
+    padding: 4px 11px;
+    font: 400 12px/1.4 var(--font-mono);
+    letter-spacing: normal;
+    color: var(--c-blue-soft);
+    background: var(--c-blue-deep);
+    border: 1px solid color-mix(in srgb, var(--c-blue) 35%, transparent);
+    border-radius: 999px;
+  }
   .sr-only {
     position: absolute;
     width: 1px;

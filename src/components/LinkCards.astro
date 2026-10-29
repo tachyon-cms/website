@@ -23,33 +23,44 @@ const { links } = Astro.props;
 </ul>
 
 <style>
+  /* Rows split by hairlines: the link and its sentence on the left, an arrow on the
+   * right. No outer rules, so it never doubles a section's own. */
   .link-cards {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
-    gap: 0.75rem;
-    margin: 0 0 1.5rem;
+    margin: 0 0 1.25rem;
     padding: 0;
     list-style: none;
   }
+  li + li {
+    border-top: 1px solid var(--c-line);
+  }
+  li:first-child a {
+    padding-top: 0;
+  }
+  li:last-child a {
+    padding-bottom: 0;
+  }
   a {
     display: grid;
-    align-content: start;
-    gap: 0.4rem;
-    height: 100%;
-    padding: 1.25rem;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 16px;
+    padding: 16px 0;
     color: var(--c-muted);
     text-decoration: none;
-    background: var(--c-panel);
-    border: 1px solid var(--c-line);
-    border-radius: 14px;
-  }
-  a:hover {
-    border-color: var(--c-blue-soft);
   }
   strong {
+    font-weight: 600;
     color: var(--c-text);
   }
+  span {
+    grid-column: 1;
+    font-size: 0.9375rem;
+  }
   a :global(svg) {
+    grid-area: 1 / 2 / 3;
+    color: var(--c-blue);
+  }
+  a:hover strong {
     color: var(--c-blue-soft);
   }
 </style>

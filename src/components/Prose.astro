@@ -1,8 +1,13 @@
 ---
 // Long-form text: policies, posts, release notes. Styles the plain elements Markdown emits.
+interface Props {
+  /** Wide screens put each h2 in a left column beside its text. */
+  split?: boolean;
+}
+const { split } = Astro.props;
 ---
 
-<div class="prose"><slot /></div>
+<div class:list={['prose', { split }]}><slot /></div>
 
 <style>
   /* A flag or a path in inline code can be longer than a phone is wide. */
@@ -13,6 +18,7 @@
   }
   .prose :global(:where(h2, h3)) {
     color: var(--c-text);
+    font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 1.2;
     margin: 2.5rem 0 0.75rem;
@@ -72,5 +78,40 @@
   .prose :global(blockquote) {
     padding-left: 1rem;
     border-left: 2px solid var(--c-blue);
+  }
+  /* Wide, each h2 takes the left column beside its first paragraph, and the text
+   * reads down the right at a comfortable measure, with a rule over each pair. */
+  @media (min-width: 64rem) {
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 17rem) minmax(0, 42rem);
+      column-gap: 4rem;
+      max-width: none;
+    }
+    .split > :global(*) {
+      grid-column: 2;
+    }
+    .split > :global(h2) {
+      grid-column: 1;
+      font-size: 1.375rem;
+    }
+    .split > :global(h3) {
+      margin-top: 2rem;
+      font-size: 1.0625rem;
+      letter-spacing: -0.01em;
+    }
+    .split > :global(:is(h2, h2 + *)) {
+      margin-top: 0;
+      padding-top: 2rem;
+      border-top: 1px solid var(--c-line);
+    }
+    .split > :global(:is(h2, h2 + *):not(:first-child, h2:first-child + *)) {
+      margin-top: 2.5rem;
+    }
+    /* The hero's line already sits above the first one. */
+    .split > :global(:is(h2:first-child, h2:first-child + *)) {
+      padding-top: 0;
+      border-top: 0;
+    }
   }
 </style>
