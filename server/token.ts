@@ -29,20 +29,20 @@ async function key(secret: string): Promise<CryptoKey> {
 export const LINK_LIFETIME_MS = 48 * 60 * 60 * 1000;
 
 export async function signToken(email: string, secret: string, now = Date.now()): Promise<string> {
-  const payload = base64url(encoder.encode(JSON.stringify({ e: email, x: now + LINK_LIFETIME_MS })));
-  const signature = await crypto.subtle.sign('HMAC', await key(secret), encoder.encode(payload));
-  return `${payload}.${base64url(new Uint8Array(signature))}`;
+  const body = base64url(encoder.encode(JSON.stringify({ e: email, x: now + LINK_LIFETIME_MS })));
+  const signature = await crypto.subtle.sign('HMAC', await key(secret), encoder.encode(body));
+  return `${body}.${base64url(new Uint8Array(signature))}`;
 }
 
 /** The address a token confirms, or null when it's forged, damaged or expired. */
 export async function verifyToken(token: string, secret: string, now = Date.now()): Promise<string | null> {
-  const [payload, signature, ...rest] = token.split('.');
-  if (!payload || !signature || rest.length > 0) return null;
+  const [body, signature, ...rest] = token.split('.');
+  if (!body || !signature || rest.length > 0) return null;
   const sig = fromBase64url(signature);
   if (!sig) return null;
-  const valid = await crypto.subtle.verify('HMAC', await key(secret), sig, encoder.encode(payload));
+  const valid = await crypto.subtle.verify('HMAC', await key(secret), sig, encoder.encode(body));
   if (!valid) return null;
-  const bytes = fromBase64url(payload);
+  const bytes = fromBase64url(body);
   if (!bytes) return null;
   try {
     const { e, x } = JSON.parse(new TextDecoder().decode(bytes)) as { e?: unknown; x?: unknown };

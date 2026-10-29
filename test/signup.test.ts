@@ -48,13 +48,13 @@ describe('confirmation tokens', () => {
     expect(await verifyToken(await signToken('a@b.co', 's'), 's')).toBe('a@b.co');
   });
 
-  it('refuse a different secret, a tampered payload and an expired link', async () => {
+  it('refuse a different secret, a tampered body and an expired link', async () => {
     const token = await signToken('a@b.co', 's', 1_000);
     expect(await verifyToken(token, 'other', 1_000)).toBeNull();
-    const [payload, sig] = token.split('.');
+    const [body, sig] = token.split('.');
     const forged = btoa(JSON.stringify({ e: 'victim@b.co', x: 9e15 })).replace(/=+$/, '');
     expect(await verifyToken(`${forged}.${sig}`, 's', 1_000)).toBeNull();
-    expect(await verifyToken(`${payload}.${sig}x`, 's', 1_000)).toBeNull();
+    expect(await verifyToken(`${body}.${sig}x`, 's', 1_000)).toBeNull();
     expect(await verifyToken(token, 's', 1_000 + LINK_LIFETIME_MS + 1)).toBeNull();
     expect(await verifyToken(token, 's', 1_000 + LINK_LIFETIME_MS - 1)).toBe('a@b.co');
     expect(await verifyToken('garbage', 's')).toBeNull();
