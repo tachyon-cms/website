@@ -27,6 +27,6 @@ Some of the admin's groundwork ships today, because it lives in the schema:
 
 ## What comes with it
 
-The roadmap builds the admin alongside the core, starting after milestone 3: sign-in, API keys and access rules, which all shipped in v0.1.0. After that come drafts, versions, scheduled publishing and a Trash (milestone 4), translations and full-text search (5), a media library with image processing (6), live preview (10) and a WordPress importer (11).
+Sign-in, API keys and access rules shipped in v0.1.0, so the admin will have something to sign in to. Before the admin itself come rich text and blocks, then drafts, versions and scheduled publishing, then media, live preview and authoring tools such as Markdown import. The admin follows those.
 
 There are no dates yet. The [roadmap](/roadmap) shows the order.

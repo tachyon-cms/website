@@ -16,11 +16,11 @@ rows:
     them: GROQ, a query language that combines documents and returns only the fields you ask for.
     source: https://www.sanity.io/docs/groq
   - topic: GraphQL
-    tachyon: Not yet. That's milestone 7.
+    tachyon: Not yet. It's planned, with no date.
     them: A read-only GraphQL API generated from your schema and deployed with the Sanity CLI. Writes go through the Mutation API.
     source: https://www.sanity.io/docs/graphql
   - topic: History
-    tachyon: Not yet. Drafts and versions are milestone 4.
+    tachyon: Not yet. Drafts and versions are next on the roadmap, after rich text.
     them: Every edit is kept as revision history. Free keeps 3 days, Growth 90 and Enterprise 365.
     source: https://www.sanity.io/docs/content-lake/history-experience
   - topic: Roles

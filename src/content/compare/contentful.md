@@ -16,7 +16,7 @@ rows:
     them: The Content Management API, which Contentful's own web app is built on.
     source: https://www.contentful.com/developers/docs/references/api-basics/
   - topic: Previews and images
-    tachyon: Neither yet. Drafts are milestone 4 and media is milestone 6.
+    tachyon: Neither yet. Drafts, then media, come next on the roadmap.
     them: A Content Preview API for unpublished content, and an Images API that resizes, crops and converts.
     source: https://www.contentful.com/developers/docs/references/api-basics/
   - topic: Editing
@@ -28,7 +28,7 @@ rows:
     them: Admin and Editor on Free, Author too on Lite, and custom roles on Enterprise.
     source: https://www.contentful.com/pricing/
   - topic: Languages
-    tachyon: Not yet. Localization is milestone 5.
+    tachyon: Not yet. Localization is planned, with no date.
     them: Two locales on Free, three on Lite, and as many as you agree on Enterprise.
     source: https://www.contentful.com/pricing/
   - topic: Limits
@@ -42,9 +42,9 @@ rows:
 notYet:
   - There's no admin screen, and none of the editing extras that come with one.
   - No previews, image transforms, versions, scheduled publishing or locales.
-  - No GraphQL. That's milestone 7.
+  - No GraphQL. It's planned, with no date.
   - No CDN or hosted service. You run it and keep it up.
-  - No apps or webhooks. Plugins and webhooks are milestone 9.
+  - No apps or webhooks. Both are planned, with no date.
   - It's pre-alpha, so keep it off the public internet for now.
 ---
 

@@ -16,11 +16,11 @@ rows:
     them: The Data Studio, a web app for your team's content, files, users and dashboards.
     source: https://directus.com/docs/getting-started/overview
   - topic: Drafts and versions
-    tachyon: Not yet. That's milestone 4.
+    tachyon: Not yet. They're next on the roadmap, after rich text.
     them: Content versioning. Draft changes in a version, publish it when it's ready, and revert through revisions.
     source: https://directus.com/docs/guides/content/content-versioning
   - topic: Translations
-    tachyon: Not yet. That's milestone 5.
+    tachyon: Not yet. Translations are planned, with no date.
     them: A translations field for content, and a Data Studio that can be translated too.
     source: https://directus.com/docs/guides/content/translations
   - topic: Access control
@@ -28,7 +28,7 @@ rows:
     them: Roles hold policies. Permissions are set per collection and action, and filter rules decide which items a user can reach.
     source: https://directus.com/docs/guides/auth/access-control
   - topic: Extending
-    tachyon: No plugins yet. WebAssembly plugins are milestone 9.
+    tachyon: No plugins yet. WebAssembly plugins are planned, with no date.
     them: App extensions for the Data Studio and API extensions for the server, published through the Directus Marketplace.
     source: https://directus.com/docs/guides/extensions/overview
   - topic: Running it

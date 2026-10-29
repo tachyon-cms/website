@@ -24,11 +24,11 @@ rows:
     them: Cookie sign-in from inside WordPress, and Application Passwords over HTTPS for everything else.
     source: https://developer.wordpress.org/rest-api/using-the-rest-api/authentication/
   - topic: Drafts and history
-    tachyon: Not yet. Drafts, versions and scheduled publishing are milestone 4.
+    tachyon: Not yet. Drafts, versions and scheduled publishing are next on the roadmap, after rich text.
     them: Every saved draft or update is a revision you can compare and restore, and autosave keeps a backup while you write.
     source: https://wordpress.org/documentation/article/revisions/
   - topic: Media
-    tachyon: Not yet. A media library is milestone 6.
+    tachyon: Not yet. Media is on the roadmap, after drafts.
     them: A Media Library for images, video, audio and files, with crop, rotate and scale for images.
     source: https://wordpress.org/documentation/article/media-library-screen/
   - topic: Roles
@@ -36,7 +36,7 @@ rows:
     them: Six predefined roles, from Subscriber up to Super Admin, each a set of capabilities.
     source: https://wordpress.org/documentation/article/roles-and-capabilities/
   - topic: Extending
-    tachyon: No plugins yet. WebAssembly plugins are milestone 9.
+    tachyon: No plugins yet. WebAssembly plugins are planned, with no date.
     them: A plugin directory, and more blocks through plugins.
     source: https://wordpress.org/plugins/
   - topic: Licence
@@ -52,7 +52,7 @@ notYet:
   - No media uploads, drafts, revisions or scheduled posts.
   - No themes and no front end. TachyonCMS serves JSON, and the site that shows it is yours to build.
   - No plugins and no translations.
-  - No WordPress importer. That's milestone 11.
+  - No WordPress importer. Bulk import is on the roadmap, after live preview.
   - It's pre-alpha, so keep it off the public internet for now.
 ---
 

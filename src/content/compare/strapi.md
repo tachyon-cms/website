@@ -20,7 +20,7 @@ rows:
     them: REST by default, and GraphQL through Strapi's built-in GraphQL plugin.
     source: https://docs.strapi.io/cms/api/content-api
   - topic: Drafts
-    tachyon: Not yet. Drafts, versions and scheduled publishing are milestone 4.
+    tachyon: Not yet. Drafts, versions and scheduled publishing are next on the roadmap, after rich text.
     them: Draft & Publish, free, switched on per content type.
     source: https://docs.strapi.io/cms/features/draft-and-publish
   - topic: Content history
@@ -28,11 +28,11 @@ rows:
     them: On the Growth plan (14 days kept) and Enterprise (you choose).
     source: https://strapi.io/pricing-self-hosted
   - topic: Translations
-    tachyon: Not yet. Localization is milestone 5.
+    tachyon: Not yet. Localization is planned, with no date.
     them: Internationalization, free, with content kept per locale.
     source: https://docs.strapi.io/cms/features/internationalization
   - topic: Media
-    tachyon: Not yet. A media library is milestone 6.
+    tachyon: Not yet. Media is on the roadmap, after drafts.
     them: A free Media Library for every uploaded asset.
     source: https://docs.strapi.io/cms/features/media-library
   - topic: Roles
@@ -40,7 +40,7 @@ rows:
     them: Author, Editor and Super Admin in the admin panel, custom roles, and conditions such as "the administrator must be the creator".
     source: https://docs.strapi.io/cms/features/rbac
   - topic: Extending
-    tachyon: No plugins yet. WebAssembly plugins are milestone 9.
+    tachyon: No plugins yet. WebAssembly plugins are planned, with no date.
     them: Plugins and providers, found through the Marketplace in the admin panel.
     source: https://docs.strapi.io/cms/plugins/installing-plugins-via-marketplace
   - topic: Licence and price
@@ -54,7 +54,7 @@ rows:
 notYet:
   - There's no admin panel. Content types, users and documents are managed over HTTP or with the `tachyon` command.
   - No media library, no drafts and no translations.
-  - No GraphQL. That's milestone 7, with OpenAPI.
+  - No GraphQL. It's planned, with OpenAPI, and has no date.
   - No plugins and no marketplace.
   - No hosted option. You run the binary or the Docker image, and the database.
   - It's pre-alpha, so keep it off the public internet for now.
