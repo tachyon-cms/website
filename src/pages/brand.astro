@@ -54,7 +54,7 @@ const logos = [
   />
 
   <div class="brand-page">
-    <section aria-labelledby="logos">
+    <Prose split>
       <h2 id="logos">Logo and mark</h2>
       <ul class="logos">
         {
@@ -70,32 +70,22 @@ const logos = [
           ))
         }
       </ul>
-      <Prose>
-        <p>
-          Give the logo room: at least the mark's height on every side. Don't recolour it or stretch it, and keep it on
-          a dark background, because that's the only one it's drawn for. The <a href="/trademark">trademark page</a>{' '}
-          covers where you can use it.
-        </p>
-      </Prose>
-    </section>
+      <p>
+        Give the logo room: at least the mark's height on every side. Don't recolour it or stretch it, and keep it on
+        a dark background, because that's the only one it's drawn for. The <a href="/trademark">trademark page</a>{' '}
+        covers where you can use it.
+      </p>
 
-    <section aria-labelledby="name">
       <h2 id="name">Writing the name</h2>
-      <Prose>
-        <p>
-          <strong>TachyonCMS</strong>: one word, capital T, capital CMS. Not "Tachyon CMS", "TachyonCms" or "Tachyon" on its
-          own. In code and commands it's lower case, because that's what you type: <code>tachyon serve</code>,{' '}
-          <code>ghcr.io/tachyon-cms/tachyoncms</code>.
-        </p>
-      </Prose>
-    </section>
+      <p>
+        <strong>TachyonCMS</strong>: one word, capital T, capital CMS. Not "Tachyon CMS", "TachyonCms" or "Tachyon" on its
+        own. In code and commands it's lower case, because that's what you type: <code>tachyon serve</code>,{' '}
+        <code>ghcr.io/tachyon-cms/tachyoncms</code>.
+      </p>
 
-    <section aria-labelledby="colours">
       <h2 id="colours">Colours</h2>
-      <Prose>
-        <p>The site and docs are dark only, so there's one set: near-black, quiet greys and one electric blue.</p>
-      </Prose>
-      <div class="table">
+      <p>The site and docs are dark only, so there's one set: near-black, quiet greys and one electric blue.</p>
+      <div class="colours">
         <table>
           <thead>
             <tr>
@@ -120,9 +110,7 @@ const logos = [
           </tbody>
         </table>
       </div>
-    </section>
 
-    <section aria-labelledby="fonts">
       <h2 id="fonts">Fonts</h2>
       <div class="fonts">
         <div>
@@ -134,41 +122,36 @@ const logos = [
           <p>Code, labels and numbers. Free under the SIL Open Font License.</p>
         </div>
       </div>
-    </section>
+    </Prose>
   </div>
 </Base>
 
 <style>
   .brand-page {
-    display: grid;
-    gap: clamp(2.5rem, 6vw, 4rem);
-    padding-bottom: clamp(3rem, 8vw, 5rem);
+    padding: 64px 0 clamp(3.5rem, 6vw, 4.5rem);
   }
-  h2 {
-    margin: 0 0 1.25rem;
-    font-size: 1.625rem;
-    letter-spacing: -0.02em;
+  .brand-page :global(.prose > h2:first-child) {
+    margin-top: 0;
   }
   .logos {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
-    gap: 1rem;
-    margin: 0 0 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: 16px;
     padding: 0;
     list-style: none;
   }
   .logos li {
     display: grid;
-    gap: 0.6rem;
+    gap: 10px;
   }
   .tile {
     display: grid;
     place-items: center;
     height: 8rem;
     padding: 1rem;
-    border: 1px solid var(--c-line);
-    border-radius: 14px;
-    background: var(--c-bg);
+    border: 1px solid var(--c-line-2);
+    border-radius: 12px;
+    background: linear-gradient(var(--c-panel), var(--c-bg));
   }
   .tile img {
     max-width: 100%;
@@ -179,57 +162,46 @@ const logos = [
   .tile img[src$='.png'] {
     height: 6rem;
   }
+  .logos a {
+    font-size: 15px;
+  }
   .logos a span {
-    font: 600 0.75rem var(--font-mono);
+    margin-left: 4px;
+    font: 400 12px var(--font-mono);
     color: var(--c-muted);
   }
-  .table {
-    max-width: 42rem;
+  /* The table takes the prose's rules; a long hex can scroll on the narrowest phone. */
+  .colours {
     overflow-x: auto;
   }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  :where(th, td) {
-    padding: 0.6rem 0.75rem 0.6rem 0;
-    text-align: left;
-    border-bottom: 1px solid var(--c-line);
-  }
-  thead th {
-    font-size: 0.875rem;
-    color: var(--c-muted);
-  }
-  td {
+  .colours td {
     white-space: nowrap;
   }
-  td svg {
+  .colours td svg {
     vertical-align: middle;
-    margin-right: 0.5rem;
-  }
-  td code {
-    font-family: var(--font-mono);
+    margin-right: 10px;
   }
   .fonts {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
-    gap: 1rem;
-  }
-  .fonts > div {
-    padding: 1.25rem;
-    background: var(--c-panel);
-    border: 1px solid var(--c-line);
-    border-radius: 14px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: 24px 0;
   }
   .fonts p {
     margin: 0;
+    font-size: 0.9375rem;
     color: var(--c-muted);
   }
   .fonts .sample {
-    margin-bottom: 0.5rem;
+    margin-bottom: 6px;
     font-size: 1.75rem;
     line-height: 1.2;
     color: var(--c-text);
+  }
+  @media (min-width: 40rem) {
+    .fonts > div + div {
+      padding-left: 32px;
+      border-left: 1px solid var(--c-line);
+    }
   }
   .sans {
     font-family: var(--font-sans);

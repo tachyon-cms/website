@@ -14,6 +14,29 @@ const today = [
 // Pages about what isn't built yet. They have to say so where you can see it.
 const headed = ['/editors', '/product/admin'];
 const all = [...today.map((p) => p.path), ...headed, '/why', '/security'];
+// Every other inner page: the project pages, the blog, the comparisons, the signup
+// steps and the 404 (any path that isn't a page).
+const rest = [
+  '/compare',
+  ...['wordpress', 'strapi', 'contentful', 'sanity', 'directus'].map((s) => `/compare/${s}`),
+  '/blog',
+  '/blog/v0-1-0',
+  '/blog/where-tachyoncms-is-headed',
+  '/roadmap',
+  '/releases',
+  '/community',
+  '/starters',
+  '/faq',
+  '/brand',
+  '/privacy',
+  '/trademark',
+  '/confirmed',
+  '/check-your-inbox',
+  '/link-expired',
+  '/signup-problem',
+  '/no-such-page',
+];
+const inner = [...all, ...rest];
 // Pages that show working code, beyond the feature pages checked below.
 const withCode = ['/why', '/security'];
 
@@ -104,6 +127,34 @@ for (const width of [320, 390]) {
   });
 }
 
+// The signup steps and the 404; the other pages are checked in their own specs.
+for (const width of [320, 390]) {
+  test(`the short pages fit a ${width} px phone`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    for (const path of rest.slice(-5)) {
+      await page.goto(path);
+      expect(await overflowing(page), path).toEqual([]);
+    }
+  });
+}
+
+// Only the preloaded faces: mono is Geist Mono 400, and headings are Inter 400 or 600.
+test('inner pages set type in the preloaded weights', async ({ page }) => {
+  for (const path of rest) {
+    await page.goto(path);
+    const off = await page.locator('main').evaluate((main) =>
+      [...main.querySelectorAll('*')]
+        .filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim()) || /^H[1-6]$/.test(el.tagName))
+        .map((el) => ({ el, css: getComputedStyle(el) }))
+        .filter(({ el, css }) =>
+          css.fontFamily.includes('Geist Mono') ? css.fontWeight !== '400' : /^H[1-6]$/.test(el.tagName) && !['400', '600'].includes(css.fontWeight),
+        )
+        .map(({ el, css }) => `${el.tagName.toLowerCase()}.${el.className} ${css.fontFamily.split(',')[0]} ${css.fontWeight}`),
+    );
+    expect(off, path).toEqual([]);
+  }
+});
+
 const compare = ['wordpress', 'strapi', 'contentful', 'sanity', 'directus'];
 
 test('/compare links to every comparison', async ({ page }) => {
@@ -138,7 +189,7 @@ for (const width of [320, 390]) {
 }
 
 test.describe('the still header', () => {
-  for (const path of all) {
+  for (const path of inner) {
     test(`${path} opens on the still header, with no canvas`, async ({ page }) => {
       await page.goto(path);
       const hero = page.locator('.page-hero');
@@ -153,7 +204,7 @@ test.describe('the still header', () => {
     });
   }
 
-  for (const path of all) {
+  for (const path of inner) {
     test(`${path}: it stays put, nothing in it animates or transitions`, async ({ page }) => {
       await page.goto(path);
       const moving = await page.locator('.page-hero, .page-hero *').evaluateAll((els) =>
@@ -172,7 +223,7 @@ test.describe('the still header', () => {
 });
 
 test('every page is dark', async ({ page }) => {
-  for (const path of ['/', ...all]) {
+  for (const path of ['/', ...inner]) {
     await page.goto(path);
     expect(await page.evaluate(() => getComputedStyle(document.documentElement).backgroundColor), path).toBe('rgb(12, 13, 13)');
   }
@@ -214,6 +265,28 @@ for (const width of [1440, 390]) {
     }
   });
 }
+
+// The tabs carry side padding for their focus rings; neither the first label nor the
+// current tab's blue rule may stick out past the page's left edge because of it.
+test('at 1440 px the first product tab and its rule line up with the page', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/product/content-modelling');
+  const edges = await page.evaluate(() => {
+    const text = (el: Element) => {
+      const r = document.createRange();
+      r.selectNodeContents(el);
+      return r.getClientRects()[0].left;
+    };
+    const tab = document.querySelector('nav.product-nav a[aria-current="page"]')!;
+    const box = tab.getBoundingClientRect().left;
+    const after = getComputedStyle(tab, '::after');
+    // The rule is either the tab's own bottom border or a ::after drawn under the label.
+    const rule = after.content !== 'none' && after.content !== 'normal' ? box + parseFloat(after.left) : box;
+    return { edge: text(document.querySelector('.page-hero .eyebrow')!), label: text(tab), rule };
+  });
+  expect(edges.label).toBeCloseTo(edges.edge, 0);
+  expect(edges.rule).toBeCloseTo(edges.edge, 0);
+});
 
 test('the heading weight is preloaded with the body weight, and no unused mono face ships', async ({ page }) => {
   for (const path of ['/', '/product/querying']) {

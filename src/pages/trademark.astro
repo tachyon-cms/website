@@ -18,7 +18,7 @@ import Base from '../layouts/Base.astro';
   </PageHero>
 
   <div class="trademark">
-    <Prose>
+    <Prose split>
       <h2>What's covered</h2>
       <p>
         The name <strong>TachyonCMS</strong>, and the logo and mark you can download from the{' '}
@@ -61,9 +61,9 @@ import Base from '../layouts/Base.astro';
 
 <style>
   .trademark {
-    padding-bottom: clamp(3rem, 8vw, 5rem);
+    padding: 64px 0 clamp(3.5rem, 6vw, 4.5rem);
   }
-  .trademark :global(.prose h2:first-child) {
+  .trademark :global(.prose > h2:first-child) {
     margin-top: 0;
   }
 </style>

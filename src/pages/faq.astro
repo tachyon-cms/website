@@ -18,7 +18,7 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
   />
 
   <div class="faq">
-    <Prose>
+    <Prose split>
       <h2 id="production">Is it production ready?</h2>
       <p>
         No. TachyonCMS is pre-alpha. The content API, sign-in and access rules work today. The admin screen, rich text,
@@ -104,9 +104,9 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
 
 <style>
   .faq {
-    padding-bottom: clamp(3rem, 8vw, 5rem);
+    padding: 64px 0 clamp(3.5rem, 6vw, 4.5rem);
   }
-  .faq :global(.prose h2:first-child) {
+  .faq :global(.prose > h2:first-child) {
     margin-top: 0;
   }
 </style>

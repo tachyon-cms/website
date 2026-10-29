@@ -29,24 +29,20 @@ const next = [
   />
 
   <div class="roadmap">
-    <section aria-labelledby="today">
+    <Prose split>
       <h2 id="today">Works today</h2>
-      <Prose>
-        <p>
-          Content types defined over the API or kept in a JSON file you diff and apply. Twenty-odd field types, including
-          relationships, groups, arrays and map points. Filters that reach through relationships and into lists, joins,
-          and <code>select</code> and <code>populate</code> so you fetch only what you need. Sign-in with sessions or
-          bearer tokens, scoped API keys, roles, and access rules down to a single field.
-        </p>
-        <p>
-          That's <a href="/releases">v0.1.0</a>, and it's pre-alpha. The{' '}
-          <a href="https://github.com/tachyon-cms/tachyoncms/blob/v0.1.0/README.md#what-works-today">README</a> has the
-          full list, with examples.
-        </p>
-      </Prose>
-    </section>
+      <p>
+        Content types defined over the API or kept in a JSON file you diff and apply. Twenty-odd field types, including
+        relationships, groups, arrays and map points. Filters that reach through relationships and into lists, joins,
+        and <code>select</code> and <code>populate</code> so you fetch only what you need. Sign-in with sessions or
+        bearer tokens, scoped API keys, roles, and access rules down to a single field.
+      </p>
+      <p>
+        That's <a href="/releases">v0.1.0</a>, and it's pre-alpha. The{' '}
+        <a href="https://github.com/tachyon-cms/tachyoncms/blob/v0.1.0/README.md#what-works-today">README</a> has the
+        full list, with examples.
+      </p>
 
-    <section aria-labelledby="next">
       <h2 id="next">Being built, in this order</h2>
       <ol class="steps">
         {
@@ -54,30 +50,24 @@ const next = [
             <li>
               <h3>
                 {title}
-                {i === 0 && <span class="now">Under way</span>}
+                {i === 0 && <span class="pill">Under way</span>}
               </h3>
               <p>{text}</p>
             </li>
           ))
         }
       </ol>
-      <Prose>
-        <p>
-          After those comes the admin screen. The bar for it: anyone who has used WordPress can pick it up without
-          training. <a href="/product/admin">Here's what it's being built on.</a>
-        </p>
-        <p>None of this is in v0.1.0, and none of it has a date. What you're looking at is the order.</p>
-      </Prose>
-    </section>
+      <p>
+        After those comes the admin screen. The bar for it: anyone who has used WordPress can pick it up without
+        training. <a href="/product/admin">Here's what it's being built on.</a>
+      </p>
+      <p>None of this is in v0.1.0, and none of it has a date. What you're looking at is the order.</p>
 
-    <section aria-labelledby="say">
       <h2 id="say">Think the order's wrong?</h2>
-      <Prose>
-        <p>
-          I'd much rather hear it now than after it ships. Two polls are open, and the roadmap itself started as a
-          discussion you can reply to.
-        </p>
-      </Prose>
+      <p>
+        I'd much rather hear it now than after it ships. Two polls are open, and the roadmap itself started as a
+        discussion you can reply to.
+      </p>
       <LinkCards
         links={[
           {
@@ -93,71 +83,60 @@ const next = [
           { href: `${discussions}/35`, title: 'Reply to the roadmap', text: 'Discussion #35, where this page started.' },
         ]}
       />
-      <Prose>
-        <p>
-          Rather build than vote? I've opened <a href={issues}>a set of issues</a> that are ready to pick up. Each one says which files to
-          change, how to test it, and when it's done. Say you're taking one, and it's yours.
-        </p>
-      </Prose>
-    </section>
+      <p>
+        Rather build than vote? I've opened <a href={issues}>a set of issues</a> that are ready to pick up. Each one says which files to
+        change, how to test it, and when it's done. Say you're taking one, and it's yours.
+      </p>
+    </Prose>
   </div>
 </Base>
 
 <style>
   .roadmap {
-    display: grid;
-    gap: clamp(2.5rem, 6vw, 4rem);
-    padding-bottom: clamp(3rem, 8vw, 5rem);
+    padding: 64px 0 clamp(3.5rem, 6vw, 4.5rem);
   }
-  h2 {
-    margin: 0 0 1.25rem;
-    font-size: 1.625rem;
-    letter-spacing: -0.02em;
+  .roadmap :global(.prose > h2:first-child) {
+    margin-top: 0;
   }
+  /* Ruled rows, numbered in the margin. */
   .steps {
-    display: grid;
-    gap: 0.75rem;
-    max-width: 42rem;
-    margin: 0 0 1.5rem;
     padding: 0;
     list-style: none;
     counter-reset: step;
   }
   .steps li {
     position: relative;
-    padding: 1rem 1.25rem 1rem 3.5rem;
-    background: var(--c-panel);
-    border: 1px solid var(--c-line);
-    border-radius: 14px;
+    padding: 16px 0 16px 40px;
     counter-increment: step;
   }
+  .steps li + li {
+    border-top: 1px solid var(--c-line);
+  }
+  .steps li:first-child {
+    padding-top: 0;
+  }
   .steps li::before {
-    content: counter(step);
+    content: counter(step, decimal-leading-zero);
     position: absolute;
-    top: 1rem;
-    left: 1.25rem;
-    font: 600 1.125rem/1.4 var(--font-mono);
+    top: 19px;
+    left: 0;
+    font: 400 12.5px/1.4 var(--font-mono);
+    color: var(--c-muted);
+  }
+  .steps li:first-child::before {
+    top: 3px;
     color: var(--c-blue-soft);
   }
   .steps h3 {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem 0.75rem;
-    margin: 0 0 0.25rem;
-    font-size: 1.125rem;
+    gap: 6px 12px;
+    margin: 0 0 4px;
+    font-size: 1.0625rem;
+    letter-spacing: -0.01em;
   }
   .steps p {
     margin: 0;
-    color: var(--c-muted);
-  }
-  .now {
-    padding: 0.2rem 0.6rem;
-    font: 600 0.75rem/1.2 var(--font-mono);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--c-on-blue);
-    background: var(--c-blue);
-    border-radius: 999px;
   }
 </style>

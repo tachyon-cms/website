@@ -17,11 +17,11 @@ const options = ['Astro', 'Next.js', 'SvelteKit', 'Nuxt', 'Remix / React Router'
     title="A site you clone, wired up and ready to deploy"
     lede="There are no starters yet. The first will be a working site connected to TachyonCMS, and you get to pick the framework it's built in."
   >
-    <p class="roadmap">On the roadmap</p>
+    <p class="pill roadmap">On the roadmap</p>
   </PageHero>
 
   <div class="starters">
-    <Prose>
+    <Prose split>
       <h2>Vote for your front end</h2>
       <p>
         I'll build the first starter for whichever framework most of you would actually use. The poll is open in{' '}
@@ -43,20 +43,13 @@ const options = ['Astro', 'Next.js', 'SvelteKit', 'Nuxt', 'Remix / React Router'
 
 <style>
   .starters {
-    padding-bottom: clamp(3rem, 8vw, 5rem);
+    padding: 64px 0 clamp(3.5rem, 6vw, 4.5rem);
   }
-  .starters :global(.prose h2:first-child) {
+  .starters :global(.prose > h2:first-child) {
     margin-top: 0;
   }
+
   .roadmap {
-    display: inline-block;
-    margin: 1.5rem 0 0;
-    padding: 0.35rem 0.8rem;
-    font: 600 0.8125rem/1.2 var(--font-mono);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--c-on-blue);
-    background: var(--c-blue);
-    border-radius: 999px;
+    margin: 28px 0 0;
   }
 </style>

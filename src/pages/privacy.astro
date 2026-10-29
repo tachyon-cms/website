@@ -18,7 +18,7 @@ import Base from '../layouts/Base.astro';
   </PageHero>
 
   <div class="privacy">
-    <Prose>
+    <Prose split>
       <h2>Reading the site</h2>
       <p>
         Reading these pages sets no cookies and runs no analytics. The fonts and scripts come from tachyoncms.com itself,
@@ -78,9 +78,9 @@ import Base from '../layouts/Base.astro';
 
 <style>
   .privacy {
-    padding-bottom: clamp(3rem, 8vw, 5rem);
+    padding: 64px 0 clamp(3.5rem, 6vw, 4.5rem);
   }
-  .privacy :global(.prose h2:first-child) {
+  .privacy :global(.prose > h2:first-child) {
     margin-top: 0;
   }
 </style>
