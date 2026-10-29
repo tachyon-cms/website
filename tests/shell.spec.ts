@@ -357,6 +357,27 @@ test('pointing at the brand replays the draw-in', async ({ page }) => {
   await expect.poll(() => page.evaluate(() => (window as any).draws)).toBe(3);
 });
 
+test('a tap on the brand does not replay the draw-in as the page leaves', async ({ page }) => {
+  await page.goto('/');
+  const stroke = page.locator('header .brand .mark .stroke').first();
+  await expect.poll(() => stroke.evaluate((p) => getComputedStyle(p).strokeDashoffset)).toBe('0px');
+  const enter = (pointerType: string) =>
+    page.evaluate(async (pointerType) => {
+      document.querySelector('header .brand')!.dispatchEvent(new PointerEvent('pointerenter', { pointerType }));
+      // Two frames: long enough for a started animation to report itself.
+      for (let i = 0; i < 2; i++) await new Promise(requestAnimationFrame);
+      return (window as any).draws;
+    }, pointerType);
+  await page.evaluate(() => {
+    (window as any).draws = 0;
+    addEventListener('animationstart', (e) => e.animationName.endsWith('mark-draw') && (window as any).draws++);
+  });
+  expect(await enter('touch')).toBe(0);
+  // A mouse still replays it, so the listener is there.
+  await enter('mouse');
+  await expect.poll(() => page.evaluate(() => (window as any).draws)).toBe(3);
+});
+
 test('a mark script that runs after the fallback leaves the mark drawn, not redrawn', async ({ page }) => {
   // Fire Base's 1.5 s fallback at once, so the mark's module runs "late".
   await page.addInitScript(() => {
