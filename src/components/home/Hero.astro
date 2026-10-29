@@ -8,11 +8,47 @@ import Icon from '../Icon.astro';
 import { formatStars, stars } from '../../lib/stars';
 
 const count = await stars();
+
+// Out of the schema panel's bottom edge, down, and into the response's left side.
+// Origin: the schema panel's bottom-left corner. The response sits 30 px lower and
+// starts 180 px in, so every wire ends at x 180.
+const wires = [
+  { d: 'M48 0 V100 Q48 120 68 120 H180', from: [48, 0], to: [180, 120] },
+  { d: 'M68 0 V80 Q68 100 88 100 H180', from: [68, 0], to: [180, 100] },
+  { d: 'M88 0 V60 Q88 80 108 80 H180', from: [88, 0], to: [180, 80] },
+];
+// Without JS, a few still streaks on the grid rows to the right of the copy; the
+// canvas covers them once it runs. [row, start %, end %]
+const still = [
+  [2, 54, 66],
+  [3, 80, 95],
+  [5, 61, 72],
+  [7, 86, 97],
+  [8, 74, 84],
+  [9, 55, 67],
+];
 ---
 
 <section id="top" class="hero" aria-labelledby="hero-title">
   <div class="backdrop" aria-hidden="true">
     <canvas class="field" aria-hidden="true"></canvas>
+    <svg class="still">
+      <defs>
+        <linearGradient id="hero-still">
+          <stop offset="0" stop-color="#3da9ff" stop-opacity="0"></stop>
+          <stop offset="0.85" stop-color="#3da9ff" stop-opacity="0.5"></stop>
+          <stop offset="1" stop-color="#bfe2ff" stop-opacity="0.8"></stop>
+        </linearGradient>
+      </defs>
+      {
+        still.map(([row, a, b]) => (
+          <>
+            <rect x={`${a}%`} y={row * 64 - 0.1} width={`${b - a}%`} height="1.2" fill="url(#hero-still)" />
+            <circle cx={`${b}%`} cy={row * 64 + 0.5} r="1.6" />
+          </>
+        ))
+      }
+    </svg>
     <div class="glow"></div>
     <div class="grid"></div>
   </div>
@@ -53,28 +89,25 @@ const count = await stars();
           '}',
         ]}
       />
+      <svg class="wires" width="184" height="124" viewBox="0 0 184 124">
+        {wires.map(({ d }) => <path class="wire" d={d} />)}
+        {wires.map(({ d }) => <path class="pulse" pathLength="100" d={d} />)}
+        {wires.flatMap(({ from, to }) => [from, to]).map(([x, y]) => <circle class="port" cx={x} cy={y} r="2.5" />)}
+      </svg>
     </div>
-    <!-- Out of the schema's right edge and down into the response's top. -->
-    <svg class="streak" viewBox="0 0 240 170">
-      <defs>
-        <linearGradient id="hero-streak" gradientUnits="userSpaceOnUse" x1="30" x2="180" y1="0" y2="0">
-          <stop offset="0" stop-color="#3da9ff" stop-opacity="0"></stop>
-          <stop offset="1" stop-color="#bfe2ff"></stop>
-        </linearGradient>
-      </defs>
-      <path pathLength="100" d="M30 40 C100 40 140 70 140 160"></path>
-      <path pathLength="100" d="M30 60 C110 60 160 90 160 160"></path>
-      <path pathLength="100" d="M30 80 C120 80 180 110 180 160"></path>
-    </svg>
     <div class="panel response">
       <p class="head">GET /api/posts</p>
       <Code
         lines={[
-          '{ "docs": [',
-          '    { "title": "Hello, world",',
-          '      "published": true }',
+          '{',
+          '  "docs": [',
+          '    {',
+          '      "title": "Hello, world",',
+          '      "published": true',
+          '    }',
           '  ],',
-          '  "hasNextPage": false }',
+          '  "hasNextPage": false',
+          '}',
         ]}
       />
     </div>
@@ -87,7 +120,8 @@ const count = await stars();
   const canvas = document.querySelector<HTMLCanvasElement>('.hero .field');
   // Only once the page has loaded and gone idle, so the headline paints first and
   // stays the largest paint, and the field never competes with it.
-  const go = () => canvas && startField(canvas);
+  const copy = document.querySelector('.hero .copy');
+  const go = () => canvas && startField(canvas, copy ? [copy] : []);
   const start = () => ('requestIdleCallback' in window ? requestIdleCallback(go, { timeout: 1000 }) : setTimeout(go, 200));
   if (document.readyState === 'complete') start();
   else addEventListener('load', start, { once: true });
@@ -126,6 +160,18 @@ const count = await stars();
   }
   .field.on {
     opacity: 1;
+  }
+  .still {
+    display: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: var(--c-blue-soft);
+    transition: opacity 1.2s ease;
+  }
+  .field.on ~ .still {
+    opacity: 0;
   }
   .glow {
     position: absolute;
@@ -239,6 +285,7 @@ const count = await stars();
     max-width: 34rem;
   }
   .panel {
+    position: relative;
     min-width: 0;
     background: linear-gradient(var(--c-panel), var(--c-bg));
     border: 1px solid var(--c-line-2);
@@ -266,59 +313,87 @@ const count = await stars();
   .panel :global(.k) {
     color: var(--c-blue-soft);
   }
+  .panel :global(.s) {
+    color: var(--c-code-string);
+  }
+  .panel :global(.p) {
+    color: var(--c-muted);
+  }
   .schema {
     width: min(100%, 330px);
   }
   .response {
     justify-self: end;
     width: min(92%, 360px);
-    margin-top: -10px;
+    margin-top: 32px;
   }
-  .streak {
+  /* Stacked, the bus is three short wires straight down from schema to response. */
+  .response::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 1px);
+    left: 40px;
+    width: 42px;
+    height: 32px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--c-blue) 45%, transparent) 1.5px, transparent 1.5px) 0 0 /
+      20px 100% repeat-x;
+  }
+  .wires {
     display: none;
   }
-  .streak path {
-    fill: none;
-    stroke: url(#hero-streak);
-    stroke-width: 2;
-    stroke-linecap: round;
-  }
 
-  @media (min-width: 1080px) {
+  @media (min-width: 1200px) {
     .hero {
       grid-template-columns: 1.05fr 1fr;
       align-items: center;
       gap: 40px;
       padding: 96px 0;
     }
-    .vis {
-      position: relative;
+    .still {
       display: block;
-      max-width: none;
-      height: 480px;
     }
-    .schema,
-    .response,
-    .streak {
-      position: absolute;
+    /* Fixed geometry, so the wires meet the panels exactly: the response starts
+     * 180 px in and 30 px below the schema. */
+    .vis {
+      display: block;
+      justify-self: end;
+      width: 540px;
+      max-width: none;
     }
     .schema {
-      top: 20px;
-      left: 0;
+      z-index: 1;
+      width: 330px;
     }
     .response {
-      top: 230px;
-      right: 0;
       width: 360px;
-      margin: 0;
+      margin: 30px 0 0 180px;
     }
-    .streak {
+    .response::before {
+      content: none;
+    }
+    .wires {
       display: block;
-      top: 70px;
-      left: 300px;
-      width: 240px;
-      height: 170px;
+      position: absolute;
+      top: calc(100% + 1px);
+      left: -1px;
+      overflow: visible;
     }
+  }
+  .wires path {
+    fill: none;
+    stroke-linecap: round;
+  }
+  .wire {
+    stroke: color-mix(in srgb, var(--c-blue) 45%, transparent);
+    stroke-width: 1.5;
+  }
+  /* Only drawn while it moves: the still picture is the wires and their ports. */
+  .pulse {
+    stroke: none;
+    stroke-width: 2;
+  }
+  .port {
+    fill: var(--c-blue-soft);
   }
 
   /* Only the background moves on its own; with less motion asked for, it's a still. */
@@ -326,15 +401,19 @@ const count = await stars();
     .glow {
       animation: hero-breathe 9s ease-in-out infinite;
     }
-    .streak path {
-      stroke-dasharray: 22 128;
-      animation: hero-fly 2.4s cubic-bezier(0.6, 0, 0.2, 1) infinite;
+    .wires {
+      filter: drop-shadow(0 0 3px var(--c-blue));
     }
-    .streak path:nth-child(3) {
-      animation-delay: 0.25s;
+    .pulse {
+      stroke: var(--c-blue-soft);
+      stroke-dasharray: 24 100;
+      animation: hero-flow 2.4s cubic-bezier(0.5, 0, 0.3, 1) infinite;
     }
-    .streak path:nth-child(4) {
-      animation-delay: 0.5s;
+    .pulse:nth-of-type(5) {
+      animation-delay: 0.3s;
+    }
+    .pulse:nth-of-type(6) {
+      animation-delay: 0.6s;
     }
   }
   @keyframes hero-breathe {
@@ -343,12 +422,13 @@ const count = await stars();
       opacity: 1;
     }
   }
-  @keyframes hero-fly {
+  /* The dash enters at the schema and runs out through the response's port. */
+  @keyframes hero-flow {
     from {
-      stroke-dashoffset: 150;
+      stroke-dashoffset: 24;
     }
     to {
-      stroke-dashoffset: 0;
+      stroke-dashoffset: -100;
     }
   }
 </style>

@@ -42,6 +42,7 @@ const pairs = [
   ["--c-blue-soft", "--c-bg", 4.5], ["--c-blue-soft", "--c-panel", 4.5],
   ["--c-on-blue", "--c-blue", 4.5],
   ["--c-blue", "--c-bg", 4.5], ["--c-blue", "--c-panel", 4.5],
+  ["--c-code-string", "--c-bg", 4.5], ["--c-code-string", "--c-panel", 4.5],
   // Dim is for decorative and meta text only, never body copy.
   ["--c-dim", "--c-bg", 3], ["--c-dim", "--c-panel", 3],
 ];

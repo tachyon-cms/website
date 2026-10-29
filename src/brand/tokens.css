@@ -17,6 +17,8 @@
   /* Link colour. */
   --c-blue-soft: #bfe2ff;
   --c-blue-deep: #0b2236;
+  /* String values in code samples. */
+  --c-code-string: #9fd5ff;
   /* Text on --c-blue buttons. */
   --c-on-blue: #04121f;
 }

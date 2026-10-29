@@ -3,9 +3,14 @@
 //
 // It only runs while it can be seen: a hidden tab or a hero scrolled off screen
 // schedules no frames. Under reduced motion it draws one still frame and never
-// starts the loop. Returns a function that stops it for good.
+// starts the loop. Every frame, the areas behind `keepClear` (the copy) are erased
+// with a soft edge, so no streak ever runs through text. Returns a function that
+// stops it for good.
+import { GRID, laneCount, rgba } from '../lib/field';
 
-const GRID = 64;
+// Room kept around the copy, and how far the erased edge fades, in CSS px.
+const CLEAR_PAD = 20;
+const CLEAR_FEATHER = 28;
 // Speeds are in px per frame at 60 fps; faster screens take smaller steps.
 const FRAME_MS = 1000 / 60;
 
@@ -17,13 +22,21 @@ interface Streak {
   a: number;
 }
 
-export function startField(canvas: HTMLCanvasElement): () => void {
+export function startField(canvas: HTMLCanvasElement, keepClear: Element[] = []): () => void {
   const ctx = canvas.getContext('2d');
-  if (!ctx) return () => {};
-  // The colours come from the tokens; a 6-digit hex takes an alpha suffix.
+  const mask = document.createElement('canvas').getContext('2d');
+  if (!ctx || !mask) return () => {};
+  // The colours come from the tokens. The canvas normalises each to #rrggbb, and a
+  // value it can't read leaves the fallback in place.
   const css = getComputedStyle(canvas);
-  const blue = css.getPropertyValue('--c-blue').trim() || '#3da9ff';
-  const soft = css.getPropertyValue('--c-blue-soft').trim() || '#bfe2ff';
+  const token = (name: string, fallback: string) => {
+    ctx.fillStyle = fallback;
+    ctx.fillStyle = css.getPropertyValue(name).trim() || fallback;
+    return String(ctx.fillStyle);
+  };
+  const blue = token('--c-blue', '#3da9ff');
+  const soft = token('--c-blue-soft', '#bfe2ff');
+  const tail = [rgba(blue, 0), rgba(blue, 0.7), rgba(soft, 1)];
   const reduce = matchMedia('(prefers-reduced-motion: reduce)');
 
   let w = 0;
@@ -34,7 +47,7 @@ export function startField(canvas: HTMLCanvasElement): () => void {
   // The observer says so within a frame of starting.
   let onScreen = false;
 
-  const lane = () => (1 + Math.floor(Math.random() * Math.max(1, Math.ceil(h / GRID) - 1))) * GRID + 0.5;
+  const lane = () => (1 + Math.floor(Math.random() * laneCount(h))) * GRID + 0.5;
   // Scattered across the canvas at the start; afterwards, waiting off the left edge.
   const spawn = (scatter: boolean): Streak => {
     const len = 80 + Math.random() * 220;
@@ -50,16 +63,16 @@ export function startField(canvas: HTMLCanvasElement): () => void {
   const draw = () => {
     ctx.clearRect(0, 0, w, h);
     for (const s of streaks) {
-      const tail = s.x - s.len;
-      const g = ctx.createLinearGradient(tail, 0, s.x, 0);
-      g.addColorStop(0, `${blue}00`);
-      g.addColorStop(0.85, `${blue}b3`);
-      g.addColorStop(1, soft);
+      const from = s.x - s.len;
+      const g = ctx.createLinearGradient(from, 0, s.x, 0);
+      g.addColorStop(0, tail[0]);
+      g.addColorStop(0.85, tail[1]);
+      g.addColorStop(1, tail[2]);
       ctx.globalAlpha = s.a;
       ctx.strokeStyle = g;
       ctx.lineWidth = 1.2;
       ctx.beginPath();
-      ctx.moveTo(tail, s.y);
+      ctx.moveTo(from, s.y);
       ctx.lineTo(s.x, s.y);
       ctx.stroke();
       ctx.fillStyle = soft;
@@ -71,6 +84,27 @@ export function startField(canvas: HTMLCanvasElement): () => void {
       ctx.shadowBlur = 0;
     }
     ctx.globalAlpha = 1;
+    // Wipe what landed behind the copy, in device pixels.
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.drawImage(mask.canvas, 0, 0);
+    ctx.restore();
+  };
+
+  // A solid block over each kept-clear box, its shadow the soft edge. Built once per
+  // resize, then stamped out of every frame.
+  const buildMask = (dpr: number) => {
+    mask.canvas.width = canvas.width;
+    mask.canvas.height = canvas.height;
+    mask.setTransform(dpr, 0, 0, dpr, 0, 0);
+    mask.fillStyle = mask.shadowColor = '#000';
+    mask.shadowBlur = CLEAR_FEATHER * dpr;
+    const c = canvas.getBoundingClientRect();
+    for (const el of keepClear) {
+      const r = el.getBoundingClientRect();
+      mask.fillRect(r.left - c.left - CLEAR_PAD, r.top - c.top - CLEAR_PAD, r.width + 2 * CLEAR_PAD, r.height + 2 * CLEAR_PAD);
+    }
   };
 
   const resize = () => {
@@ -80,6 +114,7 @@ export function startField(canvas: HTMLCanvasElement): () => void {
     canvas.width = Math.round(w * dpr);
     canvas.height = Math.round(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    buildMask(dpr);
     const count = Math.round(w / 45);
     streaks = streaks.slice(0, count).map((s) => (s.y > h ? spawn(true) : s));
     while (streaks.length < count) streaks.push(spawn(true));
@@ -113,6 +148,8 @@ export function startField(canvas: HTMLCanvasElement): () => void {
   canvas.classList.add('on');
   const sizes = new ResizeObserver(resize);
   sizes.observe(canvas);
+  // The copy can change height on its own, when a web font arrives.
+  for (const el of keepClear) sizes.observe(el);
   const seen = new IntersectionObserver(([entry]) => {
     onScreen = entry.isIntersecting;
     sync();

@@ -168,6 +168,95 @@ test.describe('the hero', () => {
     expect(await idle(page)).toBeGreaterThan(5);
   });
 
+  // The brightest canvas pixel behind each piece of copy, sampled over a few frames.
+  const behindCopy = (page: Page, samples = 6) =>
+    page.evaluate(async (samples) => {
+      const canvas = document.querySelector<HTMLCanvasElement>('.hero canvas')!;
+      const ctx = canvas.getContext('2d')!;
+      const c = canvas.getBoundingClientRect();
+      const sx = canvas.width / c.width;
+      let max = 0;
+      for (let i = 0; i < samples; i++) {
+        for (const el of document.querySelectorAll('.hero .copy > *')) {
+          const r = el.getBoundingClientRect();
+          const data = ctx.getImageData((r.left - c.left) * sx, (r.top - c.top) * sx, r.width * sx, r.height * sx).data;
+          for (let a = 3; a < data.length; a += 4) max = Math.max(max, data[a]);
+        }
+        await new Promise((done) => setTimeout(done, 120));
+      }
+      return max;
+    }, samples);
+
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+    test.describe(`at ${viewport.width} px`, () => {
+      test.use({ viewport });
+
+      test('no streak ever crosses the copy', async ({ page }) => {
+        await page.goto('/');
+        await expect(page.locator('.hero canvas')).toHaveClass(/\bon\b/);
+        expect(await behindCopy(page)).toBeLessThanOrEqual(8);
+      });
+
+      test('nor in the reduced-motion still', async ({ page }) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.goto('/');
+        await expect(page.locator('.hero canvas')).toHaveClass(/\bon\b/);
+        expect(await behindCopy(page, 1)).toBeLessThanOrEqual(8);
+      });
+    });
+  }
+
+  test.describe('at desktop width', () => {
+    test.use({ viewport: { width: 1440, height: 900 } });
+
+    test('each wire runs from the schema panel into the left side of the response', async ({ page }) => {
+      await page.goto('/');
+      const schema = (await page.locator('.hero .schema').boundingBox())!;
+      const response = (await page.locator('.hero .response').boundingBox())!;
+      const ends = await page.locator('.hero .wires path.wire').evaluateAll((paths) =>
+        (paths as SVGPathElement[]).map((p) => {
+          const m = p.getScreenCTM()!;
+          const at = (len: number) => new DOMPoint(p.getPointAtLength(len).x, p.getPointAtLength(len).y).matrixTransform(m);
+          const end = at(p.getTotalLength());
+          const before = at(p.getTotalLength() - 4);
+          return { start: at(0), end, horizontal: Math.abs(end.y - before.y) < 0.5 };
+        }),
+      );
+      expect(ends).toHaveLength(3);
+      for (const { start, end, horizontal } of ends) {
+        expect(Math.abs(start.y - (schema.y + schema.height))).toBeLessThan(2);
+        expect(start.x).toBeGreaterThan(schema.x);
+        expect(Math.abs(end.x - response.x)).toBeLessThan(2);
+        expect(end.y).toBeGreaterThan(response.y + 30);
+        expect(end.y).toBeLessThan(response.y + response.height);
+        expect(horizontal).toBe(true);
+      }
+    });
+
+    test.describe('without JavaScript', () => {
+      test.use({ javaScriptEnabled: false });
+
+      test('still streaks stand in for the field', async ({ page }) => {
+        await page.goto('/');
+        await expect(page.locator('.hero .still')).toBeVisible();
+        expect(await page.locator('.hero .still rect').count()).toBeGreaterThan(3);
+      });
+    });
+
+    test('the still streaks give way once the field is running', async ({ page }) => {
+      await page.goto('/');
+      await expect(page.locator('.hero canvas')).toHaveClass(/\bon\b/);
+      await expect(page.locator('.hero .still')).toHaveCSS('opacity', '0');
+    });
+  });
+
+  test('code colours strings and quiets punctuation', async ({ page }) => {
+    await page.goto('/');
+    const d = page.locator('[data-diagram="schema-to-api"]');
+    await expect(d.locator('.s').first()).toHaveText('"posts"');
+    expect(await d.locator('.p').count()).toBeGreaterThan(5);
+  });
+
   test('stops once the hero is scrolled away', async ({ page }) => {
     await page.addInitScript(countFrames);
     await page.goto('/');
