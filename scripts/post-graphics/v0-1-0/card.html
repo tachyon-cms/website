@@ -9,20 +9,20 @@
   .frame { height: 100%; padding: 60px 72px; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto; }
   .top { display: flex; justify-content: space-between; align-items: center; }
   .top img { height: 40px; }
-  h1 { align-self: center; font-size: 84px; line-height: 1.02; letter-spacing: -0.04em; font-weight: 700; }
+  h1 { align-self: center; font-size: 84px; line-height: 1.02; letter-spacing: -0.04em; }
   .bottom { display: grid; gap: 22px; }
   pre { padding: 22px 28px; font-size: 26px; color: var(--text); }
-  pre span { color: var(--hi); }
+  pre span { color: var(--blue); }
   ul { display: flex; gap: 12px; padding: 0; list-style: none; font: 400 18px/1 var(--mono); color: var(--muted); }
   .eyebrow span { text-transform: none; }
-  li { white-space: nowrap; padding: 10px 14px; border: 2px solid var(--border); border-radius: 999px; }
-  li b { color: var(--text); font-weight: 600; }
+  li { white-space: nowrap; padding: 10px 14px; border: 2px solid var(--line); border-radius: 999px; }
+  li b { color: var(--text); font-weight: 400; }
 </style>
 </head>
 <body>
 <div class="frame">
   <div class="top"><img src="../../../public/brand/logo.svg" alt=""><span class="eyebrow">Release · <span>v0.1.0</span></span></div>
-  <h1>Run it<br><span class="grad">without building it.</span></h1>
+  <h1>Run it<br><span class="accent">without building it.</span></h1>
   <div class="bottom">
     <pre class="box"><span>$</span> docker pull ghcr.io/tachyon-cms/tachyoncms:v0.1.0</pre>
     <ul>

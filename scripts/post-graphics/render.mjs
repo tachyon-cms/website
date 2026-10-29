@@ -27,6 +27,14 @@ const open = async (file, width, height) => {
   const page = await browser.newPage({ viewport: { width, height } });
   await page.goto(`file://${join(here, slug, file)}`);
   await page.evaluate(() => document.fonts.ready);
+  // A face that failed to load (a removed package, a wrong path) would render in a
+  // fallback font without a word; fail instead.
+  const broken = await page.evaluate(() =>
+    [...document.fonts].filter((f) => f.status === 'error').map((f) => `${f.family} ${f.weight}`));
+  if (broken.length) {
+    await browser.close();
+    throw new Error(`${slug}/${file} could not load ${broken.join(', ')}`);
+  }
   // Everything stays inside the .frame's content box: a chip running into the
   // margin, or off the image, fails the render instead of shipping.
   const over = await page.evaluate(() => {

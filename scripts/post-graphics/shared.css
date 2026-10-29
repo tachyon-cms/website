@@ -1,36 +1,47 @@
 /* Shared by every post graphic. Fonts load from the installed @fontsource
- * files, the same ones the site serves; colours are the dark Ultraviolet tokens. */
-@font-face { font-family: "Instrument Sans"; font-weight: 400; src: url("../../node_modules/@fontsource/instrument-sans/files/instrument-sans-latin-400-normal.woff2"); }
-@font-face { font-family: "Instrument Sans"; font-weight: 600; src: url("../../node_modules/@fontsource/instrument-sans/files/instrument-sans-latin-600-normal.woff2"); }
-@font-face { font-family: "Instrument Sans"; font-weight: 700; src: url("../../node_modules/@fontsource/instrument-sans/files/instrument-sans-latin-700-normal.woff2"); }
-@font-face { font-family: "IBM Plex Mono"; font-weight: 400; src: url("../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2"); }
-@font-face { font-family: "IBM Plex Mono"; font-weight: 600; src: url("../../node_modules/@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-600-normal.woff2"); }
+ * files, the same ones the site serves; colours are values from
+ * src/brand/tokens.css (scripts/brand.test.mjs keeps them in step). */
+@font-face { font-family: Inter; font-weight: 400; src: url("../../node_modules/@fontsource/inter/files/inter-latin-400-normal.woff2"); }
+@font-face { font-family: Inter; font-weight: 600; src: url("../../node_modules/@fontsource/inter/files/inter-latin-600-normal.woff2"); }
+@font-face { font-family: "Geist Mono"; font-weight: 400; src: url("../../node_modules/@fontsource/geist-mono/files/geist-mono-latin-400-normal.woff2"); }
 
 :root {
-  --bg: #07060c;
-  --surface: #140d24;
-  --border: #2b1d4a;
-  --text: #e9e3ff;
-  --muted: #a99cc9;
-  --violet: #8b5cf6;
-  --pink: #ec4899;
-  --hi: #f0abfc;
-  --soft: #c3a6ff;
-  --grad: linear-gradient(90deg, var(--violet), var(--pink));
-  --sans: "Instrument Sans", sans-serif;
-  --mono: "IBM Plex Mono", monospace;
+  --bg: #0c0d0d;
+  --panel: #111315;
+  --line: #242628;
+  --line-2: #303236;
+  --text: #f4f5f6;
+  --muted: #94979e;
+  --blue: #3da9ff;
+  --blue-soft: #bfe2ff;
+  --blue-deep: #0b2236;
+  --on-blue: #04121f;
+  --sans: Inter, sans-serif;
+  --mono: "Geist Mono", monospace;
 }
 * { box-sizing: border-box; margin: 0; }
+p, h1, h3 { text-wrap: pretty; }
 body {
-  background:
-    radial-gradient(60rem 30rem at 85% -10%, rgb(139 92 246 / 0.28), transparent 70%),
-    radial-gradient(40rem 24rem at 0% 110%, rgb(236 72 153 / 0.16), transparent 70%),
-    var(--bg);
+  position: relative;
+  background: radial-gradient(56rem 36rem at 92% -12%, rgb(61 169 255 / 0.2), transparent 70%), var(--bg);
   color: var(--text);
   font-family: var(--sans);
+  font-weight: 400;
   -webkit-font-smoothing: antialiased;
 }
-.eyebrow { font: 600 20px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--soft); }
-.grad { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+/* The same faint grid as the site's page headers, fading out from the top right. */
+body::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(60% 520px at 88% 0%, #000 10%, transparent 75%);
+  opacity: 0.6;
+}
+.frame { position: relative; }
+h1, h2, h3, b, strong { font-weight: 600; }
+.eyebrow { font: 400 20px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--blue); }
+.accent { color: var(--blue); }
 code, pre { font-family: var(--mono); }
-.box { background: var(--surface); border: 2px solid var(--border); border-radius: 18px; }
+.box { background: var(--panel); border: 2px solid var(--line); border-radius: 16px; }

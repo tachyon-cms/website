@@ -1,0 +1,86 @@
+name: Preview docs
+
+# Every push to a branch uploads the docs as a new Worker version without
+# deploying it, so docs.tachyoncms.com doesn't change, and puts the version's
+# preview URL in the job summary. Never on pull_request: a fork's PR must not
+# reach the Cloudflare secrets. Never on main: deploy-docs.yml ships main.
+on:
+  push:
+    branches-ignore: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: preview-docs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  preview:
+    if: github.repository == 'tachyon-cms/website'
+    runs-on: ubuntu-latest
+    steps:
+      # Without the Cloudflare secrets, skip with a notice instead of failing.
+      - name: Check for the Cloudflare secrets
+        id: secrets
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -n "$CLOUDFLARE_API_TOKEN" ] && [ -n "$CLOUDFLARE_ACCOUNT_ID" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "::notice::CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not set, so no docs preview was made."
+          fi
+      - if: steps.secrets.outputs.ready == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - if: steps.secrets.outputs.ready == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # From the root: the docs are a workspace and import ../scripts/csp.mjs.
+      - if: steps.secrets.outputs.ready == 'true'
+        run: npm ci
+      - if: steps.secrets.outputs.ready == 'true'
+        run: npm run build:docs
+      # `versions upload` doesn't change the Worker's settings, so turn preview URLs
+      # on here. docs/wrangler.jsonc sets preview_urls too, so a main deploy keeps
+      # them on; the workers.dev route stays off.
+      - if: steps.secrets.outputs.ready == 'true'
+        name: Turn on preview URLs
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          curl -fsS -X POST \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/workers/scripts/tachyoncms-docs/subdomain" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            -H "Cloudflare-Workers-Script-Api-Date: 2025-08-01" \
+            --data '{"enabled":false,"previews_enabled":true}' > /dev/null
+      - if: steps.secrets.outputs.ready == 'true'
+        name: Upload a preview version
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          WRANGLER_SEND_METRICS: 'false'
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler.ndjson
+          BRANCH: ${{ github.ref_name }}
+        run: |
+          npx wrangler versions upload -c docs/wrangler.jsonc --message "$BRANCH ${GITHUB_SHA::7}"
+          url=$(jq -r 'select(.type == "version-upload") | .preview_url // empty' "$WRANGLER_OUTPUT_FILE_PATH")
+          if [ -z "$url" ]; then
+            echo "::error::wrangler uploaded the version but gave no preview URL."
+            exit 1
+          fi
+          # The preview must serve the page and the same CSP the live docs send.
+          headers=$(curl -fsS --retry 5 --retry-all-errors --retry-delay 3 -o /dev/null -D - "$url/")
+          echo "$headers" | grep -qi '^content-security-policy:' || { echo "::error::$url/ sent no CSP header."; exit 1; }
+          {
+            echo "### Docs preview"
+            echo
+            echo "[$url]($url) for \`$BRANCH\` at \`${GITHUB_SHA::7}\`"
+          } >> "$GITHUB_STEP_SUMMARY"

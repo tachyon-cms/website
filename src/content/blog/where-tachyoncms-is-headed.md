@@ -19,7 +19,7 @@ I want tachyoncms.com running on TachyonCMS itself. Right now the page you're re
 ## The list
 
 <figure>
-  <a href="/media/blog/where-tachyoncms-is-headed/infographic.png"><img src="/media/blog/where-tachyoncms-is-headed/infographic.png" alt="Where TachyonCMS is headed. The goal: run tachyoncms.com on TachyonCMS itself. Next, in order: rich text and blocks (under way), drafts, versions and scheduled publishing, media, live preview, authoring tools, then the admin screen. Where you come in: ten open issues, a vote on the order in Discussion #39, and Discussion #38 to pick the first starter." width="1600" height="1953" loading="lazy" decoding="async" /></a>
+  <a href="/media/blog/where-tachyoncms-is-headed/infographic.png"><img src="/media/blog/where-tachyoncms-is-headed/infographic.png" alt="Where TachyonCMS is headed. The goal: run tachyoncms.com on TachyonCMS itself. Next, in order: rich text and blocks (under way), drafts, versions and scheduled publishing, media, live preview, authoring tools, then the admin screen. Where you come in: ten open issues, a vote on the order in Discussion #39, and Discussion #38 to pick the first starter." width="1600" height="1946" loading="lazy" decoding="async" /></a>
   <figcaption>The order, on one page.</figcaption>
 </figure>
 

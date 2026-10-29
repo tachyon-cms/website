@@ -60,8 +60,9 @@ test("docs/public/favicon.svg matches the site's", () => {
 });
 
 // server/signup.ts serves its confirm page outside the Astro build, and brand/card.html
-// renders outside it too, so both copy colours by value. Each must still be a token.
-for (const file of ["public/signup.css", "brand/card.html"]) {
+// renders outside it too, as do the post graphics, so each copies colours by value.
+// Each must still be a token.
+for (const file of ["public/signup.css", "brand/card.html", "scripts/post-graphics/shared.css"]) {
   test(`${file} uses only brand token colours`, () => {
     const tokens = read("src/brand/tokens.css").toLowerCase();
     const colours = read(file).toLowerCase().match(/#[0-9a-f]{6}\b/g) ?? [];
