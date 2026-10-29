@@ -150,6 +150,14 @@ test.describe('the hero', () => {
       expect(await idle(page)).toBe(0);
       expect(await frames(page)).toBe(0);
     });
+
+    test('shows the still picture at once, with no fade', async ({ page }) => {
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.goto('/');
+      for (const part of ['.hero .field', '.hero .still']) {
+        await expect(page.locator(part)).toHaveCSS('transition-duration', '0s');
+      }
+    });
   });
 
   test('stops while the tab is hidden and starts again when it comes back', async ({ page }) => {
@@ -276,6 +284,25 @@ test.describe('the hero', () => {
       await page.goto('/');
       await expect(page.locator('.hero canvas')).toHaveClass(/\bon\b/);
       await expect(page.locator('.hero .still')).toHaveCSS('opacity', '0');
+    });
+  });
+
+  test.describe('without JavaScript, copy and panels side by side', () => {
+    test.use({ javaScriptEnabled: false, viewport: { width: 1100, height: 800 } });
+
+    test('still streaks stand in for the field, clear of the copy', async ({ page }) => {
+      await page.goto('/');
+      await expect(page.locator('.hero .still')).toBeVisible();
+      const copyRight = await page.locator('.hero h1').evaluate((h) => h.getBoundingClientRect().right);
+      const lefts = await page.locator('.hero .still rect').evaluateAll((rs) => rs.map((r) => r.getBoundingClientRect().left));
+      expect(lefts.length).toBeGreaterThan(3);
+      for (const left of lefts) expect(left).toBeGreaterThan(copyRight);
+    });
+
+    test('below 1024 px, where the copy spans the width, they stay hidden', async ({ page }) => {
+      await page.setViewportSize({ width: 1000, height: 800 });
+      await page.goto('/');
+      await expect(page.locator('.hero .still')).toBeHidden();
     });
   });
 
