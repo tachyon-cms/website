@@ -113,6 +113,11 @@ const {
   p {
     margin: 0 0 1.25rem;
   }
+  /* 600, the preloaded bold, not the browser's 700, which would fetch a face nobody
+   * preloads or fall back on a first visit. */
+  :where(strong, b, th) {
+    font-weight: 600;
+  }
   .skip {
     position: absolute;
     left: 16px;

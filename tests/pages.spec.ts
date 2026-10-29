@@ -139,9 +139,9 @@ for (const width of [320, 390]) {
 // Only the preloaded faces, and only our two families: Geist Mono 400, and Inter 400
 // or 600 for everything else, headings, bold and table headers included. Text that
 // falls back to the browser's own monospace, or synthesises a bold, fails here.
-test('inner pages set type in the preloaded weights', async ({ page }) => {
+test('every page sets type in the preloaded weights', async ({ page }) => {
   const found: string[] = [];
-  for (const path of rest) {
+  for (const path of ['/', ...inner]) {
     await page.goto(path);
     const off = await page.locator('main').evaluate((main) =>
       [...main.querySelectorAll('*')]

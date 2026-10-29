@@ -32,10 +32,6 @@ const { split } = Astro.props;
   .prose :global(:where(p, ul, ol, blockquote, pre)) {
     margin: 0 0 1.25rem;
   }
-  /* 600, the preloaded bold, not the browser's 700. */
-  .prose :global(:where(strong, b, th)) {
-    font-weight: 600;
-  }
   .prose :global(strong) {
     color: var(--c-text);
   }
