@@ -11,6 +11,8 @@ import { parse } from "yaml";
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 const wf = parse(read(".github/workflows/preview-docs.yml"));
 const { build, upload } = wf.jobs;
+// The same strip the workflow's sed does: drop whole-line // comments, then parse.
+const jsonc = (path) => JSON.parse(read(path).replace(/^\s*\/\/.*$/gm, ""));
 const runs = (job) => job.steps.map((s) => s.run ?? "").join("\n");
 
 test("preview-docs runs on pushes to branches other than main, and nothing else", () => {
@@ -44,7 +46,7 @@ test("the upload job has the secrets but runs only main's code", () => {
   for (const c of checkouts) assert.deepEqual(c.with, { ref: "main", "persist-credentials": false });
   // Node with no cache: a cache the branch's build job wrote must not reach this job.
   for (const s of upload.steps.filter((s) => s.uses?.startsWith("actions/setup-node@"))) {
-    assert.deepEqual(s.with, { "node-version-file": ".nvmrc" });
+    assert.deepEqual(s.with, { "node-version-file": ".nvmrc", "package-manager-cache": false });
   }
   assert.ok(!upload.steps.some((s) => /^actions\/(cache|setup-\w+)@/.test(s.uses ?? "") && !s.uses.startsWith("actions/setup-node@")));
   // The one install is main's lockfile with scripts off, and nothing is built.
@@ -53,7 +55,7 @@ test("the upload job has the secrets but runs only main's code", () => {
   const download = upload.steps.find((s) => s.uses?.startsWith("actions/download-artifact@"));
   assert.equal(download.with.path, "${{ runner.temp }}/preview/dist");
   assert.match(runs(upload), /cp docs\/wrangler\.jsonc "\$PREVIEW\/wrangler\.jsonc"/);
-  assert.doesNotMatch(JSON.stringify(upload), new RegExp(JSON.parse(read("docs/wrangler.jsonc")).name));
+  assert.doesNotMatch(JSON.stringify(upload), new RegExp(jsonc("docs/wrangler.jsonc").name));
 });
 
 test("the upload job skips without the secrets, then uploads with main's wrangler", () => {
@@ -67,7 +69,7 @@ test("the upload job skips without the secrets, then uploads with main's wrangle
 });
 
 test("the docs Worker serves preview URLs but no workers.dev route", () => {
-  const config = JSON.parse(read("docs/wrangler.jsonc").replace(/^\s*\/\/.*$/gm, ""));
+  const config = jsonc("docs/wrangler.jsonc");
   assert.equal(config.preview_urls, true);
   assert.equal(config.workers_dev, false);
 });
