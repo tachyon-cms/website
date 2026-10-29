@@ -116,7 +116,8 @@ const groups = [
   }
   h2 {
     margin: 0 0 14px;
-    font: 500 11px/1 var(--font-mono);
+    /* 400 is the preloaded mono weight, so a first visit never shows the fallback. */
+    font: 400 11px/1 var(--font-mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--c-muted);
@@ -133,7 +134,6 @@ const groups = [
     color: var(--c-muted);
     text-decoration: none;
     overflow-wrap: anywhere;
-    transition: color 0.15s ease;
   }
   a:hover {
     color: var(--c-text);
@@ -151,6 +151,11 @@ const groups = [
   }
   .base p {
     margin: 0;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    a {
+      transition: color 0.15s ease;
+    }
   }
   @media (min-width: 900px) {
     .top {

@@ -35,15 +35,20 @@ const {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Lets CSS wait for scripts that will run, such as the mark's draw-in. Hashed by scripts/csp.mjs. -->
-    <script is:inline>document.documentElement.classList.add('js');</script>
+    <!-- html.js: scripts will run. mark-pending holds the mark undrawn until its draw-in
+         starts; if that script hasn't run in 1.5 s, the finished mark shows anyway.
+         Hashed by scripts/csp.mjs. -->
+    <script is:inline>
+      document.documentElement.classList.add('js', 'mark-pending');
+      setTimeout(() => document.documentElement.classList.remove('mark-pending'), 1500);
+    </script>
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#0c0d0d" />
     <Seo title={title} description={description} path={path} image={image} imageAlt={imageAlt} published={published} noindex={noindex} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title="TachyonCMS blog" href="/rss.xml" />
     <Font cssVariable="--font-sans" preload={[{ weight: 400 }]} />
-    <Font cssVariable="--font-mono" />
+    <Font cssVariable="--font-mono" preload={[{ weight: 400 }]} />
     <slot name="head" />
   </head>
   <body>
@@ -102,7 +107,8 @@ const {
     position: absolute;
     left: 16px;
     top: -4rem;
-    z-index: 10;
+    /* Above the sticky header (z-index 20). */
+    z-index: 30;
     padding: 0.6rem 1rem;
     color: var(--c-on-blue);
     background: var(--c-blue);

@@ -1,5 +1,6 @@
 ---
 import { readFileSync } from 'node:fs';
+import { publicDir } from 'astro:config/server';
 import tokens from '../brand/tokens.css?raw';
 import PageHero from '../components/PageHero.astro';
 import Prose from '../components/Prose.astro';
@@ -25,7 +26,7 @@ if (colours.some((c) => !c.hex)) throw new Error('brand: a colour is missing fro
 // Each preview's width and height come from the file itself, so a redrawn logo can't
 // leave the page reserving the wrong space: an SVG's viewBox, a PNG's IHDR chunk.
 function size(file: string): [number, number] {
-  const data = readFileSync(`public/brand/${file}`);
+  const data = readFileSync(new URL(`brand/${file}`, publicDir));
   if (file.endsWith('.png')) return [data.readUInt32BE(16), data.readUInt32BE(20)];
   const box = data.toString().match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/);
   if (!box) throw new Error(`brand: no viewBox in public/brand/${file}`);

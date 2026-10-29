@@ -1,9 +1,10 @@
 ---
-// The thin line above the header that names the latest release. The version comes
-// from GitHub at build time, or the snapshot when GitHub can't be reached.
-import { releases } from '../lib/github';
+// The thin line above the header that names the newest plain vX.Y.Z release, so an
+// -rc or -alpha tag never gets announced. The version comes from GitHub at build time, or the
+// snapshot when GitHub can't be reached.
+import { announced, releases } from '../lib/github';
 
-const [latest] = await releases();
+const latest = announced(await releases());
 ---
 
 {
@@ -43,13 +44,17 @@ const [latest] = await releases();
     content: '→' / '';
     display: inline-block;
     margin-left: 0.3em;
-    transition: transform 0.15s ease;
   }
   a:hover::after {
     transform: translateX(2px);
   }
   a:hover {
     text-decoration: underline;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    a::after {
+      transition: transform 0.15s ease;
+    }
   }
   @media (max-width: 40rem) {
     .more {

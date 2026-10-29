@@ -31,6 +31,7 @@ const { size = 26, animate = true } = Astro.props;
     draw();
     mark.closest('.brand')?.addEventListener('pointerenter', draw);
   }
+  document.documentElement.classList.remove('mark-pending');
 </script>
 
 <style>
@@ -54,11 +55,12 @@ const { size = 26, animate = true } = Astro.props;
   }
   @media (prefers-reduced-motion: no-preference) {
     /* With JS on, the mark waits undrawn for its first .draw, so it never paints
-     * drawn and then blanks. html.js comes from a script in the head of Base.astro. */
-    :global(.js) .mark[data-animate]:not(.draw) .stroke {
+     * drawn and then blanks. html.mark-pending comes from the head of Base.astro and
+     * lasts until this script runs, or 1.5 s if it never does. */
+    :global(.mark-pending) .mark[data-animate]:not(.draw) .stroke {
       stroke-dashoffset: 1.05;
     }
-    :global(.js) .mark[data-animate]:not(.draw) .point {
+    :global(.mark-pending) .mark[data-animate]:not(.draw) .point {
       transform: scale(0);
     }
     .draw .stroke {

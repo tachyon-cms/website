@@ -131,13 +131,21 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     for (const d of menus) if (d.open && !d.contains(e.target as Node)) close(d);
   });
   for (const d of menus) {
-    // The dropdown shuts once Tab moves past it, so it never covers what has focus.
-    if (d.classList.contains('drop'))
-      d.addEventListener('focusout', (e) => {
-        const next = e.relatedTarget as Node | null;
-        if (next && !d.contains(next)) close(d);
-      });
+    // A menu shuts once Tab moves past it, so it never hides what has focus.
+    d.addEventListener('focusout', (e) => {
+      const next = e.relatedTarget as Node | null;
+      if (next && !d.contains(next)) close(d);
+    });
   }
+  // Back/forward restores the page as it was left, menus and all.
+  addEventListener('pageshow', (e) => e.persisted && menus.forEach((d) => close(d)));
+  // The sheet ends at the bottom of the screen wherever the header sits, which is
+  // lower while the announcement bar is still in view. CSS alone can't know that.
+  const sheet = document.querySelector<HTMLElement>('.site-header .sheet');
+  sheet?.parentElement?.addEventListener('toggle', () => {
+    const header = sheet.closest('header');
+    if (header) sheet.style.maxHeight = `${innerHeight - header.getBoundingClientRect().bottom}px`;
+  });
 </script>
 
 <style>
@@ -203,7 +211,6 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     border-radius: 7px;
     font-size: 14px;
     color: var(--c-muted);
-    transition: color 0.15s ease;
   }
   .links > ul > li > a:hover,
   .drop summary:hover,
@@ -224,7 +231,6 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     border-bottom: 1.5px solid currentColor;
     transform: rotate(45deg);
     opacity: 0.7;
-    transition: transform 0.15s ease;
   }
   .drop[open] summary::after {
     margin-top: 3px;
@@ -245,7 +251,6 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     box-shadow:
       0 1px 0 rgb(255 255 255 / 0.04) inset,
       0 24px 48px -12px rgb(0 0 0 / 0.6);
-    animation: menu-in 0.14s ease-out;
   }
   /* Security and Why are about the project, not one feature, so a line sets them off. */
   .menu li:nth-child(n + 7) {
@@ -258,7 +263,6 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     gap: 2px;
     padding: 10px 12px;
     border-radius: 8px;
-    transition: background-color 0.15s ease;
   }
   .menu a:hover {
     background: rgb(255 255 255 / 0.04);
@@ -300,9 +304,6 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     color: var(--c-muted);
     border: 1px solid var(--c-line-2);
     border-radius: 8px;
-    transition:
-      color 0.15s ease,
-      border-color 0.15s ease;
   }
   .gh:hover {
     color: var(--c-text);
@@ -323,7 +324,6 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     color: var(--c-on-blue);
     background: var(--c-blue);
     border-radius: 9px;
-    transition: background-color 0.15s ease;
   }
   .cta:hover {
     background: var(--c-blue-soft);
@@ -350,7 +350,6 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     height: 1.5px;
     border-radius: 1px;
     background: var(--c-text);
-    transition: transform 0.2s ease;
   }
   .mobile[open] .burger i:first-child {
     transform: translateY(3.25px) rotate(45deg);
@@ -363,7 +362,8 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     top: 100%;
     left: 0;
     right: 0;
-    max-height: calc(100dvh - 64px);
+    /* Without JS, allow for the announcement bar; the script measures it exactly. */
+    max-height: calc(100dvh - 64px - 2.5rem);
     overflow-y: auto;
     padding: 20px 16px 28px;
     background: var(--c-bg);
@@ -371,11 +371,11 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     /* Dims the page below the sheet; the clip keeps the shade off the header above. */
     box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.55);
     clip-path: inset(0 0 -100vmax 0);
-    animation: menu-in 0.14s ease-out;
   }
   .sheet .label {
     margin: 0 0 6px;
-    font: 500 11px/1 var(--font-mono);
+    /* 400 is the preloaded mono weight, so a first visit never shows the fallback. */
+    font: 400 11px/1 var(--font-mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--c-muted);
@@ -409,6 +409,33 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
   }
   .sheet [aria-current='page'] {
     color: var(--c-blue);
+  }
+
+  /* Motion only answers the reader, and not at all if they've asked for less. */
+  @media (prefers-reduced-motion: no-preference) {
+    .links > ul > li > a,
+    .drop summary {
+      transition: color 0.15s ease;
+    }
+    .drop summary::after {
+      transition: transform 0.15s ease;
+    }
+    .menu,
+    .sheet {
+      animation: menu-in 0.14s ease-out;
+    }
+    .menu a,
+    .cta {
+      transition: background-color 0.15s ease;
+    }
+    .gh {
+      transition:
+        color 0.15s ease,
+        border-color 0.15s ease;
+    }
+    .burger i {
+      transition: transform 0.2s ease;
+    }
   }
 
   @media (max-width: 899.98px) {

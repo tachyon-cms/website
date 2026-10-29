@@ -106,7 +106,7 @@ test('the header links the GitHub repo and Get started', async ({ page }) => {
 test('the announcement bar names the latest release and links its notes', async ({ page }) => {
   await page.goto('/');
   const bar = page.locator('.announce');
-  await expect(bar).toContainText(/v\d+\.\d+\.\d+ is out\./);
+  await expect(bar).toContainText(/(^|\s)v\d+\.\d+\.\d+ is out\./);
   await expect(bar.getByRole('link', { name: 'Read the release notes' })).toHaveAttribute('href', '/releases');
 });
 
@@ -168,6 +168,26 @@ test('the footer lists every contact address and has no theme toggle', async ({ 
 
 test.describe('at phone width', () => {
   test.use({ viewport: { width: 390, height: 844 } });
+
+  test('Tab out of the open sheet closes it', async ({ page }) => {
+    await page.goto('/');
+    const menu = page.locator('header details.mobile');
+    await menu.locator('summary').click();
+    await expect(menu).toHaveAttribute('open', '');
+    await menu.locator('.sheet a').last().focus();
+    await page.keyboard.press('Tab');
+    await expect(menu).not.toHaveAttribute('open');
+  });
+
+  test('the sheet ends at the bottom of the screen, with the announcement bar in view', async ({ page }) => {
+    // Short enough that the sheet has to scroll.
+    await page.setViewportSize({ width: 390, height: 480 });
+    await page.goto('/');
+    await page.locator('header details.mobile summary').click();
+    const box = (await page.locator('header .sheet').boundingBox())!;
+    expect(box.y).toBeGreaterThan(64);
+    expect(box.y + box.height).toBeLessThanOrEqual(480);
+  });
 
   test('the desktop links hide and the menu button shows', async ({ page }) => {
     await page.goto('/');
@@ -245,13 +265,70 @@ test('with reduced motion the mark is fully drawn from the start', async ({ page
 test('with JS the mark waits, undrawn, for its draw-in', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('html')).toHaveClass(/\bjs\b/);
+  // The script took the hold off once it started the draw-in.
+  await expect(page.locator('html')).not.toHaveClass(/\bmark-pending\b/);
   // Before the script adds .draw, the strokes are pushed out of sight, so there's no
   // drawn-then-blank flash.
   const offsets = await page.locator('header .brand .mark').evaluate((mark) => {
+    document.documentElement.classList.add('mark-pending');
     mark.classList.remove('draw');
     return [...mark.querySelectorAll('.stroke')].map((p) => getComputedStyle(p).strokeDashoffset);
   });
   expect(offsets).toEqual(['1.05px', '1.05px', '1.05px']);
+});
+
+test("if the mark's script never runs, the finished mark shows after 1.5 s", async ({ page }) => {
+  await page.route('**/', async (route) => {
+    const res = await route.fetch();
+    const html = (await res.text()).replace(/<script type="module">[^<]*mark-pending[^<]*<\/script>/, '');
+    await route.fulfill({ response: res, body: html });
+  });
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveClass(/\bmark-pending\b/);
+  const stroke = page.locator('header .brand .mark .stroke').first();
+  await expect(stroke).not.toHaveCSS('stroke-dashoffset', '0px');
+  await expect(stroke).toHaveCSS('stroke-dashoffset', '0px', { timeout: 3000 });
+});
+
+test('the focused skip link sits above the sticky header', async ({ page }) => {
+  for (const y of [0, 1500]) {
+    await page.goto('/');
+    await page.evaluate((y) => scrollTo(0, y), y);
+    await page.keyboard.press('Tab');
+    const skip = page.locator('a.skip');
+    await expect(skip).toBeFocused();
+    const hits = await skip.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return [
+        [r.left + r.width / 2, r.top + r.height / 2],
+        [r.left + r.width / 2, r.bottom - 2],
+      ].map(([x, y]) => document.elementFromPoint(x, y) === el);
+    });
+    expect(hits, `scrolled to ${y}`).toEqual([true, true]);
+  }
+});
+
+test('with reduced motion the menus open without animating', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.locator('nav[aria-label="Main"] details summary').click();
+  const running = await page.evaluate(
+    () => document.getAnimations().filter((a) => (a.effect as KeyframeEffect | null)?.target?.closest('.site-header')).length,
+  );
+  expect(running).toBe(0);
+  const transitions = await page
+    .locator('.site-header summary, .site-header a, .site-header .menu')
+    .evaluateAll((els) => els.map((el) => getComputedStyle(el).transitionDuration).filter((d) => d !== '0s'));
+  expect(transitions).toEqual([]);
+});
+
+test('menus close when the page comes back from the back/forward cache', async ({ page }) => {
+  await page.goto('/');
+  const menu = page.locator('nav[aria-label="Main"] details');
+  await menu.locator('summary').click();
+  await expect(menu).toHaveAttribute('open', '');
+  await page.evaluate(() => dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
+  await expect(menu).not.toHaveAttribute('open');
 });
 
 test('pointing at the brand replays the draw-in', async ({ page }) => {
