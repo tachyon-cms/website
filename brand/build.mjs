@@ -2,12 +2,17 @@
 //
 //   node brand/build.mjs [outDir]    (outDir defaults to public/)
 //
-// The mark is a "T" with speed lines, filled with the violet-to-pink gradient.
-// The wordmark is "TachyonCMS" set in Instrument Sans 700 and converted to
-// outlines, so the SVGs need no font. Colours use presentation attributes and a
-// <linearGradient>, never <style> or style="", because the CSP refuses both.
+// The mark is "slipstream": three forward-leaning strokes that brighten left to
+// right, then a point lands. src/components/Mark.astro draws the same geometry
+// inline, so keep the two in step. The wordmark is "TachyonCMS" in
+// Inter 600, converted to outlines so the SVG needs no font. Colours are
+// presentation attributes, never <style> or style="", because the CSP refuses both.
+//
+// Run as a script, it also renders the avatar and social preview PNGs from
+// brand/card.html with Playwright. Those aren't byte-stable across machines, so
+// scripts/brand.test.mjs checks only their sizes.
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createRequire } from "node:module";
@@ -15,69 +20,83 @@ import * as fontkit from "fontkit";
 import { optimize } from "svgo";
 
 const require = createRequire(import.meta.url);
+const tokens = readFileSync(new URL("../src/brand/tokens.css", import.meta.url), "utf8");
+const token = (name) => tokens.match(new RegExp(`--c-${name}:\\s*(#[0-9a-f]{6})`, "i"))[1];
+const c = { bg: token("bg"), text: token("text"), blue: token("blue"), point: token("blue-soft") };
 
-// Graphics need 3:1 on their background (WCAG 1.4.11); scripts/contrast.test.mjs
-// checks every stop below against the theme it is drawn for.
-const themes = {
-  dark: { from: "#8b5cf6", to: "#ec4899", text: "#e9e3ff" },
-  light: { from: "#7c3aed", to: "#db2777", text: "#17112b" },
-};
+// On a 64-unit grid.
+const MARK =
+  `<g fill="none" stroke="${c.blue}" stroke-width="6" stroke-linecap="round">` +
+  `<path d="M10 50 L22 14" opacity=".35"/><path d="M24 50 L36 14" opacity=".65"/><path d="M38 50 L50 14"/>` +
+  `</g><circle cx="54" cy="50" r="5" fill="${c.point}"/>`;
 
-// On a 32-unit grid: the T, then three speed lines trailing off to its left.
-const MARK = [
-  '<path d="M9 7h18v4.5h-6.75V26h-4.5V11.5H9z"/>',
-  '<rect x="4" y="14" width="9.5" height="2" rx="1"/>',
-  '<rect x="1" y="18.5" width="12.5" height="2" rx="1"/>',
-  '<rect x="6" y="23" width="7.5" height="2" rx="1"/>',
-].join("");
-
-// Each file gets its own gradient id, so two of them inlined on one page don't
-// paint with each other's gradient.
-const gradient = (id, { from, to }) =>
-  `<defs><linearGradient id="${id}" x1="1" y1="7" x2="27" y2="26" gradientUnits="userSpaceOnUse">` +
-  `<stop offset="0" stop-color="${from}"/><stop offset="1" stop-color="${to}"/></linearGradient></defs>`;
-
-// fontkit lays the text out with the font's own kerning; each glyph's outline is
-// then flipped (fonts draw y-up) and placed on the baseline.
-function wordmark(text, x, baseline, capHeight) {
-  const font = fontkit.openSync(require.resolve("@fontsource/instrument-sans/files/instrument-sans-latin-700-normal.woff2"));
-  const scale = capHeight / font.capHeight;
+// fontkit lays the text out with Inter's own kerning; each glyph's outline is then
+// flipped (fonts draw y-up) and placed on the baseline. Tracking matches the header.
+// The path is written by hand, not with fontkit's toSVG(), which rounds every
+// coordinate to two decimals; svgo does the one rounding, below.
+const SVG_COMMANDS = { moveTo: "M", lineTo: "L", quadraticCurveTo: "Q", bezierCurveTo: "C", closePath: "Z" };
+const font = fontkit.openSync(require.resolve("@fontsource/inter/files/inter-latin-600-normal.woff2"));
+function wordmark(text, x, baseline, fontSize, tracking) {
+  const scale = fontSize / font.unitsPerEm;
   const run = font.layout(text);
   let d = "";
   run.glyphs.forEach((glyph, i) => {
-    d += glyph.path.scale(scale, -scale).translate(x, baseline).toSVG();
-    x += run.positions[i].xAdvance * scale;
+    for (const { command, args } of glyph.path.commands) {
+      const points = args.map((v, j) => (j % 2 ? baseline - v * scale : x + v * scale));
+      d += SVG_COMMANDS[command] + points.join(" ");
+    }
+    x += run.positions[i].xAdvance * scale + tracking * fontSize;
   });
-  return { d, width: x };
+  return { d, width: x - tracking * fontSize };
 }
 
+// Three decimals on a 64-unit grid is 1/1000 of the mark's height, so curves stay
+// smooth even at 512 px. Coarser rounding snaps control points and facets the curves.
 function svg(width, height, body) {
   const raw = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}">${body}</svg>`;
-  const plugins = [{ name: "preset-default", params: { overrides: { cleanupIds: false } } }];
-  return optimize(raw, { multipass: true, floatPrecision: 2, plugins }).data + "\n";
+  return optimize(raw, { multipass: true, floatPrecision: 3, plugins: ["preset-default"] }).data + "\n";
 }
 
-// The T's top and baseline (7 and 26) set the wordmark's cap height and baseline.
-const word = wordmark("TachyonCMS", 34, 26, 19);
-const logoWidth = Math.ceil(word.width + 1);
-const mark = (id, t) => `${gradient(id, t)}<g fill="url(#${id})">${MARK}</g>`;
+// The header sets the mark at 26 px beside 17 px text with a 10 px gap; this is the
+// same lockup scaled to the 64-unit mark, with the cap height centred on the strokes.
+const fontSize = (64 * 17) / 26;
+const capHeight = (fontSize * font.capHeight) / font.unitsPerEm;
+const word = wordmark("TachyonCMS", 64 + (64 * 10) / 26, 32 + capHeight / 2, fontSize, -0.02);
+const logoWidth = Math.ceil(word.width + 2);
 
 export function build(dir) {
   mkdirSync(join(dir, "brand"), { recursive: true });
-  for (const [name, t] of Object.entries(themes)) {
-    writeFileSync(join(dir, `brand/mark-${name}.svg`), svg(32, 32, mark(`tc-mark-${name}`, t)));
-    writeFileSync(
-      join(dir, `brand/logo-${name}.svg`),
-      svg(logoWidth, 32, `${mark(`tc-logo-${name}`, t)}<path fill="${t.text}" d="${word.d}"/>`),
-    );
-  }
+  writeFileSync(join(dir, "brand/mark.svg"), svg(64, 64, MARK));
+  writeFileSync(join(dir, "brand/logo.svg"), svg(logoWidth, 64, `${MARK}<path fill="${c.text}" d="${word.d}"/>`));
   // Browser tabs can be light or dark, so the favicon carries its own dark tile.
-  writeFileSync(
-    join(dir, "favicon.svg"),
-    svg(32, 32, `<rect width="32" height="32" rx="7" fill="#07060c"/>${mark("tc-favicon", themes.dark)}`),
-  );
+  writeFileSync(join(dir, "favicon.svg"), svg(64, 64, `<rect width="64" height="64" rx="14" fill="${c.bg}"/>${MARK}`));
+}
+
+async function renderPngs(dir) {
+  const { chromium } = await import("@playwright/test");
+  const browser = await chromium.launch();
+  const card = new URL("card.html", import.meta.url).href;
+  const shots = [
+    ["avatar", 512, "avatar-512.png"],
+    ["avatar", 1024, "avatar-1024.png"],
+    ["social", 1280, "social-preview.png"],
+  ];
+  try {
+    for (const [kind, width, file] of shots) {
+      const height = kind === "social" ? width / 2 : width;
+      const page = await browser.newPage({ viewport: { width, height } });
+      await page.goto(`${card}#${kind}`);
+      await page.evaluate(() => document.fonts.ready);
+      await page.screenshot({ path: join(dir, "brand", file) });
+      await page.close();
+    }
+  } finally {
+    await browser.close();
+  }
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  build(process.argv[2] ?? fileURLToPath(new URL("../public", import.meta.url)));
+  const dir = process.argv[2] ?? fileURLToPath(new URL("../public", import.meta.url));
+  build(dir);
+  await renderPngs(dir);
 }

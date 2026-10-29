@@ -78,11 +78,10 @@ const shares = [
     align-content: start;
   }
   .label {
-    margin: 0 0 0.75rem;
-    font: 600 0.75rem/1 var(--font-mono);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--c-soft);
+    margin: 0 0 14px;
+    font: 400 12.5px/1.4 var(--font-mono);
+    letter-spacing: 0.02em;
+    color: var(--c-muted);
   }
   ol {
     display: grid;
@@ -90,7 +89,7 @@ const shares = [
     margin: 0;
     padding: 0 0 0 0.9rem;
     list-style: none;
-    border-left: 1px solid var(--c-border);
+    border-left: 1px solid var(--c-line);
   }
   ol a {
     font-size: 0.9375rem;
@@ -99,7 +98,7 @@ const shares = [
     text-decoration: none;
   }
   ol a:hover {
-    color: var(--c-text);
+    color: var(--c-blue-soft);
   }
   .share {
     display: flex;
@@ -111,17 +110,18 @@ const shares = [
   .share :is(a, button) {
     display: grid;
     place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
+    width: 44px;
+    height: 44px;
     padding: 0;
+    font: inherit;
     color: var(--c-text);
-    background: var(--c-surface);
-    border: 1px solid var(--c-border);
-    border-radius: 10px;
+    background: transparent;
+    border: 1px solid var(--c-line-2);
+    border-radius: 9px;
     cursor: pointer;
   }
   .share :is(a, button):hover {
-    border-color: var(--c-soft);
+    border-color: var(--c-blue-soft);
   }
   .copied {
     min-height: 1.5em;

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { overflowing } from './fit';
 
 const posts = ['/blog/v0-1-0', '/blog/where-tachyoncms-is-headed'];
 
@@ -6,7 +7,7 @@ test('/blog lists both launch posts and marks Blog in the nav', async ({ page })
   await page.goto('/blog');
   await expect(page.locator('h1')).toHaveCount(1);
   for (const path of posts) await expect(page.locator(`main a[href="${path}"]`)).toBeVisible();
-  await expect(page.locator('header nav a[href="/blog"]')).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('header nav a[href="/blog"]:visible')).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('main a[href="/rss.xml"]')).toBeVisible();
   await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'website');
   await expect(page.locator('meta[property="article:published_time"]')).toHaveCount(0);
@@ -52,11 +53,12 @@ test.describe('without JavaScript', () => {
   });
 });
 
-test('the blog fits a phone', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  for (const path of ['/blog', ...posts]) {
-    await page.goto(path);
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-    expect(overflow, path).toBeLessThanOrEqual(0);
-  }
-});
+for (const width of [320, 390]) {
+  test(`the blog fits a ${width} px phone`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    for (const path of ['/blog', ...posts]) {
+      await page.goto(path);
+      expect(await overflowing(page), path).toEqual([]);
+    }
+  });
+}

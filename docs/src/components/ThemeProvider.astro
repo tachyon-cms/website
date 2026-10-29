@@ -1,11 +1,6 @@
 ---
-// Replaces Starlight's provider, which follows the OS. Dark is the default here, as on
-// the site, and a saved choice applies before first paint. scripts/csp.mjs hashes it.
-// Starlight renders data-theme="dark" on <html> itself, so the site's no-JS rule can't
-// tell whether this ran; data-theme-js marks that it did (see ThemeSelect.astro).
-import { initTheme } from '../../../src/scripts/theme';
-
-const themeScript = `document.documentElement.dataset.themeJs = '';(${initTheme.toString()})();`;
+// The docs are dark only. Starlight renders data-theme="dark" on <html>, and its own
+// provider would switch that to light from the OS or a stored 'starlight-theme'. This
+// replaces it with nothing, so no script can change the theme. astro.config.mjs points
+// ThemeSelect here too, which removes the picker.
 ---
-
-<script is:inline set:html={themeScript} />

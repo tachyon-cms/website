@@ -1,48 +1,154 @@
 ---
+// The still header every inner page opens on: the home hero held still. The 64 px
+// grid, masked to the top right, a blue glow and four streaks frozen on the grid
+// rows, each with a fading tail and a glowing head. No script, no motion.
 interface Props {
   eyebrow?: string;
   title: string;
   lede?: string;
 }
 const { eyebrow, title, lede } = Astro.props;
+
+// [row, from x, to x, opacity] in a 900 × 320 box pinned to the top right, so each
+// streak sits on a grid row (y = row · 64). Tails are thin rects, not lines: a
+// gradient sized to a line's box draws nothing, since a flat line has no height.
+const streaks = [
+  [1, 520, 860, 0.9],
+  [2, 300, 700, 0.55],
+  [3, 610, 840, 0.75],
+  [4, 420, 620, 0.4],
+];
 ---
 
 <div class="page-hero">
-  {eyebrow && <p class="eyebrow">{eyebrow}</p>}
-  <h1>{title}</h1>
-  {lede && <p class="lede">{lede}</p>}
-  <slot />
+  <div class="backdrop" aria-hidden="true">
+    <div class="grid"></div>
+    <svg class="streaks" aria-hidden="true" width="900" height="320" viewBox="0 0 900 320">
+      <defs>
+        <linearGradient id="page-hero-tail">
+          <stop class="blue" offset="0" stop-opacity="0"></stop>
+          <stop class="blue" offset="0.85" stop-opacity="0.8"></stop>
+          <stop class="soft" offset="1"></stop>
+        </linearGradient>
+        <filter id="page-hero-glow" x="-4" y="-4" width="9" height="9">
+          <feGaussianBlur stdDeviation="2.4" result="g"></feGaussianBlur>
+          <feMerge><feMergeNode in="g"></feMergeNode><feMergeNode in="SourceGraphic"></feMergeNode></feMerge>
+        </filter>
+      </defs>
+      {
+        streaks.map(([row, x1, x2, o]) => (
+          <g opacity={o}>
+            <rect x={x1} y={row * 64 - 0.15} width={x2 - x1} height="1.3" fill="url(#page-hero-tail)" />
+            <circle cx={x2} cy={row * 64 + 0.5} r="2.2" filter="url(#page-hero-glow)" />
+          </g>
+        ))
+      }
+    </svg>
+  </div>
+  <div class="copy">
+    {Astro.slots.has('eyebrow') ? <p class="eyebrow"><slot name="eyebrow" /></p> : eyebrow && <p class="eyebrow">{eyebrow}</p>}
+    <h1>{title}</h1>
+    {lede && <p class="lede">{lede}</p>}
+    <slot />
+  </div>
 </div>
 
 <style>
   .page-hero {
-    padding: clamp(3rem, 10vw, 6rem) 0 2rem;
+    position: relative;
+    padding: 112px 0 72px;
+  }
+  /* Full width, whatever the page width, like the home hero's. */
+  .backdrop {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: calc(50% - 50vw);
+    width: 100vw;
+    overflow: hidden;
+    pointer-events: none;
+    background: radial-gradient(52rem 22rem at 78% 0%, color-mix(in srgb, var(--c-blue) 16%, transparent), transparent 70%);
+    border-bottom: 1px solid var(--c-line);
+  }
+  /* A page that is only its header (a signup step, the 404) leaves the footer's
+   * line to close it, rather than two lines with nothing between. */
+  .page-hero:last-child .backdrop {
+    border-bottom: 0;
+  }
+  /* Pinned to the top right, so its rows are the rows the streaks ride. */
+  .grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--c-line) 1px, transparent 1px), linear-gradient(90deg, var(--c-line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    background-position: right top;
+    -webkit-mask-image: radial-gradient(70% 100% at 80% 0%, #000 15%, transparent 72%);
+    mask-image: radial-gradient(70% 100% at 80% 0%, #000 15%, transparent 72%);
+    opacity: 0.6;
+  }
+  .streaks {
+    position: absolute;
+    top: 0;
+    right: 0;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 35%);
+    mask-image: linear-gradient(90deg, transparent, #000 35%);
+  }
+  /* Colours from the tokens: presentation attributes can't read a custom property. */
+  .blue {
+    stop-color: var(--c-blue);
+  }
+  .soft {
+    stop-color: var(--c-blue-soft);
+  }
+  .streaks circle {
+    fill: var(--c-blue-soft);
+  }
+  .copy {
+    position: relative;
   }
   .eyebrow {
-    margin: 0 0 1rem;
-    font: 600 0.8125rem/1 var(--font-mono);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--c-soft);
+    margin: 0 0 20px;
+    font: 400 12.5px/1.4 var(--font-mono);
+    letter-spacing: 0.02em;
+    color: var(--c-blue-soft);
+  }
+  .eyebrow :global(a) {
+    color: inherit;
   }
   h1 {
-    max-width: 22ch;
-    margin: 0 0 1.25rem;
-    font-size: clamp(2.25rem, 6vw, 3.75rem);
-    line-height: 1.05;
-    letter-spacing: -0.035em;
+    max-width: 16ch;
+    margin: 0;
+    font-size: clamp(2.5rem, 4vw + 1rem, 3.75rem);
+    font-weight: 600;
+    line-height: 1.02;
+    letter-spacing: -0.04em;
     text-wrap: balance;
   }
+  .lede {
+    max-width: 56ch;
+    margin: 22px 0 0;
+    font-size: clamp(1.0625rem, 0.5vw + 0.95rem, 1.15625rem);
+    line-height: 1.55;
+    color: var(--c-muted);
+  }
   /* Short pages, such as the signup steps, pass their one paragraph as .notice. */
-  .page-hero > :global(.notice) {
-    max-width: 38rem;
+  .copy > :global(.notice) {
+    max-width: 56ch;
+    margin: 22px 0 0;
     font-size: 1.125rem;
     color: var(--c-muted);
   }
-  .lede {
-    max-width: 38rem;
-    margin: 0;
-    font-size: 1.25rem;
-    color: var(--c-muted);
+  @media (max-width: 899.98px) {
+    .page-hero {
+      padding: 72px 0 48px;
+    }
+  }
+  /* On a phone the title runs the full width, so only the top streak stays, on the
+   * row above the label, clear of the words. */
+  @media (max-width: 639.98px) {
+    .streaks g + g {
+      display: none;
+    }
   }
 </style>

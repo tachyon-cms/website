@@ -1,6 +1,6 @@
 /* The confirm page served by server/signup.ts. It sits outside the Astro build, so it
  * gets no font tags or token stylesheet: the colours below copy src/brand/tokens.css
- * (dark theme) and the text uses the system stack. */
+ * and the text uses the system stack. */
 :root {
   color-scheme: dark;
 }
@@ -8,8 +8,8 @@
 body {
   margin: 0;
   padding: 0 16px;
-  background: #07060c;
-  color: #e9e3ff;
+  background: #0c0d0d;
+  color: #f4f5f6;
   font: 400 1.0625rem/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
@@ -27,7 +27,7 @@ h1 {
 }
 
 p {
-  color: #a99cc9;
+  color: #94979e;
 }
 
 button {
@@ -35,14 +35,14 @@ button {
   padding: 0.8rem 1.4rem;
   font: inherit;
   font-weight: 600;
-  color: #ffffff;
-  background: linear-gradient(90deg, #7c3aed, #db2777);
+  color: #04121f;
+  background: #3da9ff;
   border: 0;
   border-radius: 999px;
   cursor: pointer;
 }
 
 button:focus-visible {
-  outline: 2px solid #f0abfc;
+  outline: 2px solid #3da9ff;
   outline-offset: 3px;
 }

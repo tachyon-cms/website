@@ -3,9 +3,9 @@ import PageHero from '../components/PageHero.astro';
 import Prose from '../components/Prose.astro';
 import SignupForm from '../components/SignupForm.astro';
 import Base from '../layouts/Base.astro';
-import { fetchReleases, renderNotes } from '../lib/github';
+import { releases as allReleases, renderNotes } from '../lib/github';
 
-const releases = await fetchReleases();
+const releases = await allReleases();
 const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 ---
 
@@ -30,7 +30,7 @@ const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', ye
             <h2 id={`r-${r.tag}`}>{r.name}</h2>
             <p class="meta">
               <time datetime={r.published.slice(0, 10)}>{day.format(new Date(r.published))}</time>
-              {r.prerelease && <span class="pre">Pre-release</span>}
+              {r.prerelease && <span class="pill">Pre-release</span>}
               <a href={r.url}>Downloads on GitHub</a>
             </p>
           </header>
@@ -47,40 +47,59 @@ const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', ye
 </Base>
 
 <style>
-  .page-hero :global(form.signup) {
-    margin-top: 1.5rem;
+  :global(.page-hero form.signup) {
+    margin-top: 28px;
   }
   .releases {
     display: grid;
-    gap: clamp(2.5rem, 6vw, 4rem);
-    padding-bottom: clamp(3rem, 8vw, 5rem);
+    padding: 64px 0 clamp(3.5rem, 6vw, 4.5rem);
   }
+  /* min-width: 0 lets a long line of code scroll inside its block instead of
+   * widening the page. */
   article {
-    /* Lets a long line of code scroll inside its block instead of widening the page. */
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
     min-width: 0;
-    padding-top: 2rem;
-    border-top: 1px solid var(--c-border);
+  }
+  article + article {
+    margin-top: 64px;
+    padding-top: 48px;
+    border-top: 1px solid var(--c-line);
   }
   h2 {
-    margin: 0 0 0.5rem;
-    font: 600 clamp(1.75rem, 4vw, 2.25rem) / 1.1 var(--font-mono);
-    letter-spacing: -0.02em;
+    margin: 0 0 12px;
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
   }
   .meta {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.5rem 1rem;
-    margin: 0 0 1.5rem;
+    gap: 8px 16px;
+    margin: 0 0 32px;
+    font-size: 15px;
     color: var(--c-muted);
   }
-  .pre {
-    padding: 0.2rem 0.6rem;
-    font: 600 0.75rem/1.2 var(--font-mono);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--c-soft);
-    border: 1px solid var(--c-border);
-    border-radius: 999px;
+  time {
+    font: 400 12.5px/1.6 var(--font-mono);
+  }
+  /* Wide, the version and its links hold the left column while the notes read down
+   * the right, as the other long pages do. */
+  @media (min-width: 64rem) {
+    article {
+      grid-template-columns: minmax(0, 17rem) minmax(0, 42rem);
+      column-gap: 4rem;
+    }
+    header {
+      position: sticky;
+      top: 96px;
+      align-self: start;
+    }
+    .meta {
+      flex-direction: column;
+      align-items: start;
+    }
   }
 </style>

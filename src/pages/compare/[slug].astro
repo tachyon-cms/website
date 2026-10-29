@@ -62,7 +62,7 @@ const withCode = (text: string) =>
       </tbody>
     </table>
 
-    <Prose>
+    <Prose split>
       <h2>Where TachyonCMS isn't there yet</h2>
       <ul>
         {notYet.map((item) => <li><Fragment set:html={withCode(item)} /></li>)}
@@ -83,36 +83,37 @@ const withCode = (text: string) =>
 
 <style>
   .compare {
-    display: grid;
-    gap: 2.5rem;
-    padding-bottom: clamp(3rem, 8vw, 5rem);
+    padding-top: 56px;
   }
   .checked {
-    max-width: 42rem;
-    margin: 0;
-    font-size: 0.9375rem;
+    max-width: 60ch;
+    margin: 0 0 32px;
+    font: 400 12.5px/1.6 var(--font-mono);
     color: var(--c-muted);
   }
   table {
     width: 100%;
+    margin: 0 0 72px;
     border-collapse: collapse;
     font-size: 0.9375rem;
   }
   th,
   td {
-    padding: 0.85rem 1rem 0.85rem 0;
+    padding: 16px 24px 16px 0;
     text-align: left;
     vertical-align: top;
-    border-bottom: 1px solid var(--c-border);
+    border-bottom: 1px solid var(--c-line);
   }
   thead th {
-    font: 600 0.8125rem/1.2 var(--font-mono);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
-    color: var(--c-soft);
+    padding-top: 0;
+    font: 400 12.5px/1.4 var(--font-mono);
+    letter-spacing: 0.02em;
+    color: var(--c-muted);
+    border-bottom-color: var(--c-line-2);
   }
   tbody th {
-    width: 11rem;
+    width: 13rem;
+    font-weight: 600;
     color: var(--c-text);
   }
   td {
@@ -121,16 +122,21 @@ const withCode = (text: string) =>
   td:nth-child(2) {
     color: var(--c-text);
   }
-  code {
-    font: 0.9em var(--font-mono);
-    color: var(--c-hi);
+  /* A chip in the text's own colour, as in the prose. The cells come in through
+   * set:html, which never carries this page's scope class, hence :global. */
+  td :global(code) {
+    padding: 0.1em 0.35em;
+    font: 400 0.875em var(--font-mono);
+    color: var(--c-text);
+    background: var(--c-panel);
+    border: 1px solid var(--c-line);
+    border-radius: 5px;
   }
   .src {
     font-size: 0.8125rem;
     white-space: nowrap;
-    color: var(--c-soft);
   }
-  /* On a phone each row becomes a card, with the product named above each cell. */
+  /* On a phone each row becomes a block, with the product named above each cell. */
   @media (max-width: 40rem) {
     thead {
       position: absolute;
@@ -145,13 +151,16 @@ const withCode = (text: string) =>
       display: block;
     }
     tr {
-      padding: 1rem 0;
-      border-bottom: 1px solid var(--c-border);
+      padding: 20px 0;
+      border-bottom: 1px solid var(--c-line);
+    }
+    tr:first-child {
+      padding-top: 0;
     }
     tbody th,
     td {
       width: auto;
-      padding: 0.25rem 0;
+      padding: 0;
       border: 0;
     }
     tbody th {
@@ -160,25 +169,27 @@ const withCode = (text: string) =>
     td::before {
       content: attr(data-label);
       display: block;
-      margin-top: 0.5rem;
-      font: 600 0.75rem/1.4 var(--font-mono);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--c-soft);
+      margin: 12px 0 2px;
+      font: 400 12.5px/1.4 var(--font-mono);
+      letter-spacing: 0.02em;
+      color: var(--c-muted);
     }
   }
+  /* The same close as a product page's: a mono label over a short note. */
   .sources {
-    max-width: 42rem;
-    padding-top: 2rem;
-    border-top: 1px solid var(--c-border);
+    margin-top: 48px;
+    padding: 48px 0 clamp(3.5rem, 6vw, 4.5rem);
+    border-top: 1px solid var(--c-line);
   }
   .sources h2 {
-    margin: 0 0 1rem;
-    font-size: 1.25rem;
-    letter-spacing: -0.01em;
+    margin: 0 0 16px;
+    font: 400 12.5px/1.4 var(--font-mono);
+    letter-spacing: 0.02em;
+    color: var(--c-muted);
   }
   .sources p {
-    margin: 0 0 0.75rem;
+    max-width: 60ch;
+    margin: 0 0 12px;
     font-size: 0.9375rem;
     color: var(--c-muted);
   }

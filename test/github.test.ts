@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import contributorsSnapshot from '../src/data/contributors.snapshot.json';
 import releasesSnapshot from '../src/data/releases.snapshot.json';
-import { fetchContributors, fetchReleases, renderNotes } from '../src/lib/github';
+import { announced, fetchContributors, fetchReleases, renderNotes, type Release } from '../src/lib/github';
 
 const offline = (async () => Promise.reject(new Error('offline'))) as typeof fetch;
 const rateLimited = (async () => new Response('{"message":"API rate limit exceeded"}', { status: 403 })) as typeof fetch;
@@ -86,5 +86,15 @@ describe('release notes', () => {
     expect(a).toMatch(/<h3[^>]*>Footnotes<\/h3>/);
     const ids = (html: string) => [...html.matchAll(/id="([^"]+)"/g)].map((m) => m[1]);
     expect(ids(a).filter((id) => ids(b).includes(id))).toEqual([]);
+  });
+});
+
+describe('announced', () => {
+  const r = (tag: string, prerelease = true) => ({ tag, prerelease }) as Release;
+  it('skips -rc and -alpha tags but keeps a pre-1.0 release GitHub flags as prerelease', () => {
+    expect(announced([r('v0.2.0-rc.1'), r('v0.2.0-alpha.3'), r('v0.1.0'), r('v0.0.9')])?.tag).toBe('v0.1.0');
+  });
+  it('is undefined when nothing qualifies', () => {
+    expect(announced([r('v1.0.0-rc.1')])).toBeUndefined();
   });
 });

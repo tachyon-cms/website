@@ -4,6 +4,8 @@ import starlight from '@astrojs/starlight';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
 import starlightLinksValidator from 'starlight-links-validator';
 import { docsFonts } from '../brand/fonts.mjs';
+import { socialCard } from '../brand/social.mjs';
+import { codeTheme } from './code-theme.mjs';
 
 // Starlight fetches the Pagefind UI (about 95 KB of script) as soon as the page is idle,
 // which Lighthouse counts against mobile first paint. This loads it when a reader reaches
@@ -58,22 +60,50 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'TachyonCMS',
-      logo: {
-        dark: '../public/brand/logo-dark.svg',
-        light: '../public/brand/logo-light.svg',
-        replacesTitle: true,
-      },
       social: [{ icon: 'github', label: 'TachyonCMS on GitHub', href: 'https://github.com/tachyon-cms/tachyoncms' }],
       customCss: ['./src/styles/brand.css'],
+      // Every docs page unfurls with the brand's social card, the one the site uses.
+      // Starlight already says twitter:card summary_large_image.
+      head: [
+        ['og:image', socialCard.url],
+        ['og:image:width', String(socialCard.width)],
+        ['og:image:height', String(socialCard.height)],
+        ['og:image:alt', socialCard.alt],
+      ].map(([property, content]) => ({ tag: 'meta', attrs: { property, content } })),
+      // One dark theme in the brand code colours (code-theme.mjs): with no light theme
+      // there is nothing for the OS or a stored choice to switch the code blocks to.
+      expressiveCode: {
+        themes: [codeTheme],
+        useStarlightDarkModeSwitch: false,
+        useStarlightUiThemeColors: true,
+        styleOverrides: {
+          codeBackground: 'var(--c-panel)',
+          borderColor: 'var(--c-line)',
+          borderRadius: '10px',
+          frames: {
+            editorTabBarBackground: 'var(--c-bg)',
+            terminalTitlebarBackground: 'var(--c-bg)',
+            editorBackground: 'var(--c-panel)',
+            terminalBackground: 'var(--c-panel)',
+            frameBoxShadowCssValue: 'none',
+          },
+        },
+      },
       components: {
         // Adds the <Font> tags; Starlight has no other hook into the head for them.
         Head: './src/components/Head.astro',
         // The topics render as tabs in the header, so the sidebar drops the plugin's topic list.
         Header: './src/components/TopicTabs.astro',
+        // The site header's lockup, with the mark inline so it can draw itself in.
+        SiteTitle: './src/components/SiteTitle.astro',
+        // Topic roots open on a slim, still streak band, like the site's page header.
+        PageTitle: './src/components/PageTitle.astro',
+        // GitHub and tachyoncms.com at the foot of the phone menu.
+        MobileMenuFooter: './src/components/MobileMenuFooter.astro',
         Sidebar: '@astrojs/starlight/components/Sidebar.astro',
-        // Dark by default whatever the OS prefers, with the site's light toggle.
+        // Dark only: an empty provider, so nothing switches to light, and no picker.
         ThemeProvider: './src/components/ThemeProvider.astro',
-        ThemeSelect: './src/components/ThemeSelect.astro',
+        ThemeSelect: './src/components/ThemeProvider.astro',
       },
       editLink: { baseUrl: 'https://github.com/tachyon-cms/website/edit/main/docs/' },
       plugins: [

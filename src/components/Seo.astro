@@ -1,4 +1,6 @@
 ---
+import { socialCard } from '../../brand/social.mjs';
+
 interface Props {
   title: string;
   description: string;
@@ -9,9 +11,11 @@ interface Props {
   published?: Date;
   noindex?: boolean;
 }
+// A page without a card of its own unfurls with the brand's social card.
 const { title, description, path, image, imageAlt, published, noindex = false } = Astro.props;
+const card: { image: string; alt?: string; width?: number; height?: number } = image ? { image, alt: imageAlt } : { image: socialCard.url, ...socialCard };
 const canonical = new URL(path, Astro.site);
-const imageUrl = image && new URL(image, Astro.site);
+const imageUrl = new URL(card.image, Astro.site);
 ---
 
 <title>{title}</title>
@@ -23,6 +27,8 @@ const imageUrl = image && new URL(image, Astro.site);
 <meta property="og:type" content={published ? 'article' : 'website'} />
 {published && <meta property="article:published_time" content={published.toISOString()} />}
 <meta property="og:url" content={canonical} />
-{imageUrl && <meta property="og:image" content={imageUrl} />}
-{imageUrl && imageAlt && <meta property="og:image:alt" content={imageAlt} />}
-<meta name="twitter:card" content={imageUrl ? 'summary_large_image' : 'summary'} />
+<meta property="og:image" content={imageUrl} />
+{card.width && <meta property="og:image:width" content={String(card.width)} />}
+{card.height && <meta property="og:image:height" content={String(card.height)} />}
+{card.alt && <meta property="og:image:alt" content={card.alt} />}
+<meta name="twitter:card" content="summary_large_image" />

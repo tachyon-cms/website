@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { overflowing } from './fit';
 
 const discussions = 'https://github.com/tachyon-cms/tachyoncms/discussions';
 const pages = ['/roadmap', '/releases', '/community', '/starters', '/faq', '/brand', '/privacy', '/trademark'];
@@ -11,14 +12,15 @@ for (const path of pages) {
   });
 }
 
-test('project pages fit a phone', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  for (const path of pages) {
-    await page.goto(path);
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-    expect(overflow, path).toBeLessThanOrEqual(0);
-  }
-});
+for (const width of [320, 390]) {
+  test(`project pages fit a ${width} px phone`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    for (const path of pages) {
+      await page.goto(path);
+      expect(await overflowing(page), path).toEqual([]);
+    }
+  });
+}
 
 test('the roadmap links the discussion it mirrors and both polls', async ({ page }) => {
   await page.goto('/roadmap');
@@ -59,11 +61,26 @@ test('the FAQ answers the questions people ask first', async ({ page }) => {
 
 test('brand offers every logo file as a download', async ({ page }) => {
   await page.goto('/brand');
-  for (const file of ['logo-dark', 'logo-light', 'mark-dark', 'mark-light']) {
-    await expect(page.locator(`main a[href="/brand/${file}.svg"][download]`)).toHaveCount(1);
+  for (const file of ['logo.svg', 'mark.svg', 'avatar-1024.png']) {
+    await expect(page.locator(`main a[href="/brand/${file}"][download]`)).toHaveCount(1);
   }
-  await expect(page.locator('main')).toContainText('Instrument Sans');
-  await expect(page.locator('main')).toContainText('IBM Plex Mono');
+  await expect(page.locator('main')).toContainText('Inter');
+  await expect(page.locator('main')).toContainText('Geist Mono');
+});
+
+test('brand sizes each logo preview to the file it shows', async ({ page }) => {
+  await page.goto('/brand');
+  // The page's own wrapper isn't a .brand: that's the header's link.
+  await expect(page.locator('main .brand')).toHaveCount(0);
+  for (const img of await page.locator('main .tile img').all()) {
+    const src = (await img.getAttribute('src'))!;
+    const attrs = [await img.getAttribute('width'), await img.getAttribute('height')].map(Number);
+    // An SVG's size is its viewBox; a PNG's is its pixels.
+    const natural = src.endsWith('.svg')
+      ? (await (await page.request.get(src)).text()).match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/)!.slice(1).map(Number)
+      : await img.evaluate(async (el: HTMLImageElement) => (await el.decode(), [el.naturalWidth, el.naturalHeight]));
+    expect(attrs, src).toEqual(natural);
+  }
 });
 
 test('privacy names what the signup sends where', async ({ page }) => {

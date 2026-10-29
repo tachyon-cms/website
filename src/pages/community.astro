@@ -21,8 +21,8 @@ const contributors = await fetchContributors();
   />
 
   <div class="community">
-    <section aria-labelledby="talk">
-      <Prose><h2 id="talk">Where to talk</h2></Prose>
+    <Prose split>
+      <h2 id="talk">Where to talk</h2>
       <LinkCards
         links={[
           {
@@ -38,62 +38,50 @@ const contributors = await fetchContributors();
           },
         ]}
       />
-    </section>
 
-    <section aria-labelledby="contribute">
-      <Prose>
-        <h2 id="contribute">Contributing</h2>
-        <p>
-          Start with a <a href={`${repo}/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22`}>good first issue</a
-          >. Each one says which files to change, how to test it, and when it's done. Say you're taking it on the issue,
-          and it's yours. Small fixes (a typo, a doc, an obvious bug) can go straight to a pull request. For anything
-          bigger, open an issue or a discussion first, so nobody spends a weekend on something that clashes with the
-          roadmap.
-        </p>
-        <p>
-          Rust helps for most of the code. It isn't needed for docs and copy, and those fixes count just as much.{' '}
-          <a href={`${repo}/blob/main/CONTRIBUTING.md`}>CONTRIBUTING.md</a> takes you from clone to merged pull request.
-        </p>
-      </Prose>
-    </section>
+      <h2 id="contribute">Contributing</h2>
+      <p>
+        Start with a <a href={`${repo}/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22`}>good first issue</a
+        >. Each one says which files to change, how to test it, and when it's done. Say you're taking it on the issue,
+        and it's yours. Small fixes (a typo, a doc, an obvious bug) can go straight to a pull request. For anything
+        bigger, open an issue or a discussion first, so nobody spends a weekend on something that clashes with the
+        roadmap.
+      </p>
+      <p>
+        Rust helps for most of the code. It isn't needed for docs and copy, and those fixes count just as much.{' '}
+        <a href={`${repo}/blob/main/CONTRIBUTING.md`}>CONTRIBUTING.md</a> takes you from clone to merged pull request.
+      </p>
 
-    <section aria-labelledby="promises">
-      <Prose>
-        <h2 id="promises">What won't change</h2>
-        <ul>
-          <li>
-            <strong>It stays open source,</strong> under the MIT License.
-          </li>
-          <li>
-            <strong>No CLA, ever, and no copyright assignment.</strong> You keep the copyright to your work and sign off
-            each commit under the <a href="https://developercertificate.org/">Developer Certificate of Origin</a> with{' '}
-            <code>git commit -s</code>. Because copyright stays with everyone who contributed, no single person or company
-            can take the project closed.
-          </li>
-          <li>
-            <strong>Sponsors get visibility, not control.</strong> Every feature lives in the open source project, and
-            nobody can pay to have one held back from everyone else.
-          </li>
-        </ul>
-        <p>
-          While the project is small, I make the final call, in public. Anyone who contributes steadily and reviews other
-          people's work can be invited to become a maintainer, and once maintainers come from more than one organization,
-          the plan is to move the project, its trademark and its domains to a neutral foundation. It's all in{' '}
-          <a href={`${repo}/blob/main/GOVERNANCE.md`}>GOVERNANCE.md</a>.
-        </p>
-        <p>
-          The <a href={`${repo}/blob/main/CODE_OF_CONDUCT.md`}>Code of Conduct</a> applies everywhere in the project. Report
-          a problem to <a href="mailto:conduct@tachyoncms.com">conduct@tachyoncms.com</a>. Thinking of sponsoring? Write
-          to <a href="mailto:sponsors@tachyoncms.com">sponsors@tachyoncms.com</a>.
-        </p>
-      </Prose>
-    </section>
+      <h2 id="promises">What won't change</h2>
+      <ul>
+        <li>
+          <strong>It stays open source,</strong> under the MIT License.
+        </li>
+        <li>
+          <strong>No CLA, ever, and no copyright assignment.</strong> You keep the copyright to your work and sign off
+          each commit under the <a href="https://developercertificate.org/">Developer Certificate of Origin</a> with{' '}
+          <code>git commit -s</code>. Because copyright stays with everyone who contributed, no single person or company
+          can take the project closed.
+        </li>
+        <li>
+          <strong>Sponsors get visibility, not control.</strong> Every feature lives in the open source project, and
+          nobody can pay to have one held back from everyone else.
+        </li>
+      </ul>
+      <p>
+        While the project is small, I make the final call, in public. Anyone who contributes steadily and reviews other
+        people's work can be invited to become a maintainer, and once maintainers come from more than one organization,
+        the plan is to move the project, its trademark and its domains to a neutral foundation. It's all in{' '}
+        <a href={`${repo}/blob/main/GOVERNANCE.md`}>GOVERNANCE.md</a>.
+      </p>
+      <p>
+        The <a href={`${repo}/blob/main/CODE_OF_CONDUCT.md`}>Code of Conduct</a> applies everywhere in the project. Report
+        a problem to <a href="mailto:conduct@tachyoncms.com">conduct@tachyoncms.com</a>. Thinking of sponsoring? Write
+        to <a href="mailto:sponsors@tachyoncms.com">sponsors@tachyoncms.com</a>.
+      </p>
 
-    <section aria-labelledby="people">
-      <Prose>
-        <h2 id="people">Contributors</h2>
-        <p>Everyone with a commit on <code>main</code>, most commits first. The next name could be yours.</p>
-      </Prose>
+      <h2 id="people">Contributors</h2>
+      <p>Everyone with a commit on <code>main</code>, most commits first. The next name could be yours.</p>
       <ul class="people">
         {
           contributors.map((c) => (
@@ -106,38 +94,34 @@ const contributors = await fetchContributors();
           ))
         }
       </ul>
-    </section>
+    </Prose>
   </div>
 </Base>
 
 <style>
   .community {
-    display: grid;
-    gap: clamp(2rem, 5vw, 3rem);
-    padding-bottom: clamp(3rem, 8vw, 5rem);
+    padding: 64px 0 clamp(3.5rem, 6vw, 4.5rem);
   }
-  .community :global(.prose h2) {
+  .community :global(.prose > h2:first-child) {
     margin-top: 0;
   }
   .people {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin: 0;
+    gap: 8px;
     padding: 0;
     list-style: none;
   }
   .people li {
-    display: grid;
-    gap: 0.2rem;
-    padding: 0.9rem 1.25rem;
-    background: var(--c-surface);
-    border: 1px solid var(--c-border);
-    border-radius: 14px;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 8px 14px;
+    border: 1px solid var(--c-line-2);
+    border-radius: 9px;
   }
   .people a {
-    font-family: var(--font-mono);
-    font-weight: 600;
+    font: 400 14px/1.4 var(--font-mono);
   }
   .people span {
     font-size: 0.875rem;

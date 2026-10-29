@@ -1,0 +1,64 @@
+---
+// The thin line above the header that names the newest plain vX.Y.Z release, so an
+// -rc or -alpha tag never gets announced. The version comes from GitHub at build time, or the
+// snapshot when GitHub can't be reached.
+import { announced, releases } from '../lib/github';
+
+const latest = announced(await releases());
+---
+
+{
+  latest && (
+    <div class="announce">
+      <p>
+        <strong>{latest.tag} is out.</strong>{' '}
+        <span class="more">Grab a binary for Linux or macOS, or the Docker image. </span>
+        <a href="/releases">Read the release notes</a>
+      </p>
+    </div>
+  )
+}
+
+<style>
+  .announce {
+    border-bottom: 1px solid var(--c-line);
+    padding: 9px 16px;
+    font-size: 13px;
+    line-height: 1.5;
+    text-align: center;
+    color: var(--c-muted);
+  }
+  p {
+    margin: 0;
+  }
+  strong {
+    font-weight: 600;
+    color: var(--c-text);
+  }
+  a {
+    color: var(--c-blue);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  a::after {
+    content: '→' / '';
+    display: inline-block;
+    margin-left: 0.3em;
+  }
+  a:hover::after {
+    transform: translateX(2px);
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    a::after {
+      transition: transform 0.15s ease;
+    }
+  }
+  @media (max-width: 40rem) {
+    .more {
+      display: none;
+    }
+  }
+</style>

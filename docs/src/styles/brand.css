@@ -1,40 +1,95 @@
-/* Maps the Ultraviolet tokens onto Starlight's theme. Starlight's own values sit in
- * a cascade layer, so these unlayered rules win. Its grays run from --sl-color-white
- * (headings) through gray-1..7 to --sl-color-black (page background) and flip in
- * the light theme. scripts/contrast.test.mjs checks the text pairings here. */
+/* Maps the brand tokens onto Starlight's theme. Starlight's own values sit in a
+ * cascade layer, so these unlayered rules win. Its grays run from --sl-color-white
+ * (headings) through gray-1..7 to --sl-color-black (page background). The docs are
+ * dark only (see ThemeProvider.astro). scripts/contrast.test.mjs checks the text
+ * pairings here. */
 @import '../../../src/brand/tokens.css';
 
 :root {
   --sl-font: var(--font-sans);
   --sl-font-mono: var(--font-mono);
 
-  --sl-color-accent-low: #2a1250;
-  --sl-color-accent: var(--c-violet);
-  --sl-color-accent-high: var(--c-soft);
+  --sl-color-accent-low: var(--c-blue-deep);
+  --sl-color-accent: var(--c-blue);
+  --sl-color-accent-high: var(--c-blue-soft);
 
   --sl-color-white: #ffffff;
   --sl-color-gray-1: var(--c-text);
-  --sl-color-gray-2: #d6ccf2;
+  --sl-color-gray-2: var(--c-code);
   --sl-color-gray-3: var(--c-muted);
-  --sl-color-gray-4: #6f6391;
-  --sl-color-gray-5: var(--c-border);
-  --sl-color-gray-6: var(--c-surface);
-  --sl-color-gray-7: var(--c-surface);
+  --sl-color-gray-4: var(--c-dim);
+  --sl-color-gray-5: var(--c-line);
+  --sl-color-gray-6: var(--c-panel);
+  --sl-color-gray-7: var(--c-panel);
   --sl-color-black: var(--c-bg);
+
+  /* The page, header and sidebar share the background, split by hairlines, as on the
+   * site. The header is the site header's translucent bar (see TopicTabs.astro). */
+  --sl-color-bg-nav: color-mix(in srgb, var(--c-bg) 82%, transparent);
+  --sl-color-bg-sidebar: var(--c-bg);
+  --sl-color-bg-inline-code: var(--c-panel);
+  --sl-color-hairline-light: var(--c-line-2);
+  --sl-color-hairline: var(--c-line);
+  --sl-color-hairline-shade: var(--c-line);
+
+  /* Asides sit on a panel with a coloured edge: amber for caution, as in the site's
+   * code samples, and the brand blues for notes. */
+  --sl-color-orange-low: var(--c-panel);
+  --sl-color-orange: var(--c-warn);
+  --sl-color-orange-high: var(--c-warn);
+  --sl-color-blue-low: var(--c-blue-deep);
+  --sl-color-blue: var(--c-blue);
+  --sl-color-blue-high: var(--c-blue-soft);
 }
 
-[data-theme="light"] {
-  --sl-color-accent-low: #e4d8fd;
-  --sl-color-accent: var(--c-soft);
-  --sl-color-accent-high: #4c1d95;
+/* The canvas under the page, so overscroll and short pages stay dark too. */
+html {
+  background: var(--c-bg);
+}
 
-  --sl-color-white: #0c0818;
-  --sl-color-gray-1: var(--c-text);
-  --sl-color-gray-2: #2c2342;
-  --sl-color-gray-3: var(--c-muted);
-  --sl-color-gray-4: #8a80a6;
-  --sl-color-gray-5: var(--c-border);
-  --sl-color-gray-6: var(--c-surface);
-  --sl-color-gray-7: #f6f2fe;
-  --sl-color-black: var(--c-bg);
+/* 600, the preloaded bold, not 700, which would fetch a face nobody preloads or fall
+ * back on a first visit. Geist Mono ships at 400 only, so code inside bold text or a
+ * heading stays at 400 rather than a synthesised bold. */
+:where(strong, b, th, dt) {
+  font-weight: 600;
+}
+:where(code, kbd, samp) {
+  font-weight: 400;
+}
+
+.sl-markdown-content :not(pre) > code {
+  border: 1px solid var(--c-line);
+  border-radius: 5px;
+  /* A code span that wraps gets a closed box on each line, not two open halves. */
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* Expressive Code sets terminal titles at 500, a face the docs don't load. */
+.expressive-code .frame.is-terminal .header {
+  font-weight: 400;
+}
+
+/* Headings tracked in like the site's. */
+:where(.sl-markdown-content, .content-panel) :is(h1, h2, h3) {
+  letter-spacing: -0.02em;
+}
+
+/* The current page in the sidebar: a quiet blue tint, not a solid block. */
+#starlight__sidebar [aria-current='page'],
+#starlight__sidebar [aria-current='page']:hover,
+#starlight__sidebar [aria-current='page']:focus {
+  color: var(--c-blue-soft);
+  background-color: var(--c-blue-deep);
+}
+
+/* The phone menu button, outlined like the site's, not a white disc. */
+.sl-menu-button {
+  color: var(--c-text);
+  background-color: transparent;
+  border: 1px solid var(--c-line-2);
+  box-shadow: none;
+}
+.sl-menu-button:has(~ :popover-open) {
+  background-color: var(--c-panel);
 }

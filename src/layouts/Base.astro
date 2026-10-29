@@ -1,10 +1,10 @@
 ---
 import { Font } from 'astro:assets';
 import '../brand/tokens.css';
+import AnnounceBar from '../components/AnnounceBar.astro';
 import Seo from '../components/Seo.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import SiteHeader from '../components/SiteHeader.astro';
-import { initTheme } from '../scripts/theme';
 
 interface Props {
   title: string;
@@ -28,8 +28,6 @@ const {
   published,
   noindex,
 } = Astro.props;
-// Inlined so it runs before first paint, after the meta tags it updates; scripts/csp.mjs hashes it like any inline script.
-const themeScript = `(${initTheme.toString()})();`;
 ---
 
 <!doctype html>
@@ -37,18 +35,25 @@ const themeScript = `(${initTheme.toString()})();`;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- html.js: scripts will run. mark-pending holds the mark undrawn until its draw-in
+         starts; if that script hasn't run in 1.5 s, the finished mark shows anyway.
+         Hashed by scripts/csp.mjs. -->
+    <script is:inline>
+      document.documentElement.classList.add('js', 'mark-pending');
+      setTimeout(() => document.documentElement.classList.remove('mark-pending'), 1500);
+    </script>
     <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#07060c" />
-    <script is:inline set:html={themeScript} />
+    <meta name="theme-color" content="#0c0d0d" />
     <Seo title={title} description={description} path={path} image={image} imageAlt={imageAlt} published={published} noindex={noindex} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title="TachyonCMS blog" href="/rss.xml" />
-    <Font cssVariable="--font-sans" preload={[{ weight: 400 }]} />
-    <Font cssVariable="--font-mono" />
+    <Font cssVariable="--font-sans" preload={[{ weight: 400 }, { weight: 600 }]} />
+    <Font cssVariable="--font-mono" preload={[{ weight: 400 }]} />
     <slot name="head" />
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
+    <AnnounceBar />
     <SiteHeader path={path} />
     <main id="main">
       <slot />
@@ -65,6 +70,7 @@ const themeScript = `(${initTheme.toString()})();`;
   }
   html {
     -webkit-text-size-adjust: 100%;
+    background: var(--c-bg);
   }
   body {
     margin: 0;
@@ -74,20 +80,29 @@ const themeScript = `(${initTheme.toString()})();`;
     background: var(--c-bg);
     color: var(--c-text);
     font: 400 1.0625rem/1.65 var(--font-sans);
+    /* The home hero's backdrop is 100vw wide, which overshoots where a scrollbar
+     * takes up room. Nothing else on the site should reach past the edge. */
+    overflow-x: clip;
   }
+  /* The same width and gutters as the header and footer. */
   main {
     flex: 1;
     width: 100%;
-    max-width: 72rem;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 0 16px;
+    padding: 0 24px;
+  }
+  @media (max-width: 899.98px) {
+    main {
+      padding: 0 16px;
+    }
   }
   a {
-    color: var(--c-soft);
+    color: var(--c-blue-soft);
     text-underline-offset: 3px;
   }
   :focus-visible {
-    outline: 2px solid var(--c-hi);
+    outline: 2px solid var(--c-blue);
     outline-offset: 3px;
   }
   h1,
@@ -98,44 +113,71 @@ const themeScript = `(${initTheme.toString()})();`;
   p {
     margin: 0 0 1.25rem;
   }
+  /* 600, the preloaded bold, not the browser's 700, which would fetch a face nobody
+   * preloads or fall back on a first visit. */
+  :where(strong, b, th) {
+    font-weight: 600;
+  }
   .skip {
     position: absolute;
     left: 16px;
     top: -4rem;
-    z-index: 10;
+    /* Above the sticky header (z-index 20). */
+    z-index: 30;
     padding: 0.6rem 1rem;
-    color: var(--c-on-grad);
-    background: var(--c-grad);
+    color: var(--c-on-blue);
+    background: var(--c-blue);
     border-radius: 999px;
   }
   .skip:focus {
     top: 1rem;
   }
-  /* Call-to-action links: .btn for the gradient one, plus .ghost for the quiet one. */
+  /* Call-to-action links: .btn is the blue one, .btn.ghost the quiet one beside it.
+   * The header's Get started is a .btn at a smaller size. */
   .btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.8rem 1.4rem;
-    font-weight: 600;
-    line-height: 1.2;
+    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 20px;
+    font: 600 15px/1 var(--font-sans);
+    white-space: nowrap;
     text-decoration: none;
-    color: var(--c-on-grad);
-    background: var(--c-grad);
+    color: var(--c-on-blue);
+    background: var(--c-blue);
     border: 1px solid transparent;
-    border-radius: 999px;
+    border-radius: 9px;
   }
   .btn:hover {
-    filter: brightness(1.1);
+    background: var(--c-blue-soft);
   }
   .btn.ghost {
     color: var(--c-text);
-    background: var(--c-surface);
-    border-color: var(--c-border);
+    background: transparent;
+    border-color: var(--c-line-2);
   }
   .btn.ghost:hover {
-    filter: none;
-    border-color: var(--c-soft);
+    background: var(--c-tint);
+    border-color: var(--c-dim);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .btn {
+      transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease;
+    }
+  }
+  /* A status beside a title: "On the roadmap", "Under way", "Pre-release". */
+  .pill {
+    display: inline-block;
+    padding: 4px 11px;
+    font: 400 12px/1.4 var(--font-mono);
+    letter-spacing: normal;
+    color: var(--c-blue-soft);
+    background: var(--c-blue-deep);
+    border: 1px solid color-mix(in srgb, var(--c-blue) 35%, transparent);
+    border-radius: 999px;
   }
   .sr-only {
     position: absolute;

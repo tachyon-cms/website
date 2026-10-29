@@ -70,6 +70,17 @@ async function orSnapshot<T>(what: string, live: () => Promise<T>, snapshot: T):
 export const fetchReleases = (fetcher: typeof fetch = fetch, token = process.env.GITHUB_TOKEN) =>
   orSnapshot('releases', () => getReleases(fetcher, token), releasesSnapshot as Release[]);
 
+// Every page's announcement bar asks, so the build fetches once.
+let cachedReleases: Promise<Release[]> | undefined;
+export const releases = () => (cachedReleases ??= fetchReleases());
+
+/**
+ * The release the announcement bar names: the newest with a plain vX.Y.Z tag. GitHub's
+ * prerelease flag can't decide it, because every pre-1.0 release (v0.1.0 included)
+ * carries it; a semver suffix such as -rc.1 or -alpha.2 does.
+ */
+export const announced = (list: Release[]) => list.find((r) => /^v\d+\.\d+\.\d+$/.test(r.tag));
+
 export const fetchContributors = (fetcher: typeof fetch = fetch, token = process.env.GITHUB_TOKEN) =>
   orSnapshot('contributors', () => getContributors(fetcher, token), contributorsSnapshot as Contributor[]);
 

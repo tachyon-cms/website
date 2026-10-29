@@ -1,5 +1,6 @@
 ---
 import { render } from 'astro:content';
+import PageHero from '../../components/PageHero.astro';
 import PostAside from '../../components/PostAside.astro';
 import Prose from '../../components/Prose.astro';
 import Base from '../../layouts/Base.astro';
@@ -25,10 +26,8 @@ const minutes = Math.max(1, Math.round(words / 230));
   published={post.data.date}
 >
   <article>
-    <header>
-      <a class="back" href="/blog">Blog</a>
-      <h1>{post.data.title}</h1>
-      <p class="lede">{post.data.description}</p>
+    <PageHero title={post.data.title} lede={post.data.description}>
+      <a slot="eyebrow" href="/blog">Blog</a>
       <p class="meta">
         <time datetime={post.data.date.toISOString().slice(0, 10)}>{postDate.format(post.data.date)}</time>
         <span aria-hidden="true">·</span>
@@ -36,7 +35,7 @@ const minutes = Math.max(1, Math.round(words / 230));
         <span aria-hidden="true">·</span>
         {minutes} min read
       </p>
-    </header>
+    </PageHero>
     <div class="layout">
       <Prose><Content /></Prose>
       <PostAside headings={headings} url={new URL(path, Astro.site).href} title={post.data.title} />
@@ -46,44 +45,20 @@ const minutes = Math.max(1, Math.round(words / 230));
 
 <style>
   article {
-    padding: clamp(3rem, 10vw, 6rem) 0 clamp(3rem, 8vw, 5rem);
-  }
-  header {
-    max-width: 48rem;
-    margin-bottom: clamp(2rem, 6vw, 3.5rem);
-  }
-  .back {
-    font: 600 0.8125rem/1 var(--font-mono);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    text-decoration: none;
-  }
-  .back:hover {
-    text-decoration: underline;
-  }
-  h1 {
-    margin: 1rem 0 1.25rem;
-    font-size: clamp(2.25rem, 6vw, 3.5rem);
-    line-height: 1.05;
-    letter-spacing: -0.035em;
-    text-wrap: balance;
-  }
-  .lede {
-    margin: 0;
-    font-size: 1.25rem;
-    color: var(--c-muted);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
   }
   .meta {
     display: flex;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin: 1.5rem 0 0;
-    font: 0.8125rem var(--font-mono);
+    margin: 24px 0 0;
+    font: 400 12.5px/1.6 var(--font-mono);
     color: var(--c-muted);
   }
   .layout {
     display: grid;
     gap: 3rem;
+    padding-top: 64px;
   }
   .layout > :global(.prose) {
     min-width: 0;
@@ -100,7 +75,7 @@ const minutes = Math.max(1, Math.round(words / 230));
     display: block;
     width: 100%;
     height: auto;
-    border: 1px solid var(--c-border);
+    border: 1px solid var(--c-line);
     border-radius: 12px;
   }
   .layout :global(.prose figcaption) {
@@ -111,7 +86,7 @@ const minutes = Math.max(1, Math.round(words / 230));
   @media (max-width: 63.99rem) {
     .layout > :global(.post-aside) {
       padding-top: 2rem;
-      border-top: 1px solid var(--c-border);
+      border-top: 1px solid var(--c-line);
     }
     .layout :global(.post-aside nav) {
       display: none;
@@ -124,7 +99,8 @@ const minutes = Math.max(1, Math.round(words / 230));
     }
     .layout > :global(.post-aside) {
       position: sticky;
-      top: 2rem;
+      /* Clears the sticky site header. */
+      top: 96px;
       align-self: start;
     }
   }

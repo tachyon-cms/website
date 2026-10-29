@@ -58,45 +58,66 @@ const items = [
 </section>
 
 <style>
+  /* One ruled row of five, each a link to where you can check it. */
   ul {
     display: grid;
-    gap: 0.75rem;
     margin: 0;
     padding: 0;
     list-style: none;
+    border-top: 1px solid var(--c-line);
+  }
+  li + li {
+    border-top: 1px solid var(--c-line);
   }
   a {
     display: grid;
-    gap: 0.4rem;
+    grid-template-columns: auto 1fr;
+    gap: 6px 14px;
     height: 100%;
-    padding: 1.2rem;
+    padding: 24px 0;
     color: var(--c-text);
     text-decoration: none;
-    background: var(--c-surface);
-    border: 1px solid var(--c-border);
-    border-radius: 14px;
-  }
-  a:hover {
-    border-color: var(--c-soft);
   }
   a :global(.icon) {
-    color: var(--c-hi);
+    grid-row: span 2;
+    margin-top: 2px;
+    color: var(--c-blue);
   }
   strong {
+    font-size: 0.9375rem;
     font-weight: 600;
   }
   span {
-    font-size: 0.9375rem;
+    font-size: 0.875rem;
+    line-height: 1.55;
     color: var(--c-muted);
   }
-  @media (min-width: 40rem) {
-    ul {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
+  a:hover strong {
+    color: var(--c-blue-soft);
   }
   @media (min-width: 64rem) {
     ul {
       grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+    li + li {
+      border-top: 0;
+      border-left: 1px solid var(--c-line);
+    }
+    a {
+      grid-template-columns: 1fr;
+      align-content: start;
+      gap: 10px;
+      padding: 32px 24px 8px;
+    }
+    li:first-child a {
+      padding-left: 0;
+    }
+    li:last-child a {
+      padding-right: 0;
+    }
+    a :global(.icon) {
+      grid-row: auto;
+      margin: 0 0 6px;
     }
   }
 </style>

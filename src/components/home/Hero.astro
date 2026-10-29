@@ -1,134 +1,464 @@
 ---
+// The home hero. Behind it, a full-width field of speed streaks (src/scripts/field.ts)
+// over a masked grid and a slow blue glow. Beside the copy, a posts schema and what
+// GET /api/posts returned for it: the README's blog example as v0.1.0 answers a
+// signed-out caller, the same output the diagrams further down show.
+import Code from '../diagrams/Code.astro';
 import Icon from '../Icon.astro';
 import { formatStars, stars } from '../../lib/stars';
 
 const count = await stars();
+
+// Out of the schema panel's bottom edge, down, and into the response's left side.
+// Origin: the schema panel's bottom-left corner. The response sits 30 px lower and
+// starts 180 px in, so every wire ends at x 180.
+const wires = [
+  { d: 'M48 0 V100 Q48 120 68 120 H180', from: [48, 0], to: [180, 120] },
+  { d: 'M68 0 V80 Q68 100 88 100 H180', from: [68, 0], to: [180, 100] },
+  { d: 'M88 0 V60 Q88 80 108 80 H180', from: [88, 0], to: [180, 80] },
+];
+// Without JS, a few still streaks on the grid rows to the right of the copy; the
+// canvas covers them once it runs. [row, start %, end %]
+const still = [
+  [2, 54, 66],
+  [3, 80, 95],
+  [5, 61, 72],
+  [7, 86, 97],
+  [8, 74, 84],
+  [9, 55, 67],
+];
 ---
 
 <section id="top" class="hero" aria-labelledby="hero-title">
+  <div class="backdrop" aria-hidden="true">
+    <canvas class="field" aria-hidden="true"></canvas>
+    <svg class="still">
+      <defs>
+        <linearGradient id="hero-still">
+          <stop class="blue" offset="0" stop-opacity="0"></stop>
+          <stop class="blue" offset="0.85" stop-opacity="0.5"></stop>
+          <stop class="soft" offset="1" stop-opacity="0.8"></stop>
+        </linearGradient>
+      </defs>
+      {
+        still.map(([row, a, b]) => (
+          <>
+            <rect x={`${a}%`} y={row * 64 - 0.1} width={`${b - a}%`} height="1.2" fill="url(#hero-still)" />
+            <circle cx={`${b}%`} cy={row * 64 + 0.5} r="1.6" />
+          </>
+        ))
+      }
+    </svg>
+    <div class="glow"></div>
+    <div class="grid"></div>
+  </div>
+
   <div class="copy">
-    <p class="eyebrow">Open source · Rust · Postgres</p>
-    <h1 id="hero-title">Describe your content. Get the API back.</h1>
+    <p class="kicker">Open-source headless CMS, written in Rust</p>
+    <h1 id="hero-title">Content at the speed of your code.</h1>
     <p class="lede">
-      One Rust binary, one Postgres database, and a REST API built from the content types you define. Access rules
-      reach down to a single field. Schema changes can sit in a pull request like any other code. What's missing is the admin for your
-      editors. It's on the roadmap, and all of it is built in public.
+      Describe your content and get the API back. <strong>One Rust binary, one Postgres database</strong>, and access
+      rules that reach down to a single field.
     </p>
     <div class="actions">
       <a class="btn" href="https://docs.tachyoncms.com/install">Get started <Icon name="FiArrowRight" /></a>
       <a class="btn ghost" href="https://github.com/tachyon-cms/tachyoncms">
-        <Icon name="FiGithub" /> Star on GitHub{count !== null && <span class="count">{formatStars(count)}</span>}
+        <Icon name="SiGithub" size={16} /> Star on GitHub{count !== null && <span class="count">{formatStars(count)}</span>}
       </a>
     </div>
+    <p class="install"><span aria-hidden="true">$</span> <code>docker pull <span class="img">ghcr.io/<wbr /><span class="nb">tachyon-cms/</span><wbr />tachyoncms:v0.1.0</span></code></p>
     <p class="status">
       <a href="https://github.com/tachyon-cms/tachyoncms/releases/tag/v0.1.0">v0.1.0</a> is pre-alpha. The content
       API, sign-in and access rules work; keep it off public networks for now.
     </p>
   </div>
-  <dl class="facts">
-    <div>
-      <dt>1 binary</dt>
-      <dd>Linux and macOS builds, or a Docker image.</dd>
+
+  <!-- The same exchange is told in full, with captions, in the access rules section. -->
+  <div class="vis" aria-hidden="true">
+    <div class="panel schema">
+      <p class="head">schema · posts</p>
+      <Code
+        lines={[
+          '{',
+          '  "slug": "posts",',
+          '  "access": { "read": { "or": [',
+          '    { "published": true },',
+          '    { "author": "$user.id" }',
+          '  ] } },',
+          '  "fields": [ … ]',
+          '}',
+        ]}
+      />
+      <svg class="wires" width="184" height="124" viewBox="0 0 184 124">
+        {wires.map(({ d }) => <path class="wire" d={d} />)}
+        {wires.map(({ d }) => <path class="pulse" pathLength="100" d={d} />)}
+        {wires.flatMap(({ from, to }) => [from, to]).map(([x, y]) => <circle class="port" cx={x} cy={y} r="2.5" />)}
+      </svg>
     </div>
-    <div>
-      <dt>1 database</dt>
-      <dd>Postgres, and nothing else to run beside it.</dd>
+    <div class="panel response">
+      <p class="head">GET /api/posts</p>
+      <Code
+        lines={[
+          '{',
+          '  "docs": [',
+          '    {',
+          '      "title": "Hello, world",',
+          '      "published": true',
+          '    }',
+          '  ],',
+          '  "hasNextPage": false',
+          '}',
+        ]}
+      />
     </div>
-    <div>
-      <dt>0 unsafe blocks</dt>
-      <dd>A lint forbids unsafe Rust in every crate.</dd>
-    </div>
-  </dl>
+  </div>
 </section>
+
+<script>
+  import { startField } from '../../scripts/field';
+
+  const canvas = document.querySelector<HTMLCanvasElement>('.hero .field');
+  // Only once the page has loaded and gone idle, so the headline paints first and
+  // stays the largest paint, and the field never competes with it.
+  const copy = document.querySelector('.hero .copy');
+  const go = () => canvas && startField(canvas, copy ? [copy] : []);
+  const start = () => ('requestIdleCallback' in window ? requestIdleCallback(go, { timeout: 1000 }) : setTimeout(go, 200));
+  if (document.readyState === 'complete') start();
+  else addEventListener('load', start, { once: true });
+</script>
 
 <style>
   .hero {
     position: relative;
     display: grid;
-    gap: 2.5rem;
-    padding: clamp(3rem, 9vw, 6.5rem) 0 clamp(2.5rem, 6vw, 4.5rem);
-    isolation: isolate;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 48px;
+    padding: 56px 0 64px;
   }
-  /* The glow sits behind the copy, never under a line of small text it could wash out. */
-  .hero::before {
-    content: '';
+  .hero > :not(.backdrop) {
+    position: relative;
+  }
+
+  /* Full width, whatever the page width. body clips the sideways overflow 100vw makes
+   * when a scrollbar takes up room. */
+  .backdrop {
     position: absolute;
-    z-index: -1;
-    inset: -2rem -16px auto;
-    height: 34rem;
-    background:
-      radial-gradient(60% 70% at 15% 10%, color-mix(in srgb, var(--c-violet) 30%, transparent), transparent 70%),
-      radial-gradient(40% 50% at 85% 30%, color-mix(in srgb, var(--c-pink) 16%, transparent), transparent 70%);
+    top: 0;
+    bottom: 0;
+    left: calc(50% - 50vw);
+    width: 100vw;
+    overflow: hidden;
+    border-bottom: 1px solid var(--c-line);
     pointer-events: none;
   }
-  .eyebrow {
-    margin: 0 0 1.25rem;
-    font: 600 0.8125rem/1 var(--font-mono);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--c-soft);
+  .field {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+  .field.on {
+    opacity: 1;
+  }
+  .still {
+    display: none;
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    fill: var(--c-blue-soft);
+  }
+  .field.on ~ .still {
+    opacity: 0;
+  }
+  .still .blue {
+    stop-color: var(--c-blue);
+  }
+  .still .soft {
+    stop-color: var(--c-blue-soft);
+  }
+  .glow {
+    position: absolute;
+    top: -320px;
+    right: -200px;
+    width: 900px;
+    height: 900px;
+    opacity: 0.85;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--c-blue) 22%, transparent),
+      color-mix(in srgb, var(--c-blue) 6%, transparent) 55%,
+      transparent
+    );
+  }
+  /* The streaks ride these rows: the field's lanes are multiples of the same 64 px. */
+  .grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--c-line) 1px, transparent 1px), linear-gradient(90deg, var(--c-line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(80% 70% at 70% 40%, #000 20%, transparent 75%);
+    mask-image: radial-gradient(80% 70% at 70% 40%, #000 20%, transparent 75%);
+    opacity: 0.55;
+  }
+
+  /* Copy */
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 22px;
+    font: 400 12.5px/1.4 var(--font-mono);
+    letter-spacing: 0.02em;
+    color: var(--c-blue-soft);
+  }
+  .kicker::before {
+    content: '';
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--c-blue);
+    box-shadow: 0 0 12px var(--c-blue);
   }
   h1 {
-    max-width: 14ch;
-    margin: 0 0 1.5rem;
-    font-size: clamp(2.6rem, 8vw, 4.75rem);
-    font-weight: 700;
+    max-width: 11ch;
+    margin: 0;
+    font-size: clamp(3rem, 6vw + 0.5rem, 4.5rem);
+    font-weight: 600;
     line-height: 1;
     letter-spacing: -0.045em;
-    text-wrap: balance;
   }
   .lede {
-    max-width: 38rem;
-    font-size: clamp(1.125rem, 2.2vw, 1.3rem);
+    max-width: 30rem;
+    margin: 24px 0 0;
+    font-size: clamp(1.0625rem, 1vw + 0.8rem, 1.1875rem);
+    line-height: 1.55;
     color: var(--c-muted);
+  }
+  .lede strong {
+    font-weight: 600;
+    color: var(--c-text);
   }
   .actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin: 2rem 0 1.25rem;
+    gap: 12px;
+    margin-top: 32px;
   }
   .count {
-    padding-left: 0.6rem;
-    margin-left: 0.15rem;
-    font: 600 0.875rem/1 var(--font-mono);
+    padding-left: 10px;
+    margin-left: 2px;
+    font: 400 13px/1 var(--font-mono);
     color: var(--c-muted);
-    border-left: 1px solid var(--c-border);
+    border-left: 1px solid var(--c-line-2);
+  }
+  .install {
+    display: inline-flex;
+    gap: 12px;
+    margin: 28px 0 0;
+    padding: 11px 14px;
+    font: 400 13px/1.5 var(--font-mono);
+    color: var(--c-muted);
+    background: var(--c-panel);
+    border: 1px solid var(--c-line);
+    border-radius: 9px;
+  }
+  .install > span {
+    color: var(--c-blue);
+  }
+  .install code {
+    font: inherit;
+  }
+  /* On a phone the line breaks after "pull", and below 360 px, where the name alone
+   * is too wide, at its slashes. */
+  .install .img,
+  .install .nb {
+    white-space: nowrap;
+  }
+  @media (max-width: 359.98px) {
+    .install .img {
+      white-space: normal;
+    }
   }
   .status {
-    max-width: 34rem;
-    margin: 0;
-    font-size: 0.9375rem;
+    max-width: 30rem;
+    margin: 20px 0 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
     color: var(--c-muted);
   }
-  .facts {
+
+  /* The schema and the response */
+  .vis {
     display: grid;
-    gap: 1px;
+    max-width: 34rem;
+  }
+  .panel {
+    position: relative;
+    min-width: 0;
+    background: linear-gradient(var(--c-panel), var(--c-bg));
+    border: 1px solid var(--c-line-2);
+    border-radius: 14px;
+    box-shadow: 0 30px 80px -30px #000;
+  }
+  .head {
     margin: 0;
-    align-self: center;
-    background: var(--c-border);
-    border: 1px solid var(--c-border);
-    border-radius: 16px;
+    padding: 10px 14px;
+    font: 400 11.5px/1.4 var(--font-mono);
+    color: var(--c-muted);
+    border-bottom: 1px solid var(--c-line);
+  }
+  .panel :global(pre) {
+    margin: 0;
+    padding: 14px 16px;
+    font: 400 12.5px/1.75 var(--font-mono);
+    color: var(--c-code);
+    white-space: pre;
     overflow: hidden;
   }
-  .facts div {
-    padding: 1.1rem 1.4rem;
-    background: var(--c-surface);
+  .panel :global(pre > span) {
+    display: block;
   }
-  dt {
-    font: 700 1.6rem/1.1 var(--font-sans);
-    letter-spacing: -0.02em;
-    color: var(--c-hi);
+  .panel :global(.k) {
+    color: var(--c-blue-soft);
   }
-  dd {
-    margin: 0.3rem 0 0;
-    font-size: 0.9375rem;
+  .panel :global(.s) {
+    color: var(--c-code-string);
+  }
+  .panel :global(.p) {
     color: var(--c-muted);
   }
-  @media (min-width: 60rem) {
+  .schema {
+    width: min(100%, 330px);
+  }
+  .response {
+    justify-self: end;
+    width: min(92%, 360px);
+    margin-top: 32px;
+  }
+  /* Stacked, the bus is three short wires straight down from schema to response. */
+  .response::before {
+    content: '';
+    position: absolute;
+    bottom: calc(100% + 1px);
+    left: 40px;
+    width: 42px;
+    height: 32px;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--c-blue) 45%, transparent) 1.5px, transparent 1.5px) 0 0 /
+      20px 100% repeat-x;
+  }
+  .wires {
+    display: none;
+  }
+
+  /* Small laptops: copy and panels side by side, the panels still stacked with
+   * their short wires, since the fixed wire geometry below needs 1200 px. */
+  @media (min-width: 1024px) and (max-width: 1199.98px) {
     .hero {
-      grid-template-columns: minmax(0, 1fr) 19rem;
+      grid-template-columns: minmax(0, 1fr) 30rem;
       align-items: center;
+      gap: 40px;
+      padding: 80px 0;
+    }
+  }
+  /* From here the copy is a left column, and the still rows sit right of it. */
+  @media (min-width: 1024px) {
+    .still {
+      display: block;
+    }
+  }
+  @media (min-width: 1200px) {
+    .hero {
+      grid-template-columns: 1.05fr 1fr;
+      align-items: center;
+      gap: 40px;
+      padding: 96px 0;
+    }
+    /* Fixed geometry, so the wires meet the panels exactly: the response starts
+     * 180 px in and 30 px below the schema. */
+    .vis {
+      display: block;
+      justify-self: end;
+      width: 540px;
+      max-width: none;
+    }
+    .schema {
+      z-index: 1;
+      width: 330px;
+    }
+    .response {
+      width: 360px;
+      margin: 30px 0 0 180px;
+    }
+    .response::before {
+      content: none;
+    }
+    .wires {
+      display: block;
+      position: absolute;
+      top: calc(100% + 1px);
+      left: -1px;
+      overflow: visible;
+    }
+  }
+  .wires path {
+    fill: none;
+    stroke-linecap: round;
+  }
+  .wire {
+    stroke: color-mix(in srgb, var(--c-blue) 45%, transparent);
+    stroke-width: 1.5;
+  }
+  /* Only drawn while it moves: the still picture is the wires and their ports. */
+  .pulse {
+    stroke: none;
+    stroke-width: 2;
+  }
+  .port {
+    fill: var(--c-blue-soft);
+  }
+
+  /* Only the background moves on its own; with less motion asked for, it's a still. */
+  @media (prefers-reduced-motion: no-preference) {
+    /* The field fades in over the still streaks. */
+    .field,
+    .still {
+      transition: opacity 1.2s ease;
+    }
+    .glow {
+      animation: hero-breathe 9s ease-in-out infinite;
+    }
+    .wires {
+      filter: drop-shadow(0 0 3px var(--c-blue));
+    }
+    .pulse {
+      stroke: var(--c-blue-soft);
+      stroke-dasharray: 24 100;
+      animation: hero-flow 2.4s cubic-bezier(0.5, 0, 0.3, 1) infinite;
+    }
+    .pulse:nth-of-type(5) {
+      animation-delay: 0.3s;
+    }
+    .pulse:nth-of-type(6) {
+      animation-delay: 0.6s;
+    }
+  }
+  @keyframes hero-breathe {
+    50% {
+      transform: translate(-60px, 40px) scale(1.12);
+      opacity: 1;
+    }
+  }
+  /* The dash enters at the schema and runs out through the response's port. */
+  @keyframes hero-flow {
+    from {
+      stroke-dashoffset: 24;
+    }
+    to {
+      stroke-dashoffset: -100;
     }
   }
 </style>

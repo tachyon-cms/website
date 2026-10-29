@@ -17,24 +17,27 @@ const { eyebrow, title, id } = Astro.props;
 <style>
   .section-head {
     max-width: 44rem;
-    margin-bottom: 2rem;
+    margin-bottom: 48px;
   }
   .eyebrow {
-    margin: 0 0 0.75rem;
-    font: 600 0.8125rem/1 var(--font-mono);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--c-soft);
+    margin: 0 0 18px;
+    font: 400 12.5px/1.4 var(--font-mono);
+    letter-spacing: 0.02em;
+    color: var(--c-blue-soft);
   }
   h2 {
-    margin: 0 0 1rem;
-    font-size: clamp(1.75rem, 4.5vw, 2.6rem);
-    line-height: 1.1;
-    letter-spacing: -0.03em;
+    max-width: 22ch;
+    margin: 0 0 20px;
+    font-size: clamp(2rem, 2.5vw + 1.1rem, 2.75rem);
+    font-weight: 600;
+    line-height: 1.06;
+    letter-spacing: -0.035em;
     text-wrap: balance;
   }
   .section-head > :global(p:not(.eyebrow)) {
-    font-size: 1.125rem;
+    max-width: 38rem;
+    font-size: 1.0625rem;
+    line-height: 1.6;
     color: var(--c-muted);
   }
   .section-head > :global(p:last-child) {

@@ -2,6 +2,17 @@ import { expect, test } from '@playwright/test';
 
 const pages = ['/', '/404', '/check-your-inbox', '/confirmed', '/link-expired', '/signup-problem'];
 
+const productLinks = [
+  '/product/content-modelling',
+  '/product/querying',
+  '/product/access-control',
+  '/product/sign-in',
+  '/product/schema-as-code',
+  '/product/admin',
+  '/security',
+  '/why',
+];
+
 for (const path of pages) {
   test(`${path} has one h1, a skip link and a title`, async ({ page }) => {
     await page.goto(path);
@@ -12,31 +23,55 @@ for (const path of pages) {
   });
 }
 
-test('the theme toggle switches to light and remembers it', async ({ page }) => {
+// Pages without a card of their own share the brand's social preview; posts keep theirs.
+for (const path of ['/', '/why', '/product/access-control', '/blog']) {
+  test(`${path} unfurls with the brand's social card`, async ({ page }) => {
+    await page.goto(path);
+    const meta = (key: string) => page.locator(`meta[property="${key}"]`);
+    await expect(meta('og:image')).toHaveAttribute('content', 'https://tachyoncms.com/brand/social-preview.png');
+    await expect(meta('og:image:width')).toHaveAttribute('content', '1280');
+    await expect(meta('og:image:height')).toHaveAttribute('content', '640');
+    await expect(meta('og:image:alt')).toHaveAttribute('content', /^TachyonCMS: .{40,}/);
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
+  });
+}
+
+test('the site is dark only, whatever the OS or a stored choice says', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  // The old toggle's key: a returning visitor may still have it.
+  await page.addInitScript(() => localStorage.setItem('theme', 'light'));
   await page.goto('/');
-  await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'light');
-  await page.locator('[data-theme-toggle]').click();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('light');
-  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#faf8ff');
-  await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute('content', 'light');
-  await page.goto('/confirmed');
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  // A saved theme applies to the browser chrome before first paint too.
-  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#faf8ff');
-  await page.locator('[data-theme-toggle]').click();
-  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#07060c');
+  await expect(page.locator('html')).not.toHaveAttribute('data-theme');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#0c0d0d');
   await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute('content', 'dark');
+  await expect(page.locator('[data-theme-toggle]')).toHaveCount(0);
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(12, 13, 13)');
 });
 
 test.describe('without JavaScript', () => {
   test.use({ javaScriptEnabled: false });
 
+  test('the Product menu opens and its links are reachable', async ({ page }) => {
+    await page.goto('/');
+    const menu = page.locator('nav[aria-label="Main"] details');
+    await menu.locator('summary').click();
+    for (const href of productLinks) await expect(menu.locator(`a[href="${href}"]`)).toBeVisible();
+  });
+
+  test('the mark is drawn', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('html')).not.toHaveClass(/\bjs\b/);
+    const offsets = await page
+      .locator('header .brand .mark .stroke')
+      .evaluateAll((paths) => paths.map((p) => getComputedStyle(p).strokeDashoffset));
+    expect(offsets).toEqual(['0px', '0px', '0px']);
+  });
+
   test('the page renders dark and hides nothing', async ({ page }) => {
     await page.goto('/');
     await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'light');
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    expect(bg).toBe('rgb(7, 6, 12)');
+    expect(bg).toBe('rgb(12, 13, 13)');
     for (const el of ['header', 'main', 'footer', 'form.signup']) await expect(page.locator(el).first()).toBeVisible();
   });
 });
@@ -64,32 +99,131 @@ test('the logo and post media may be embedded elsewhere; nothing else may', asyn
     return res.headers()['cross-origin-resource-policy'];
   };
   // Exactly one value: Cloudflare joins a header set by two matching rules.
-  expect(await corp('/brand/logo-dark.svg')).toBe('cross-origin');
+  expect(await corp('/brand/logo.svg')).toBe('cross-origin');
   expect(await corp('/media/blog/v0-1-0/card.png')).toBe('cross-origin');
   expect(await corp('/')).toBe('same-origin');
   expect(await corp('/brand')).toBe('same-origin');
   // The narrower rules add to /*, so the rest of the headers still apply.
-  const logo = (await request.get('/brand/logo-dark.svg')).headers();
+  const logo = (await request.get('/brand/logo.svg')).headers();
   expect(logo['x-content-type-options']).toBe('nosniff');
   expect(logo['content-security-policy']).toContain("default-src 'self'");
 });
 
-test('the header links the GitHub repo', async ({ page }) => {
+test('the header links the GitHub repo and Get started', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('header a[href="https://github.com/tachyon-cms/tachyoncms"]')).toHaveCount(1);
+  await expect(page.locator('header a[href="https://github.com/tachyon-cms/tachyoncms"]:visible')).toHaveCount(1);
+  await expect(page.locator('header a.cta')).toHaveAttribute('href', 'https://docs.tachyoncms.com/install');
+  await expect(page.locator('header a.cta')).toHaveText('Get started');
 });
 
-test('the footer lists every contact address and the theme toggle', async ({ page }) => {
+test('the announcement bar names the latest release and links its notes', async ({ page }) => {
+  await page.goto('/');
+  const bar = page.locator('.announce');
+  await expect(bar).toContainText(/(^|\s)v\d+\.\d+\.\d+ is out\./);
+  await expect(bar.getByRole('link', { name: 'Read the release notes' })).toHaveAttribute('href', '/releases');
+});
+
+test('the header stays at the top on scroll', async ({ page }) => {
+  await page.goto('/');
+  await page.mouse.wheel(0, 2000);
+  await expect.poll(() => page.evaluate(() => scrollY)).toBeGreaterThan(500);
+  const header = page.locator('header.site-header');
+  await expect.poll(async () => (await header.boundingBox())?.y).toBe(0);
+  await expect(header).toBeInViewport();
+});
+
+
+test('Tab reaches every item in the Product menu, and Escape closes it', async ({ page }) => {
+  await page.goto('/');
+  const menu = page.locator('nav[aria-label="Main"] details');
+  const summary = menu.locator('summary');
+  await summary.focus();
+  await page.keyboard.press('Enter');
+  await expect(menu).toHaveAttribute('open', '');
+  for (const href of productLinks) {
+    await page.keyboard.press('Tab');
+    await expect(page.locator(':focus')).toHaveAttribute('href', href);
+  }
+  await page.keyboard.press('Escape');
+  await expect(menu).not.toHaveAttribute('open');
+  await expect(summary).toBeFocused();
+});
+
+test('the Product menu closes when you click elsewhere', async ({ page }) => {
+  await page.goto('/');
+  const menu = page.locator('nav[aria-label="Main"] details');
+  await menu.locator('summary').click();
+  await expect(menu).toHaveAttribute('open', '');
+  await page.mouse.click(8, 700);
+  await expect(menu).not.toHaveAttribute('open');
+});
+
+test('aria-current marks the current link, and only that one', async ({ page }) => {
+  await page.goto('/product/querying');
+  const nav = page.locator('nav[aria-label="Main"]:visible');
+  await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
+  await expect(nav.locator('a[href="/product/querying"]')).toHaveAttribute('aria-current', 'page');
+  await expect(nav.locator('summary')).toHaveClass(/\bcurrent\b/);
+  await page.goto('/compare');
+  await expect(nav.locator('[aria-current="page"]')).toHaveCount(1);
+  await expect(nav.locator('a[href="/compare"]')).toHaveAttribute('aria-current', 'page');
+  await expect(nav.locator('summary')).not.toHaveClass(/\bcurrent\b/);
+});
+
+test('the footer lists every contact address and has no theme toggle', async ({ page }) => {
   await page.goto('/');
   const footer = page.locator('footer');
   for (const box of ['hello', 'security', 'conduct', 'legal', 'sponsors']) {
     await expect(footer.locator(`a[href="mailto:${box}@tachyoncms.com"]`)).toHaveCount(1);
   }
-  await expect(footer.locator('[data-theme-toggle]')).toBeVisible();
+  await expect(footer.locator('[data-theme-toggle], button')).toHaveCount(0);
 });
 
 test.describe('at phone width', () => {
   test.use({ viewport: { width: 390, height: 844 } });
+
+  test('Tab out of the open sheet closes it', async ({ page }) => {
+    await page.goto('/');
+    const menu = page.locator('header details.mobile');
+    await menu.locator('summary').click();
+    await expect(menu).toHaveAttribute('open', '');
+    await menu.locator('.sheet a').last().focus();
+    await page.keyboard.press('Tab');
+    await expect(menu).not.toHaveAttribute('open');
+  });
+
+  test('the sheet ends at the bottom of the screen, with the announcement bar in view', async ({ page }) => {
+    // Short enough that the sheet has to scroll.
+    await page.setViewportSize({ width: 390, height: 480 });
+    await page.goto('/');
+    await page.locator('header details.mobile summary').click();
+    const box = (await page.locator('header .sheet').boundingBox())!;
+    expect(box.y).toBeGreaterThan(64);
+    expect(box.y + box.height).toBeLessThanOrEqual(480);
+  });
+
+  test('the desktop links hide and the menu button shows', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('header .links')).toBeHidden();
+    await expect(page.locator('header details.mobile summary')).toBeVisible();
+    await expect(page.locator('header a.cta')).toBeVisible();
+  });
+
+  test.describe('without JavaScript', () => {
+    test.use({ javaScriptEnabled: false });
+
+    test('the menu opens full width with every link, and nothing overflows', async ({ page }) => {
+      await page.goto('/');
+      await page.locator('header details.mobile summary').click();
+      const sheet = page.locator('header details.mobile .sheet');
+      await expect(sheet).toBeVisible();
+      expect((await sheet.boundingBox())?.width).toBe(390);
+      for (const href of [...productLinks, 'https://docs.tachyoncms.com', '/compare', '/blog', '/roadmap']) {
+        await expect(sheet.locator(`a[href="${href}"]`)).toBeVisible();
+      }
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+    });
+  });
 
   for (const path of pages) {
     test(`${path} has no horizontal scroll`, async ({ page }) => {
@@ -118,4 +252,156 @@ test('signup.js loads once and binds every signup form', async ({ page }) => {
   await page.route(/challenges\.cloudflare\.com/, (route) => route.abort());
   await page.locator('form.signup').nth(1).locator('input[type="email"]').focus();
   await turnstile;
+});
+
+test('the header mark draws itself in on load', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('header .brand .mark')).toHaveClass(/\bdraw\b/);
+  await expect(page.locator('header .brand')).toHaveText('TachyonCMS');
+});
+
+test('with reduced motion the mark is fully drawn from the start', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await expect(page.locator('header .brand .mark')).toHaveClass(/\bdraw\b/);
+  // No animation is ever created, so this holds whenever it's checked.
+  const running = await page.evaluate(
+    () => document.getAnimations().filter((a) => (a.effect as KeyframeEffect | null)?.target?.closest('.mark')).length,
+  );
+  expect(running).toBe(0);
+  const offsets = await page
+    .locator('header .brand .mark .stroke')
+    .evaluateAll((paths) => paths.map((p) => getComputedStyle(p).strokeDashoffset));
+  expect(offsets).toEqual(['0px', '0px', '0px']);
+});
+
+test('with JS the mark waits, undrawn, for its draw-in', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveClass(/\bjs\b/);
+  // The script took the hold off once it started the draw-in.
+  await expect(page.locator('html')).not.toHaveClass(/\bmark-pending\b/);
+  // Before the script adds .draw, the strokes are pushed out of sight, so there's no
+  // drawn-then-blank flash.
+  const offsets = await page.locator('header .brand .mark').evaluate((mark) => {
+    document.documentElement.classList.add('mark-pending');
+    mark.classList.remove('draw');
+    return [...mark.querySelectorAll('.stroke')].map((p) => getComputedStyle(p).strokeDashoffset);
+  });
+  expect(offsets).toEqual(['1.05px', '1.05px', '1.05px']);
+});
+
+test("if the mark's script never runs, the finished mark shows after 1.5 s", async ({ page }) => {
+  await page.route('**/', async (route) => {
+    const res = await route.fetch();
+    const html = (await res.text()).replace(/<script type="module">[^<]*mark-pending[^<]*<\/script>/, '');
+    await route.fulfill({ response: res, body: html });
+  });
+  await page.goto('/');
+  await expect(page.locator('html')).toHaveClass(/\bmark-pending\b/);
+  const stroke = page.locator('header .brand .mark .stroke').first();
+  await expect(stroke).not.toHaveCSS('stroke-dashoffset', '0px');
+  await expect(stroke).toHaveCSS('stroke-dashoffset', '0px', { timeout: 3000 });
+});
+
+test('the focused skip link sits above the sticky header', async ({ page }) => {
+  for (const y of [0, 1500]) {
+    await page.goto('/');
+    await page.evaluate((y) => scrollTo(0, y), y);
+    await page.keyboard.press('Tab');
+    const skip = page.locator('a.skip');
+    await expect(skip).toBeFocused();
+    const hits = await skip.evaluate((el) => {
+      const r = el.getBoundingClientRect();
+      return [
+        [r.left + r.width / 2, r.top + r.height / 2],
+        [r.left + r.width / 2, r.bottom - 2],
+      ].map(([x, y]) => document.elementFromPoint(x, y) === el);
+    });
+    expect(hits, `scrolled to ${y}`).toEqual([true, true]);
+  }
+});
+
+test('with reduced motion the menus open without animating', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  await page.locator('nav[aria-label="Main"] details summary').click();
+  const running = await page.evaluate(
+    () => document.getAnimations().filter((a) => (a.effect as KeyframeEffect | null)?.target?.closest('.site-header')).length,
+  );
+  expect(running).toBe(0);
+  const transitions = await page
+    .locator('.site-header summary, .site-header a, .site-header .menu')
+    .evaluateAll((els) => els.map((el) => getComputedStyle(el).transitionDuration).filter((d) => d !== '0s'));
+  expect(transitions).toEqual([]);
+});
+
+test('menus close when the page comes back from the back/forward cache', async ({ page }) => {
+  await page.goto('/');
+  const menu = page.locator('nav[aria-label="Main"] details');
+  await menu.locator('summary').click();
+  await expect(menu).toHaveAttribute('open', '');
+  await page.evaluate(() => dispatchEvent(new PageTransitionEvent('pageshow', { persisted: true })));
+  await expect(menu).not.toHaveAttribute('open');
+});
+
+test('pointing at the brand replays the draw-in', async ({ page }) => {
+  await page.goto('/');
+  const stroke = page.locator('header .brand .mark .stroke').first();
+  // Wait out the first draw, then check the replay starts the stroke over.
+  await expect.poll(() => stroke.evaluate((p) => getComputedStyle(p).strokeDashoffset)).toBe('0px');
+  await page.evaluate(() => {
+    (window as any).draws = 0;
+    addEventListener('animationstart', (e) => e.animationName.endsWith('mark-draw') && (window as any).draws++);
+  });
+  await page.locator('header .brand').hover();
+  await expect.poll(() => page.evaluate(() => (window as any).draws)).toBe(3);
+});
+
+test('a tap on the brand does not replay the draw-in as the page leaves', async ({ page }) => {
+  await page.goto('/');
+  const stroke = page.locator('header .brand .mark .stroke').first();
+  await expect.poll(() => stroke.evaluate((p) => getComputedStyle(p).strokeDashoffset)).toBe('0px');
+  const enter = (pointerType: string) =>
+    page.evaluate(async (pointerType) => {
+      document.querySelector('header .brand')!.dispatchEvent(new PointerEvent('pointerenter', { pointerType }));
+      // Two frames: long enough for a started animation to report itself.
+      for (let i = 0; i < 2; i++) await new Promise(requestAnimationFrame);
+      return (window as any).draws;
+    }, pointerType);
+  await page.evaluate(() => {
+    (window as any).draws = 0;
+    addEventListener('animationstart', (e) => e.animationName.endsWith('mark-draw') && (window as any).draws++);
+  });
+  expect(await enter('touch')).toBe(0);
+  // A mouse or a hovering pen still replays it.
+  await enter('mouse');
+  await expect.poll(() => page.evaluate(() => (window as any).draws)).toBe(3);
+  await enter('pen');
+  await expect.poll(() => page.evaluate(() => (window as any).draws)).toBe(6);
+});
+
+test('a mark script that runs after the fallback leaves the mark drawn, not redrawn', async ({ page }) => {
+  // Fire Base's 1.5 s fallback at once, so the mark's module runs "late".
+  await page.addInitScript(() => {
+    const later = window.setTimeout;
+    window.setTimeout = ((fn: () => void, ms?: number, ...rest: unknown[]) =>
+      ms === 1500 ? (fn(), 0) : later(fn, ms, ...rest)) as typeof window.setTimeout;
+  });
+  await page.goto('/');
+  await expect(page.locator('html')).not.toHaveClass(/mark-pending/);
+  await expect(page.locator('header .mark')).not.toHaveClass(/\bdraw\b/);
+});
+
+test('the open sheet refits when the screen changes size', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 600 });
+  await page.goto('/');
+  await page.locator('header details.mobile summary').click();
+  const sheet = page.locator('header .sheet');
+  // The fit happens on the toggle event, which lands a moment after the click.
+  await expect.poll(() => sheet.evaluate((s) => s.style.maxHeight)).not.toBe('');
+  await page.setViewportSize({ width: 390, height: 420 });
+  await expect.poll(async () => {
+    const box = (await sheet.boundingBox())!;
+    return box.y + box.height;
+  }).toBeLessThanOrEqual(420);
 });

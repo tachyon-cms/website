@@ -1,33 +1,31 @@
-/* Ultraviolet brand tokens. Dark by default; the theme toggle sets
- * data-theme="light" on <html>. scripts/contrast.test.mjs checks every
- * text pairing here against WCAG AA in both themes, so tune values there
- * first. --font-sans and --font-mono come from the Astro fonts config. */
+/* Brand tokens. Dark only: there is no light theme and no toggle.
+ * scripts/contrast.test.mjs checks every text pairing here against WCAG AA,
+ * so tune values there first. --font-sans and --font-mono come from the
+ * Astro fonts config (brand/fonts.mjs). */
 
 :root {
   color-scheme: dark;
-  --c-bg: #07060c;
-  --c-surface: #140d24;
-  --c-border: #2b1d4a;
-  --c-text: #e9e3ff;
-  --c-muted: #a99cc9;
-  --c-violet: #7c3aed;
-  --c-pink: #db2777;
-  --c-hi: #f0abfc;
-  --c-soft: #c3a6ff;
-  --c-ok: #4ade80;
-  /* Text on --c-grad buttons, in both themes. */
-  --c-on-grad: #ffffff;
-  --c-grad: linear-gradient(90deg, var(--c-violet), var(--c-pink));
-}
-
-[data-theme="light"] {
-  color-scheme: light;
-  --c-bg: #faf8ff;
-  --c-surface: #f1ebfd;
-  --c-border: #d9cdf3;
-  --c-text: #17112b;
-  --c-muted: #5b5175;
-  --c-hi: #a21caf;
-  --c-soft: #6d28d9;
-  --c-ok: #166534;
+  --c-bg: #0c0d0d;
+  --c-panel: #111315;
+  --c-line: #242628;
+  --c-line-2: #303236;
+  --c-text: #f4f5f6;
+  --c-muted: #94979e;
+  /* Decorative and meta text only: it clears 3:1, not 4.5:1. */
+  --c-dim: #61646b;
+  --c-blue: #3da9ff;
+  /* Link colour. */
+  --c-blue-soft: #bfe2ff;
+  --c-blue-deep: #0b2236;
+  /* Plain text in code samples. */
+  --c-code: #c9cbcf;
+  /* String values in code samples. */
+  --c-code-string: #9fd5ff;
+  /* Warnings in code samples: a 404, a data loss, a refused key. Amber, so it
+   * never reads as one more blue. */
+  --c-warn: #f0b95e;
+  /* Text on --c-blue buttons. */
+  --c-on-blue: #04121f;
+  /* A faint white wash: hovers, and the lit top edge of a menu. */
+  --c-tint: rgb(255 255 255 / 0.04);
 }
