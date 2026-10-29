@@ -4,7 +4,7 @@
 //
 // Without the .draw class the mark is simply drawn, which is what no-JS and reduced
 // motion get. With JS and motion it waits undrawn until .draw arrives. The script
-// adds .draw on load and again when a mouse enters the parent .brand, which
+// adds .draw on load and again when a mouse or pen enters the parent .brand, which
 // replays it.
 interface Props {
   size?: number;
@@ -32,9 +32,10 @@ const { size = 26, animate = true } = Astro.props;
       mark.classList.add('draw');
     };
     if (!late) draw();
-    // Only a mouse: a tap fires pointerenter too, just as the link navigates away.
+    // Not on touch: a tap fires pointerenter too, just as the link navigates away.
+    // A mouse or a hovering pen replays it.
     mark.closest('.brand')?.addEventListener('pointerenter', (e) => {
-      if ((e as PointerEvent).pointerType === 'mouse') draw();
+      if ((e as PointerEvent).pointerType !== 'touch') draw();
     });
   }
   document.documentElement.classList.remove('mark-pending');

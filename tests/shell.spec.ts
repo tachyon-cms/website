@@ -373,9 +373,11 @@ test('a tap on the brand does not replay the draw-in as the page leaves', async 
     addEventListener('animationstart', (e) => e.animationName.endsWith('mark-draw') && (window as any).draws++);
   });
   expect(await enter('touch')).toBe(0);
-  // A mouse still replays it, so the listener is there.
+  // A mouse or a hovering pen still replays it.
   await enter('mouse');
   await expect.poll(() => page.evaluate(() => (window as any).draws)).toBe(3);
+  await enter('pen');
+  await expect.poll(() => page.evaluate(() => (window as any).draws)).toBe(6);
 });
 
 test('a mark script that runs after the fallback leaves the mark drawn, not redrawn', async ({ page }) => {
