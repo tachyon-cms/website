@@ -340,3 +340,42 @@ test.describe('without JS', () => {
     expect(offsets).toEqual(['0px', '0px', '0px']);
   });
 });
+
+// The site's still page header, slimmer: grid, glow and frozen streaks behind the
+// title of each topic root, and nowhere else.
+for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+  test.describe(`at ${viewport.width} px`, () => {
+    test.use({ viewport });
+
+    for (const { link } of topics) {
+      test(`${link} opens on a still streak band, clear of the title`, async ({ page }) => {
+        await page.goto(link);
+        const band = page.locator('main .topic-band');
+        await expect(band).toBeVisible();
+        const streaks = band.locator('.streaks g:visible');
+        expect(await streaks.count()).toBeGreaterThan(0);
+        // Every visible streak sits above the title, so none runs through its words.
+        const top = await page.locator('main h1').evaluate((h) => h.getBoundingClientRect().top);
+        for (const box of await streaks.evaluateAll((gs) => gs.map((g) => g.getBoundingClientRect().bottom))) {
+          expect(box).toBeLessThan(top);
+        }
+        // Still, and slimmer than the site's page header.
+        const moving = await page.evaluate(
+          () => document.getAnimations().filter((a) => (a.effect as KeyframeEffect | null)?.target?.closest?.('.topic-band')).length,
+        );
+        expect(moving).toBe(0);
+        expect(await band.locator('[style]').count()).toBe(0);
+        const height = await band.evaluate((b) => b.getBoundingClientRect().height);
+        expect(height).toBeLessThan(viewport.width > 800 ? 260 : 240);
+      });
+    }
+  });
+}
+
+test('pages below a topic root have no streak band', async ({ page }) => {
+  for (const link of ['/access-rules', '/reference/http-api', '/tutorials/build-a-blog']) {
+    await page.goto(link);
+    await expect(page.locator('h1')).toHaveCount(1);
+    await expect(page.locator('.topic-band')).toHaveCount(0);
+  }
+});

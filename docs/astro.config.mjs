@@ -87,6 +87,8 @@ export default defineConfig({
         Header: './src/components/TopicTabs.astro',
         // The site header's lockup, with the mark inline so it can draw itself in.
         SiteTitle: './src/components/SiteTitle.astro',
+        // Topic roots open on a slim, still streak band, like the site's page header.
+        PageTitle: './src/components/PageTitle.astro',
         // GitHub and tachyoncms.com at the foot of the phone menu.
         MobileMenuFooter: './src/components/MobileMenuFooter.astro',
         Sidebar: '@astrojs/starlight/components/Sidebar.astro',

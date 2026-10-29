@@ -1,0 +1,103 @@
+---
+// Starlight's page title. A topic root (Docs, Tutorials, Reference, CLI) opens on a
+// slim take on the site's still page header (src/components/PageHero.astro): the
+// grid masked to the top right, a blue glow and frozen streaks on the two grid rows
+// above the title. No script, no motion.
+import Default from '@astrojs/starlight/components/PageTitle.astro';
+
+const here = `/${Astro.locals.starlightRoute.id}`;
+const isRoot = Astro.locals.starlightSidebarTopics.topics.some((topic) => topic.link === here);
+
+// [row, from x, to x, opacity] in a 900 × 160 box pinned to the top right, so each
+// streak sits on a grid row (y = row · 64), above the title.
+const streaks = [
+  [1, 520, 860, 0.9],
+  [2, 300, 700, 0.55],
+  [2, 760, 880, 0.4],
+];
+---
+
+{
+  isRoot && (
+    <div class="topic-band" aria-hidden="true">
+      <div class="grid" />
+      <svg class="streaks" width="900" height="160" viewBox="0 0 900 160">
+        <defs>
+          <linearGradient id="topic-band-tail">
+            <stop class="blue" offset="0" stop-opacity="0" />
+            <stop class="blue" offset="0.85" stop-opacity="0.8" />
+            <stop class="soft" offset="1" />
+          </linearGradient>
+          <filter id="topic-band-glow" x="-4" y="-4" width="9" height="9">
+            <feGaussianBlur stdDeviation="2.4" result="g" />
+            <feMerge>
+              <feMergeNode in="g" />
+              <feMergeNode in="SourceGraphic" />
+            </feMerge>
+          </filter>
+        </defs>
+        {streaks.map(([row, x1, x2, o]) => (
+          <g opacity={o}>
+            <rect x={x1} y={row * 64 - 0.15} width={x2 - x1} height="1.3" fill="url(#topic-band-tail)" />
+            <circle cx={x2} cy={row * 64 + 0.5} r="2.2" filter="url(#topic-band-glow)" />
+          </g>
+        ))}
+      </svg>
+    </div>
+  )
+}
+<Default />
+
+<style>
+  /* The band fills the title's panel, from edge to edge of the content column. */
+  :global(.content-panel:has(.topic-band)) {
+    position: relative;
+    overflow: hidden;
+    padding-top: 144px;
+  }
+  /* After the band in source order, and positioned, so the title paints over it. */
+  :global(.content-panel:has(.topic-band) h1) {
+    position: relative;
+    margin-top: 0;
+  }
+  .topic-band {
+    position: absolute;
+    inset: 0;
+    margin: 0;
+    pointer-events: none;
+    background: radial-gradient(40rem 12rem at 78% 0%, color-mix(in srgb, var(--c-blue) 16%, transparent), transparent 70%);
+  }
+  .grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--c-line) 1px, transparent 1px), linear-gradient(90deg, var(--c-line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    background-position: right top;
+    -webkit-mask-image: radial-gradient(70% 100% at 80% 0%, #000 15%, transparent 72%);
+    mask-image: radial-gradient(70% 100% at 80% 0%, #000 15%, transparent 72%);
+    opacity: 0.6;
+  }
+  .streaks {
+    position: absolute;
+    top: 0;
+    right: 0;
+    -webkit-mask-image: linear-gradient(90deg, transparent, #000 35%);
+    mask-image: linear-gradient(90deg, transparent, #000 35%);
+  }
+  .blue {
+    stop-color: var(--c-blue);
+  }
+  .soft {
+    stop-color: var(--c-blue-soft);
+  }
+  .streaks circle {
+    fill: var(--c-blue-soft);
+  }
+  /* On a phone, one streak per row is enough. */
+  @media (max-width: 639.98px) {
+    .streaks g:last-child {
+      display: none;
+    }
+  }
+</style>
