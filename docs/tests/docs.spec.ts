@@ -379,3 +379,16 @@ test('pages below a topic root have no streak band', async ({ page }) => {
     await expect(page.locator('.topic-band')).toHaveCount(0);
   }
 });
+
+test('docs pages unfurl with the brand social card', async ({ page }) => {
+  for (const link of ['/', '/access-rules', '/reference/http-api']) {
+    await page.goto(link);
+    const meta = (key: string) => page.locator(`meta[property="${key}"]`);
+    await expect(meta('og:image')).toHaveAttribute('content', 'https://tachyoncms.com/brand/social-preview.png');
+    await expect(meta('og:image:width')).toHaveAttribute('content', '1280');
+    await expect(meta('og:image:height')).toHaveAttribute('content', '640');
+    await expect(meta('og:image:alt')).toHaveAttribute('content', /^TachyonCMS: .{40,}/);
+    await expect(meta('og:image')).toHaveCount(1);
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
+  }
+});

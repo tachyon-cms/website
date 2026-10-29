@@ -1,4 +1,6 @@
 ---
+import { socialCard } from '../../brand/social.mjs';
+
 interface Props {
   title: string;
   description: string;
@@ -9,15 +11,9 @@ interface Props {
   published?: Date;
   noindex?: boolean;
 }
-// A page without a card of its own unfurls with the brand's social preview.
-const brandCard = {
-  image: '/brand/social-preview.png',
-  width: 1280,
-  height: 640,
-  alt: 'TachyonCMS: Content at the speed of your code. An open-source headless CMS, one Rust binary, one Postgres database.',
-};
+// A page without a card of its own unfurls with the brand's social card.
 const { title, description, path, image, imageAlt, published, noindex = false } = Astro.props;
-const card: { image: string; alt?: string; width?: number; height?: number } = image ? { image, alt: imageAlt } : brandCard;
+const card: { image: string; alt?: string; width?: number; height?: number } = image ? { image, alt: imageAlt } : { image: socialCard.url, ...socialCard };
 const canonical = new URL(path, Astro.site);
 const imageUrl = new URL(card.image, Astro.site);
 ---

@@ -4,6 +4,7 @@ import starlight from '@astrojs/starlight';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
 import starlightLinksValidator from 'starlight-links-validator';
 import { docsFonts } from '../brand/fonts.mjs';
+import { socialCard } from '../brand/social.mjs';
 import { codeTheme } from './code-theme.mjs';
 
 // Starlight fetches the Pagefind UI (about 95 KB of script) as soon as the page is idle,
@@ -61,6 +62,14 @@ export default defineConfig({
       title: 'TachyonCMS',
       social: [{ icon: 'github', label: 'TachyonCMS on GitHub', href: 'https://github.com/tachyon-cms/tachyoncms' }],
       customCss: ['./src/styles/brand.css'],
+      // Every docs page unfurls with the brand's social card, the one the site uses.
+      // Starlight already says twitter:card summary_large_image.
+      head: [
+        ['og:image', socialCard.url],
+        ['og:image:width', String(socialCard.width)],
+        ['og:image:height', String(socialCard.height)],
+        ['og:image:alt', socialCard.alt],
+      ].map(([property, content]) => ({ tag: 'meta', attrs: { property, content } })),
       // One dark theme in the brand code colours (code-theme.mjs): with no light theme
       // there is nothing for the OS or a stored choice to switch the code blocks to.
       expressiveCode: {
