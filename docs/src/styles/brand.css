@@ -15,7 +15,7 @@
 
   --sl-color-white: #ffffff;
   --sl-color-gray-1: var(--c-text);
-  --sl-color-gray-2: #c9cbcf;
+  --sl-color-gray-2: var(--c-code);
   --sl-color-gray-3: var(--c-muted);
   --sl-color-gray-4: var(--c-dim);
   --sl-color-gray-5: var(--c-line);

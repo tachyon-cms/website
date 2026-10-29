@@ -74,7 +74,7 @@ test("--c-warn is a different hue from the blues", () => {
 });
 
 // Colours live in tokens.css, so moving a token moves everything drawn with it.
-// The one exception is black, the solid half of a mask or a shadow.
+// The one exception is black, the solid half of a mask or a shadow, at any alpha.
 test("components and layouts take their colours from the tokens", () => {
   const dirs = ["../src/components/", "../src/layouts/"];
   const files = dirs.flatMap((d) =>
@@ -84,7 +84,9 @@ test("components and layouts take their colours from the tokens", () => {
   for (const file of files) {
     // The theme-color meta is read by the browser chrome, which can't see a custom property.
     const source = read(file).replace(/<meta name="theme-color" content="#[0-9a-f]{6}"/i, "");
-    const literals = [...source.matchAll(/#[0-9a-f]{6}\b|#[0-9a-f]{3}\b/gi)].map((m) => m[0]).filter((c) => c !== "#000");
+    const literals = [...source.matchAll(/#[0-9a-f]{6}\b|#[0-9a-f]{3}\b|\b(?:rgba?|hsla?)\([^)]*\)/gi)]
+      .map((m) => m[0])
+      .filter((c) => c !== "#000" && !/^rgba?\(0[ ,]+0[ ,]+0\b/.test(c));
     assert.deepEqual(literals, [], `${file} hard-codes colours`);
   }
 });
@@ -94,6 +96,15 @@ test("components and layouts take their colours from the tokens", () => {
 const docs = read("../docs/src/styles/brand.css");
 const sl = block(":root", docs);
 const colour = (v) => (sl[v].startsWith("var(") ? t[sl[v].slice(4, -1)] : sl[v]);
+// A docs colour with a token's value must name the token, or moving the token
+// leaves the docs behind.
+test("the docs name a token rather than repeat its value", () => {
+  const values = Object.fromEntries(Object.entries(t).map(([k, v]) => [v.toLowerCase(), k]));
+  for (const [name, value] of Object.entries(sl)) {
+    const token = values[value.toLowerCase()];
+    assert.equal(token, undefined, `${name} repeats ${token}; write var(${token})`);
+  }
+});
 test("the docs have no light theme", () => assert.doesNotMatch(docs, /data-theme/));
 const docsPairs = [
   ["--sl-color-white", "--sl-color-black"], ["--sl-color-gray-1", "--sl-color-black"],

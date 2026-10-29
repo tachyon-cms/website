@@ -26,4 +26,6 @@
   --c-warn: #f0b95e;
   /* Text on --c-blue buttons. */
   --c-on-blue: #04121f;
+  /* A faint white wash: hovers, and the lit top edge of a menu. */
+  --c-tint: rgb(255 255 255 / 0.04);
 }

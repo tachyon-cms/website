@@ -159,7 +159,7 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     position: sticky;
     top: 0;
     z-index: 20;
-    background: rgb(12 13 13 / 0.82);
+    background: color-mix(in srgb, var(--c-bg) 82%, transparent);
     -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--c-line);
@@ -255,7 +255,7 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     border: 1px solid var(--c-line-2);
     border-radius: 12px;
     box-shadow:
-      0 1px 0 rgb(255 255 255 / 0.04) inset,
+      0 1px 0 var(--c-tint) inset,
       0 24px 48px -12px rgb(0 0 0 / 0.6);
   }
   /* Security and Why are about the project, not one feature, so a line sets them off. */
@@ -271,7 +271,7 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     border-radius: 8px;
   }
   .menu a:hover {
-    background: rgb(255 255 255 / 0.04);
+    background: var(--c-tint);
   }
   .menu .name {
     font-size: 14px;
