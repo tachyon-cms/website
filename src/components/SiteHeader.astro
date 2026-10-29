@@ -1,7 +1,10 @@
 ---
+// The sticky header. Both menus are <details>, so they open without JavaScript; the
+// script only adds Escape, click-away and tab-away closing. Under 900 px the links move
+// into the menu button's full-width sheet.
 import Icon from './Icon.astro';
 import Mark from './Mark.astro';
-import { isCurrent, nav } from '../lib/nav';
+import { isCurrent, nav, product } from '../lib/nav';
 import { formatStars, stars } from '../lib/stars';
 
 interface Props {
@@ -9,6 +12,9 @@ interface Props {
 }
 const { path } = Astro.props;
 const count = await stars();
+const current = (href: string) => (isCurrent(path, href) ? 'page' : undefined);
+const inProduct = product.some(({ href }) => isCurrent(path, href));
+const repo = 'https://github.com/tachyon-cms/tachyoncms';
 ---
 
 <header class="site-header">
@@ -17,8 +23,26 @@ const count = await stars();
       <Mark />
       TachyonCMS
     </a>
-    <nav aria-label="Main">
+
+    <nav class="links" aria-label="Main">
       <ul>
+        <li>
+          <details class="drop">
+            <summary class:list={{ current: inProduct }}>Product</summary>
+            <ul class="menu">
+              {
+                product.map(({ href, label, note }) => (
+                  <li>
+                    <a href={href} aria-current={current(href)}>
+                      <span class="name">{label}</span>
+                      <span class="note">{note}</span>
+                    </a>
+                  </li>
+                ))
+              }
+            </ul>
+          </details>
+        </li>
         {
           nav.map(({ href, section, label }) => (
             <li>
@@ -30,35 +54,128 @@ const count = await stars();
         }
       </ul>
     </nav>
-    <a class="github" href="https://github.com/tachyon-cms/tachyoncms">
-      <Icon name="FiGithub" />
-      <span class="label">GitHub</span>
-      {
-        count !== null && (
-          <span class="stars">
-            <Icon name="FiStar" size={14} />
-            {formatStars(count)}
-            <span class="sr-only"> stars</span>
-          </span>
-        )
-      }
-    </a>
+
+    <div class="end">
+      <a class="gh" href={repo}>
+        <Icon name="SiGithub" size={15} />
+        Star<span class="sr-only"> on GitHub</span>
+        {
+          count !== null && (
+            <span class="count">
+              {formatStars(count)}
+              <span class="sr-only"> stars</span>
+            </span>
+          )
+        }
+      </a>
+      <a class="cta" href="https://docs.tachyoncms.com/install">Get started</a>
+      <details class="mobile">
+        <summary>
+          <span class="burger" aria-hidden="true"><i></i><i></i></span>
+          <span class="sr-only">Menu</span>
+        </summary>
+        <nav class="sheet" aria-label="Main">
+          <p class="label">Product</p>
+          <ul class="sheet-product">
+            {
+              product.map(({ href, label }) => (
+                <li>
+                  <a href={href} aria-current={current(href)}>
+                    {label}
+                  </a>
+                </li>
+              ))
+            }
+          </ul>
+          <ul class="sheet-main">
+            {
+              nav.map(({ href, section, label }) => (
+                <li>
+                  <a href={href} aria-current={isCurrent(path, section) ? 'page' : undefined}>
+                    {label}
+                  </a>
+                </li>
+              ))
+            }
+            <li>
+              <a href={repo}>
+                GitHub
+                {
+                  count !== null && (
+                    <span class="count">
+                      {formatStars(count)}
+                      <span class="sr-only"> stars</span>
+                    </span>
+                  )
+                }
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </details>
+    </div>
   </div>
 </header>
 
+<script>
+  const menus = [...document.querySelectorAll<HTMLDetailsElement>('.site-header details')];
+  const close = (d: HTMLDetailsElement, refocus = false) => {
+    d.open = false;
+    if (refocus) d.querySelector('summary')?.focus();
+  };
+  addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    for (const d of menus) if (d.open) close(d, d.contains(document.activeElement));
+  });
+  addEventListener('click', (e) => {
+    for (const d of menus) if (d.open && !d.contains(e.target as Node)) close(d);
+  });
+  for (const d of menus) {
+    // The dropdown shuts once Tab moves past it, so it never covers what has focus.
+    if (d.classList.contains('drop'))
+      d.addEventListener('focusout', (e) => {
+        const next = e.relatedTarget as Node | null;
+        if (next && !d.contains(next)) close(d);
+      });
+  }
+</script>
+
 <style>
   .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: rgb(12 13 13 / 0.82);
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--c-line);
   }
   .bar {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
-    gap: 0.75rem 1.5rem;
-    max-width: 72rem;
+    gap: 28px;
+    max-width: 1240px;
+    height: 64px;
     margin: 0 auto;
-    padding: 1rem 16px;
+    padding: 0 24px;
   }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  a {
+    text-decoration: none;
+  }
+  summary {
+    list-style: none;
+    cursor: pointer;
+    user-select: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
   /* Live text beside the mark, not an outlined logo, so it stays crisp at any zoom. */
   .brand {
     display: flex;
@@ -68,59 +185,243 @@ const count = await stars();
     font-weight: 600;
     letter-spacing: -0.02em;
     color: var(--c-text);
-    text-decoration: none;
+    border-radius: 6px;
   }
-  nav {
-    order: 3;
-    flex-basis: 100%;
-    overflow-x: auto;
-  }
-  ul {
+
+  /* Desktop links */
+  .links > ul {
     display: flex;
-    gap: 1rem;
-    margin: 0;
-    padding: 0;
-    list-style: none;
+    align-items: center;
+    gap: 4px;
   }
-  nav a {
-    color: var(--c-muted);
-    text-decoration: none;
-    white-space: nowrap;
-  }
-  nav a:hover,
-  nav a[aria-current='page'] {
-    color: var(--c-text);
-  }
-  .github {
+  .links > ul > li > a,
+  .drop summary {
     display: inline-flex;
     align-items: center;
-    gap: 0.45rem;
-    margin-left: auto;
-    padding: 0.4rem 0.85rem;
+    height: 32px;
+    padding: 0 11px;
+    border-radius: 7px;
+    font-size: 14px;
+    color: var(--c-muted);
+    transition: color 0.15s ease;
+  }
+  .links > ul > li > a:hover,
+  .drop summary:hover,
+  .drop[open] summary,
+  .links [aria-current='page'],
+  .drop summary.current {
     color: var(--c-text);
-    text-decoration: none;
-    border: 1px solid var(--c-line);
-    border-radius: 999px;
   }
-  .github:hover {
-    border-color: var(--c-blue-soft);
+  .drop {
+    position: relative;
   }
-  .stars {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.25rem;
-    padding-left: 0.45rem;
-    border-left: 1px solid var(--c-line);
-    font: 0.875rem var(--font-mono);
+  .drop summary::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 8px;
+    border-right: 1.5px solid currentColor;
+    border-bottom: 1.5px solid currentColor;
+    transform: rotate(45deg);
+    opacity: 0.7;
+    transition: transform 0.15s ease;
+  }
+  .drop[open] summary::after {
+    margin-top: 3px;
+    transform: rotate(225deg);
+  }
+  .menu {
+    position: absolute;
+    top: calc(100% + 17px);
+    left: -12px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px 0;
+    width: 39rem;
+    padding: 8px;
+    background: var(--c-panel);
+    border: 1px solid var(--c-line-2);
+    border-radius: 12px;
+    box-shadow:
+      0 1px 0 rgb(255 255 255 / 0.04) inset,
+      0 24px 48px -12px rgb(0 0 0 / 0.6);
+    animation: menu-in 0.14s ease-out;
+  }
+  /* Security and Why are about the project, not one feature, so a line sets them off. */
+  .menu li:nth-child(n + 7) {
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px solid var(--c-line);
+  }
+  .menu a {
+    display: grid;
+    gap: 2px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    transition: background-color 0.15s ease;
+  }
+  .menu a:hover {
+    background: rgb(255 255 255 / 0.04);
+  }
+  .menu .name {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--c-text);
+  }
+  .menu [aria-current='page'] .name {
+    color: var(--c-blue);
+  }
+  .menu .note {
+    font-size: 13px;
+    line-height: 1.45;
     color: var(--c-muted);
   }
-  @media (min-width: 48rem) {
-    nav {
-      order: 0;
-      flex-basis: auto;
+  @keyframes menu-in {
+    from {
+      opacity: 0;
+      transform: translateY(-4px);
     }
-    ul {
-      gap: 1.25rem;
+  }
+
+  /* Right-hand side */
+  .end {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-left: auto;
+  }
+  .gh {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 32px;
+    padding: 0 10px;
+    font: 12.5px var(--font-mono);
+    color: var(--c-muted);
+    border: 1px solid var(--c-line-2);
+    border-radius: 8px;
+    transition:
+      color 0.15s ease,
+      border-color 0.15s ease;
+  }
+  .gh:hover {
+    color: var(--c-text);
+    border-color: var(--c-dim);
+  }
+  .gh .count {
+    padding-left: 7px;
+    border-left: 1px solid var(--c-line-2);
+    color: var(--c-text);
+  }
+  .cta {
+    display: inline-flex;
+    align-items: center;
+    height: 36px;
+    padding: 0 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--c-on-blue);
+    background: var(--c-blue);
+    border-radius: 9px;
+    transition: background-color 0.15s ease;
+  }
+  .cta:hover {
+    background: var(--c-blue-soft);
+  }
+
+  /* Mobile menu */
+  .mobile {
+    display: none;
+  }
+  .mobile summary {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border: 1px solid var(--c-line-2);
+    border-radius: 9px;
+  }
+  .burger {
+    display: grid;
+    gap: 5px;
+    width: 16px;
+  }
+  .burger i {
+    height: 1.5px;
+    border-radius: 1px;
+    background: var(--c-text);
+    transition: transform 0.2s ease;
+  }
+  .mobile[open] .burger i:first-child {
+    transform: translateY(3.25px) rotate(45deg);
+  }
+  .mobile[open] .burger i:last-child {
+    transform: translateY(-3.25px) rotate(-45deg);
+  }
+  .sheet {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    max-height: calc(100dvh - 64px);
+    overflow-y: auto;
+    padding: 20px 16px 28px;
+    background: var(--c-bg);
+    border-bottom: 1px solid var(--c-line);
+    /* Dims the page below the sheet; the clip keeps the shade off the header above. */
+    box-shadow: 0 0 0 100vmax rgb(0 0 0 / 0.55);
+    clip-path: inset(0 0 -100vmax 0);
+    animation: menu-in 0.14s ease-out;
+  }
+  .sheet .label {
+    margin: 0 0 6px;
+    font: 500 11px/1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--c-muted);
+  }
+  .sheet-product {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--c-line);
+  }
+  .sheet-product a {
+    display: block;
+    padding: 9px 0;
+    font-size: 15px;
+    color: var(--c-muted);
+  }
+  .sheet-main a {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 0;
+    font-size: 17px;
+    font-weight: 500;
+    color: var(--c-text);
+    border-bottom: 1px solid var(--c-line);
+  }
+  .sheet-main .count {
+    font: 13px var(--font-mono);
+    color: var(--c-muted);
+  }
+  .sheet [aria-current='page'] {
+    color: var(--c-blue);
+  }
+
+  @media (max-width: 899.98px) {
+    .bar {
+      gap: 12px;
+      padding: 0 16px;
+    }
+    .links,
+    .gh {
+      display: none;
+    }
+    .mobile {
+      display: block;
     }
   }
 </style>

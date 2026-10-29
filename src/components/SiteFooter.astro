@@ -1,4 +1,5 @@
 ---
+import Mark from './Mark.astro';
 
 const groups = [
   {
@@ -52,24 +53,31 @@ const groups = [
 
 <footer class="site-footer">
   <div class="inner">
-    <nav aria-label="Site map">
-      {
-        groups.map(({ title, links }) => (
-          <div>
-            <h2>{title}</h2>
-            <ul>
-              {links.map(([href, label]) => (
-                <li>
-                  <a href={href}>{label}</a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))
-      }
-    </nav>
+    <div class="top">
+      <a class="logo" href="/">
+        <Mark size={22} animate={false} />
+        TachyonCMS
+      </a>
+      <nav aria-label="Site map">
+        {
+          groups.map(({ title, links }) => (
+            <div>
+              <h2>{title}</h2>
+              <ul>
+                {links.map(([href, label]) => (
+                  <li>
+                    <a href={href}>{label}</a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+      </nav>
+    </div>
     <div class="base">
-      <p>MIT licensed and built in public. © 2026 TachyonCMS</p>
+      <p>MIT licensed and built in public.</p>
+      <p>© 2026 TachyonCMS</p>
     </div>
   </div>
 </footer>
@@ -78,24 +86,40 @@ const groups = [
   .site-footer {
     margin-top: 6rem;
     border-top: 1px solid var(--c-line);
-    font-size: 0.9375rem;
+    font-size: 14px;
   }
   .inner {
-    max-width: 72rem;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 3rem 16px 2rem;
+    padding: 56px 24px 32px;
+  }
+  .top {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    align-self: start;
+    gap: 9px;
+    width: max-content;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--c-text);
   }
   nav {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
-    gap: 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+    gap: 32px 24px;
   }
   h2 {
-    margin: 0 0 0.75rem;
-    font: 600 0.8125rem/1 var(--font-mono);
+    margin: 0 0 14px;
+    font: 500 11px/1 var(--font-mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--c-blue-soft);
+    color: var(--c-muted);
   }
   ul {
     margin: 0;
@@ -103,29 +127,46 @@ const groups = [
     list-style: none;
   }
   li + li {
-    margin-top: 0.4rem;
+    margin-top: 9px;
   }
   a {
     color: var(--c-muted);
     text-decoration: none;
     overflow-wrap: anywhere;
+    transition: color 0.15s ease;
   }
   a:hover {
     color: var(--c-text);
-    text-decoration: underline;
   }
   .base {
     display: flex;
     flex-wrap: wrap;
-    align-items: center;
     justify-content: space-between;
-    gap: 1rem;
-    margin-top: 3rem;
-    padding-top: 1.5rem;
+    gap: 8px 24px;
+    margin-top: 56px;
+    padding-top: 24px;
     border-top: 1px solid var(--c-line);
+    font: 12.5px var(--font-mono);
+    color: var(--c-muted);
   }
   .base p {
     margin: 0;
-    color: var(--c-muted);
+  }
+  @media (min-width: 900px) {
+    .top {
+      grid-template-columns: 14rem 1fr;
+    }
+  }
+  @media (max-width: 899.98px) {
+    .inner {
+      padding-inline: 16px;
+    }
+    nav {
+      grid-template-columns: 1fr 1fr;
+    }
+    /* The addresses are too long for half a phone, so they get the full width. */
+    nav > :last-child {
+      grid-column: 1 / -1;
+    }
   }
 </style>

@@ -6,7 +6,7 @@ test('/blog lists both launch posts and marks Blog in the nav', async ({ page })
   await page.goto('/blog');
   await expect(page.locator('h1')).toHaveCount(1);
   for (const path of posts) await expect(page.locator(`main a[href="${path}"]`)).toBeVisible();
-  await expect(page.locator('header nav a[href="/blog"]')).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('header nav a[href="/blog"]:visible')).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('main a[href="/rss.xml"]')).toBeVisible();
   await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'website');
   await expect(page.locator('meta[property="article:published_time"]')).toHaveCount(0);

@@ -70,6 +70,10 @@ async function orSnapshot<T>(what: string, live: () => Promise<T>, snapshot: T):
 export const fetchReleases = (fetcher: typeof fetch = fetch, token = process.env.GITHUB_TOKEN) =>
   orSnapshot('releases', () => getReleases(fetcher, token), releasesSnapshot as Release[]);
 
+// Every page's announcement bar asks, so the build fetches once.
+let cachedReleases: Promise<Release[]> | undefined;
+export const releases = () => (cachedReleases ??= fetchReleases());
+
 export const fetchContributors = (fetcher: typeof fetch = fetch, token = process.env.GITHUB_TOKEN) =>
   orSnapshot('contributors', () => getContributors(fetcher, token), contributorsSnapshot as Contributor[]);
 

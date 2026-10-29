@@ -1,6 +1,7 @@
 ---
 import { Font } from 'astro:assets';
 import '../brand/tokens.css';
+import AnnounceBar from '../components/AnnounceBar.astro';
 import Seo from '../components/Seo.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import SiteHeader from '../components/SiteHeader.astro';
@@ -34,6 +35,8 @@ const {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Lets CSS wait for scripts that will run, such as the mark's draw-in. Hashed by scripts/csp.mjs. -->
+    <script is:inline>document.documentElement.classList.add('js');</script>
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#0c0d0d" />
     <Seo title={title} description={description} path={path} image={image} imageAlt={imageAlt} published={published} noindex={noindex} />
@@ -45,6 +48,7 @@ const {
   </head>
   <body>
     <a class="skip" href="#main">Skip to content</a>
+    <AnnounceBar />
     <SiteHeader path={path} />
     <main id="main">
       <slot />

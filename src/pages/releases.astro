@@ -3,9 +3,9 @@ import PageHero from '../components/PageHero.astro';
 import Prose from '../components/Prose.astro';
 import SignupForm from '../components/SignupForm.astro';
 import Base from '../layouts/Base.astro';
-import { fetchReleases, renderNotes } from '../lib/github';
+import { releases as allReleases, renderNotes } from '../lib/github';
 
-const releases = await fetchReleases();
+const releases = await allReleases();
 const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 ---
 

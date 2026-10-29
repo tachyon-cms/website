@@ -3,8 +3,9 @@
 // point lands, then glows. The geometry matches brand/build.mjs.
 //
 // Without the .draw class the mark is simply drawn, which is what no-JS and reduced
-// motion get. The script adds .draw on load and again when the pointer enters the
-// parent .brand, which replays it.
+// motion get. With JS and motion it waits undrawn until .draw arrives. The script
+// adds .draw on load and again when the pointer enters the parent .brand, which
+// replays it.
 interface Props {
   size?: number;
   animate?: boolean;
@@ -52,6 +53,14 @@ const { size = 26, animate = true } = Astro.props;
     transform-origin: center;
   }
   @media (prefers-reduced-motion: no-preference) {
+    /* With JS on, the mark waits undrawn for its first .draw, so it never paints
+     * drawn and then blanks. html.js comes from a script in the head of Base.astro. */
+    :global(.js) .mark[data-animate]:not(.draw) .stroke {
+      stroke-dashoffset: 1.05;
+    }
+    :global(.js) .mark[data-animate]:not(.draw) .point {
+      transform: scale(0);
+    }
     .draw .stroke {
       animation: mark-draw 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) both;
     }

@@ -107,7 +107,7 @@ test('/compare links to every comparison', async ({ page }) => {
   await page.goto('/compare');
   await expect(page.locator('h1')).toHaveCount(1);
   for (const slug of compare) await expect(page.locator(`main a[href="/compare/${slug}"]`)).toHaveCount(1);
-  await expect(page.locator('header a[href="/compare"]')).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('header a[href="/compare"]:visible')).toHaveAttribute('aria-current', 'page');
 });
 
 for (const slug of compare) {
