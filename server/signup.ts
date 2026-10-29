@@ -3,6 +3,8 @@ import { signToken, verifyToken } from './token';
 
 const RESEND = 'https://api.resend.com';
 const TURNSTILE = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
+/** Cloudflare's always-pass test secret, which .dev.vars.example uses. */
+const TEST_SECRET = '1x0000000000000000000000000000000AA';
 
 /** Plain enough to catch typos; the confirmation email is the real check. */
 export function normalizeEmail(input: unknown): string | null {
@@ -55,8 +57,15 @@ async function humanCheck(env: Env, request: Request, token: unknown): Promise<b
   if (outcome.success !== true) {
     // The codes say whether it's the visitor or our keys, such as `invalid-input-secret`.
     console.error('signup: human check failed', outcome['error-codes'] ?? [], outcome.hostname ?? '');
+    return false;
   }
-  return outcome.success === true;
+  // A token solved on some other site that borrowed our site key doesn't count. Cloudflare's
+  // test secret answers for example.com, so local dev skips this check.
+  if (env.TURNSTILE_SECRET_KEY !== TEST_SECRET && outcome.hostname !== new URL(request.url).hostname) {
+    console.error('signup: human check came from another host', outcome.hostname ?? '');
+    return false;
+  }
+  return true;
 }
 
 function resend(env: Env, path: string, method: string, body?: unknown): Promise<Response> {

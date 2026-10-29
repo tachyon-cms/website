@@ -14,7 +14,7 @@ const env: Env = {
 type Call = { url: string; method: string; body: unknown };
 
 /** Stands in for Turnstile and Resend, recording every call. */
-function fakeNetwork(opts: { human?: boolean; resend?: (call: Call) => number } = {}) {
+function fakeNetwork(opts: { human?: boolean; hostname?: string; resend?: (call: Call) => number } = {}) {
   const calls: Call[] = [];
   vi.stubGlobal('fetch', async (input: string, init: RequestInit = {}) => {
     const url = String(input);
@@ -22,7 +22,7 @@ function fakeNetwork(opts: { human?: boolean; resend?: (call: Call) => number } 
       init.body instanceof FormData ? Object.fromEntries(init.body) : init.body ? JSON.parse(String(init.body)) : undefined;
     const call = { url, method: init.method ?? 'GET', body };
     calls.push(call);
-    if (url.includes('turnstile')) return Response.json({ success: opts.human ?? true });
+    if (url.includes('turnstile')) return Response.json({ success: opts.human ?? true, hostname: opts.hostname ?? 'tachyoncms.com' });
     return new Response('{}', { status: opts.resend?.(call) ?? 200 });
   });
   return calls;
@@ -105,6 +105,28 @@ describe('subscribe', () => {
     expect(calls.filter((c) => c.url.includes('resend'))).toEqual([]);
   });
 
+  it('accepts a check solved on this host and refuses one solved on another', async () => {
+    const send = () => subscribe(post('/api/subscribe', { email: 'a@b.co', 'cf-turnstile-response': 't' }), env);
+    let calls = fakeNetwork({ hostname: 'tachyoncms.com' });
+    expect(where(await send())).toBe('/check-your-inbox');
+    expect(calls.some((c) => c.url.includes('resend'))).toBe(true);
+
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    for (const hostname of ['evil.example', 'tachyoncms.com.evil.example', '']) {
+      calls = fakeNetwork({ hostname });
+      expect(where(await send()), hostname).toBe('/signup-problem');
+      expect(calls.filter((c) => c.url.includes('resend')), hostname).toEqual([]);
+    }
+    expect(log).toHaveBeenCalledWith('signup: human check came from another host', 'evil.example');
+  });
+
+  it("skips the host check for Cloudflare's always-pass test secret, which answers for example.com", async () => {
+    fakeNetwork({ hostname: 'example.com' });
+    const dev = { ...env, TURNSTILE_SECRET_KEY: '1x0000000000000000000000000000000AA' };
+    const res = await subscribe(post('/api/subscribe', { email: 'a@b.co', 'cf-turnstile-response': 't' }), dev);
+    expect(where(res)).toBe('/check-your-inbox');
+  });
+
   it('says so when the email fails to send, and logs why without the address', async () => {
     fakeNetwork({ resend: () => 403 });
     const log = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -121,7 +143,7 @@ describe('subscribe', () => {
       ['null', 'unknown'],
     ]) {
       vi.stubGlobal('fetch', async (input: string) =>
-        String(input).includes('turnstile') ? Response.json({ success: true }) : new Response(body, { status: 422 }),
+        String(input).includes('turnstile') ? Response.json({ success: true, hostname: 'tachyoncms.com' }) : new Response(body, { status: 422 }),
       );
       const log = vi.spyOn(console, 'error').mockImplementation(() => {});
       const res = await subscribe(post('/api/subscribe', { email: 'a@b.co', 'cf-turnstile-response': 't' }), env);
