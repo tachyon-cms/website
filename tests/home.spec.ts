@@ -206,19 +206,32 @@ test.describe('the hero', () => {
     });
   }
 
-  // Below 1200 px the hero stays stacked: copy over panels. So that it isn't a left
-  // column with nothing beside it, the copy keeps to its own width, the streaks run
-  // in the room to its right, and the panels sit to the right below it.
-  for (const width of [1024, 1100]) {
-    test(`at ${width} px the hero is stacked, the panels set to the right`, async ({ page }) => {
+  // From 1024 px the copy and the panels sit side by side. Under 1200 the panels stay
+  // stacked, joined by three short wires out of the schema's bottom edge and into
+  // the top of the response.
+  for (const width of [1024, 1100, 1199]) {
+    test(`at ${width} px the copy and the panels sit side by side, the wires meeting both`, async ({ page }) => {
       await page.setViewportSize({ width, height: 800 });
       await page.goto('/');
       const hero = (await page.locator('.hero').boundingBox())!;
       const copy = (await page.locator('.hero .copy').boundingBox())!;
       const vis = (await page.locator('.hero .vis').boundingBox())!;
-      expect(vis.y).toBeGreaterThanOrEqual(copy.y + copy.height);
-      expect(copy.width).toBeLessThanOrEqual(hero.width * 0.6);
-      expect(Math.abs(vis.x + vis.width - (hero.x + hero.width))).toBeLessThanOrEqual(1);
+      const schema = (await page.locator('.hero .schema').boundingBox())!;
+      const response = (await page.locator('.hero .response').boundingBox())!;
+      // One row: the panels to the right of the copy, overlapping it vertically.
+      expect(vis.x).toBeGreaterThanOrEqual(copy.x + copy.width);
+      expect(vis.y).toBeLessThan(copy.y + copy.height);
+      expect(vis.x + vis.width).toBeLessThanOrEqual(hero.x + hero.width + 1);
+      // The short wires fill the gap exactly and land on the schema panel.
+      const wire = await page.locator('.hero .response').evaluate((el) => {
+        const css = getComputedStyle(el, '::before');
+        return { content: css.content, height: parseFloat(css.height), left: parseFloat(css.left), width: parseFloat(css.width) };
+      });
+      expect(wire.content).not.toBe('none');
+      expect(Math.abs(response.y - (schema.y + schema.height) - wire.height)).toBeLessThanOrEqual(1);
+      expect(response.x + wire.left).toBeGreaterThanOrEqual(schema.x);
+      expect(response.x + wire.left + wire.width).toBeLessThanOrEqual(schema.x + schema.width);
+      await expect(page.locator('.hero .wires')).toBeHidden();
     });
   }
 

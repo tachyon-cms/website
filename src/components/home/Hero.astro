@@ -138,11 +138,6 @@ const still = [
   .hero > :not(.backdrop) {
     position: relative;
   }
-  /* Stacked, the copy keeps to its own width, so the streaks run in the room to its
-   * right, and the panels sit to the right below it. */
-  .copy {
-    max-width: 34rem;
-  }
 
   /* Full width, whatever the page width. body clips the sideways overflow 100vw makes
    * when a scrollbar takes up room. */
@@ -301,8 +296,6 @@ const still = [
   /* The schema and the response */
   .vis {
     display: grid;
-    justify-self: end;
-    width: 100%;
     max-width: 34rem;
   }
   .panel {
@@ -363,15 +356,22 @@ const still = [
     display: none;
   }
 
+  /* Small laptops: copy and panels side by side, the panels still stacked with
+   * their short wires, since the fixed wire geometry below needs 1200 px. */
+  @media (min-width: 1024px) and (max-width: 1199.98px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) 30rem;
+      align-items: center;
+      gap: 40px;
+      padding: 80px 0;
+    }
+  }
   @media (min-width: 1200px) {
     .hero {
       grid-template-columns: 1.05fr 1fr;
       align-items: center;
       gap: 40px;
       padding: 96px 0;
-    }
-    .copy {
-      max-width: none;
     }
     .still {
       display: block;
