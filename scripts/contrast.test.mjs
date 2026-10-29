@@ -41,8 +41,9 @@ const pairs = [
   ["--c-muted", "--c-bg", 4.5], ["--c-muted", "--c-panel", 4.5],
   ["--c-blue-soft", "--c-bg", 4.5], ["--c-blue-soft", "--c-panel", 4.5],
   ["--c-on-blue", "--c-blue", 4.5],
+  ["--c-blue", "--c-bg", 4.5], ["--c-blue", "--c-panel", 4.5],
   // Dim is for decorative and meta text only, never body copy.
-  ["--c-dim", "--c-bg", 3],
+  ["--c-dim", "--c-bg", 3], ["--c-dim", "--c-panel", 3],
 ];
 for (const [fg, bg, min] of pairs) {
   test(`${fg} on ${bg} is at least ${min}:1`, () => {
@@ -74,15 +75,14 @@ for (const [fg, bg] of docsPairs) {
 }
 
 // The logo files are drawn by brand/build.mjs. Every colour in them is a graphic on
-// the page background, so it needs 3:1; the favicon brings its own dark tile.
-const logos = {
-  "brand/logo-dark.svg": t["--c-bg"], "brand/mark-dark.svg": t["--c-bg"], "favicon.svg": "#07060c",
-};
+// the page background, so it needs 3:1. The favicon brings its own tile in --c-bg.
+// The first stroke's .35 opacity is a deliberate fade; the others carry the mark.
+const logos = { "brand/logo.svg": t["--c-bg"], "brand/mark.svg": t["--c-bg"], "favicon.svg": t["--c-bg"] };
 for (const [file, bg] of Object.entries(logos)) {
   test(`${file} is at least 3:1 on ${bg} and has no inline styles`, () => {
     const svg = readFileSync(new URL(`../public/${file}`, import.meta.url), "utf8");
     assert.doesNotMatch(svg, /<style|style=/);
-    const colours = [...svg.matchAll(/(?:stop-color|fill)="(#[0-9a-f]{6})"/gi)].map((m) => m[1]).filter((c) => c !== bg);
+    const colours = [...svg.matchAll(/(?:stop-color|fill|stroke)="(#[0-9a-f]{6})"/gi)].map((m) => m[1]).filter((c) => c !== bg);
     assert.ok(colours.length > 0, "no colours found");
     for (const c of colours) assert.ok(ratio(c, bg) >= 3, `${c} on ${bg} is ${ratio(c, bg).toFixed(2)}:1`);
   });

@@ -1,5 +1,6 @@
 ---
 import Icon from './Icon.astro';
+import Mark from './Mark.astro';
 import { isCurrent, nav } from '../lib/nav';
 import { formatStars, stars } from '../lib/stars';
 
@@ -12,8 +13,9 @@ const count = await stars();
 
 <header class="site-header">
   <div class="bar">
-    <a class="home" href="/">
-      <img src="/brand/logo-dark.svg" alt="TachyonCMS" width="152" height="24" />
+    <a class="brand" href="/">
+      <Mark />
+      TachyonCMS
     </a>
     <nav aria-label="Main">
       <ul>
@@ -57,8 +59,16 @@ const count = await stars();
     margin: 0 auto;
     padding: 1rem 16px;
   }
-  .home {
+  /* Live text beside the mark, not an outlined logo, so it stays crisp at any zoom. */
+  .brand {
     display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--c-text);
+    text-decoration: none;
   }
   nav {
     order: 3;

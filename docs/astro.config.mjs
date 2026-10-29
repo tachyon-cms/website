@@ -58,7 +58,8 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'TachyonCMS',
-      logo: { src: '../public/brand/logo-dark.svg', replacesTitle: true },
+      // The mark beside the title as live text, the same lockup as the site header.
+      logo: { src: '../public/brand/mark.svg' },
       social: [{ icon: 'github', label: 'TachyonCMS on GitHub', href: 'https://github.com/tachyon-cms/tachyoncms' }],
       customCss: ['./src/styles/brand.css'],
       components: {

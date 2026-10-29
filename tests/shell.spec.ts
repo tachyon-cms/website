@@ -59,12 +59,12 @@ test('the logo and post media may be embedded elsewhere; nothing else may', asyn
     return res.headers()['cross-origin-resource-policy'];
   };
   // Exactly one value: Cloudflare joins a header set by two matching rules.
-  expect(await corp('/brand/logo-dark.svg')).toBe('cross-origin');
+  expect(await corp('/brand/logo.svg')).toBe('cross-origin');
   expect(await corp('/media/blog/v0-1-0/card.png')).toBe('cross-origin');
   expect(await corp('/')).toBe('same-origin');
   expect(await corp('/brand')).toBe('same-origin');
   // The narrower rules add to /*, so the rest of the headers still apply.
-  const logo = (await request.get('/brand/logo-dark.svg')).headers();
+  const logo = (await request.get('/brand/logo.svg')).headers();
   expect(logo['x-content-type-options']).toBe('nosniff');
   expect(logo['content-security-policy']).toContain("default-src 'self'");
 });
@@ -112,4 +112,32 @@ test('signup.js loads once and binds every signup form', async ({ page }) => {
   await page.route(/challenges\.cloudflare\.com/, (route) => route.abort());
   await page.locator('form.signup').nth(1).locator('input[type="email"]').focus();
   await turnstile;
+});
+
+test('the header mark draws itself in on load', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('header .brand .mark')).toHaveClass(/\bdraw\b/);
+  await expect(page.locator('header .brand')).toHaveText('TachyonCMS');
+});
+
+test('with reduced motion the mark is fully drawn from the start', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const offsets = await page
+    .locator('header .brand .mark .stroke')
+    .evaluateAll((paths) => paths.map((p) => getComputedStyle(p).strokeDashoffset));
+  expect(offsets).toEqual(['0px', '0px', '0px']);
+});
+
+test('pointing at the brand replays the draw-in', async ({ page }) => {
+  await page.goto('/');
+  const stroke = page.locator('header .brand .mark .stroke').first();
+  // Wait out the first draw, then check the replay starts the stroke over.
+  await expect.poll(() => stroke.evaluate((p) => getComputedStyle(p).strokeDashoffset)).toBe('0px');
+  await page.evaluate(() => {
+    (window as any).draws = 0;
+    addEventListener('animationstart', (e) => e.animationName.endsWith('mark-draw') && (window as any).draws++);
+  });
+  await page.locator('header .brand').hover();
+  await expect.poll(() => page.evaluate(() => (window as any).draws)).toBe(3);
 });

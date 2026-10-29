@@ -59,8 +59,8 @@ test('the FAQ answers the questions people ask first', async ({ page }) => {
 
 test('brand offers every logo file as a download', async ({ page }) => {
   await page.goto('/brand');
-  for (const file of ['logo-dark', 'logo-light', 'mark-dark', 'mark-light']) {
-    await expect(page.locator(`main a[href="/brand/${file}.svg"][download]`)).toHaveCount(1);
+  for (const file of ['logo.svg', 'mark.svg', 'avatar-1024.png']) {
+    await expect(page.locator(`main a[href="/brand/${file}"][download]`)).toHaveCount(1);
   }
   await expect(page.locator('main')).toContainText('Inter');
   await expect(page.locator('main')).toContainText('Geist Mono');

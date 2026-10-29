@@ -43,9 +43,16 @@ const here = `/${Astro.locals.starlightRoute.id}`;
     }
   }
 
-  /* Keep the logo and the mobile menu button sized and centred to the top bar. */
+  /* The mark and title as the site header sets them; the menu button centres on the bar. */
+  :global(.site-title) {
+    gap: 10px;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    color: var(--sl-color-white);
+  }
   :global(.site-title img) {
-    height: calc(var(--tc-bar) - 2 * var(--sl-nav-pad-y));
+    height: 26px;
   }
   :global(.sl-menu-button) {
     top: calc((var(--tc-bar) - var(--sl-menu-button-size)) / 2);

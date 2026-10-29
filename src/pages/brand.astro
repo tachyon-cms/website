@@ -22,10 +22,9 @@ const colours = roles.map(([token, role]) => ({ token, role, hex: values[token] 
 if (colours.some((c) => !c.hex)) throw new Error('brand: a colour is missing from src/brand/tokens.css');
 
 const logos = [
-  { file: 'logo-dark.svg', label: 'Logo, for dark backgrounds', tile: 'on-dark', width: 202, height: 32 },
-  { file: 'logo-light.svg', label: 'Logo, for light backgrounds', tile: 'on-light', width: 202, height: 32 },
-  { file: 'mark-dark.svg', label: 'Mark, for dark backgrounds', tile: 'on-dark', width: 32, height: 32 },
-  { file: 'mark-light.svg', label: 'Mark, for light backgrounds', tile: 'on-light', width: 32, height: 32 },
+  { file: 'logo.svg', label: 'Logo', type: 'SVG', width: 353, height: 64 },
+  { file: 'mark.svg', label: 'Mark', type: 'SVG', width: 64, height: 64 },
+  { file: 'avatar-1024.png', label: 'Avatar, 1024 px square', type: 'PNG', width: 1024, height: 1024 },
 ];
 ---
 
@@ -47,11 +46,11 @@ const logos = [
         {
           logos.map((l) => (
             <li>
-              <div class:list={['tile', l.tile]}>
+              <div class="tile">
                 <img src={`/brand/${l.file}`} alt="" width={l.width} height={l.height} />
               </div>
               <a href={`/brand/${l.file}`} download>
-                {l.label} <span>SVG</span>
+                {l.label} <span>{l.type}</span>
               </a>
             </li>
           ))
@@ -59,8 +58,9 @@ const logos = [
       </ul>
       <Prose>
         <p>
-          Give the logo room, at least the mark's height on every side. Don't recolour it, stretch it, or set it on a
-          background that fights the gradient. The <a href="/trademark">trademark page</a> covers where you can use it.
+          Give the logo room: at least the mark's height on every side. Don't recolour it or stretch it, and keep it on
+          a dark background, because that's the only one it's drawn for. The <a href="/trademark">trademark page</a>{' '}
+          covers where you can use it.
         </p>
       </Prose>
     </section>
@@ -79,7 +79,7 @@ const logos = [
     <section aria-labelledby="colours">
       <h2 id="colours">Colours</h2>
       <Prose>
-        <p>TachyonCMS is dark only, so there's one set: near-black, quiet greys and one electric blue.</p>
+        <p>The site and docs are dark only, so there's one set: near-black, quiet greys and one electric blue.</p>
       </Prose>
       <div class="table">
         <table>
@@ -154,18 +154,16 @@ const logos = [
     padding: 1rem;
     border: 1px solid var(--c-line);
     border-radius: 14px;
-  }
-  /* The two backgrounds the logo files are drawn for, whatever the page's theme. */
-  .on-dark {
-    background: #0c0d0d;
-  }
-  .on-light {
-    background: #faf8ff;
+    background: var(--c-bg);
   }
   .tile img {
     max-width: 100%;
     height: 2.5rem;
     width: auto;
+  }
+  /* The avatar is a square with the mark inside, so it needs more room to read. */
+  .tile img[src$='.png'] {
+    height: 6rem;
   }
   .logos a span {
     font: 600 0.75rem var(--font-mono);
