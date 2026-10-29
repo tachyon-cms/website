@@ -1,0 +1,131 @@
+---
+import { render } from 'astro:content';
+import PostAside from '../../components/PostAside.astro';
+import Prose from '../../components/Prose.astro';
+import Base from '../../layouts/Base.astro';
+import { postDate, publishedPosts } from '../../lib/posts';
+
+export async function getStaticPaths() {
+  return (await publishedPosts()).map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content, headings } = await render(post);
+const path = `/blog/${post.id}`;
+const words = (post.body ?? '').replace(/```[\s\S]*?```|<[^>]+>/g, ' ').split(/\s+/).filter(Boolean).length;
+const minutes = Math.max(1, Math.round(words / 230));
+---
+
+<Base
+  title={`${post.data.title} · TachyonCMS`}
+  description={post.data.description}
+  path={path}
+  image={post.data.image}
+  imageAlt={post.data.imageAlt}
+  published={post.data.date}
+>
+  <article>
+    <header>
+      <a class="back" href="/blog">Blog</a>
+      <h1>{post.data.title}</h1>
+      <p class="lede">{post.data.description}</p>
+      <p class="meta">
+        <time datetime={post.data.date.toISOString().slice(0, 10)}>{postDate.format(post.data.date)}</time>
+        <span aria-hidden="true">·</span>
+        {post.data.author}
+        <span aria-hidden="true">·</span>
+        {minutes} min read
+      </p>
+    </header>
+    <div class="layout">
+      <Prose><Content /></Prose>
+      <PostAside headings={headings} url={new URL(path, Astro.site).href} title={post.data.title} />
+    </div>
+  </article>
+</Base>
+
+<style>
+  article {
+    padding: clamp(3rem, 10vw, 6rem) 0 clamp(3rem, 8vw, 5rem);
+  }
+  header {
+    max-width: 48rem;
+    margin-bottom: clamp(2rem, 6vw, 3.5rem);
+  }
+  .back {
+    font: 600 0.8125rem/1 var(--font-mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    text-decoration: none;
+  }
+  .back:hover {
+    text-decoration: underline;
+  }
+  h1 {
+    margin: 1rem 0 1.25rem;
+    font-size: clamp(2.25rem, 6vw, 3.5rem);
+    line-height: 1.05;
+    letter-spacing: -0.035em;
+    text-wrap: balance;
+  }
+  .lede {
+    margin: 0;
+    font-size: 1.25rem;
+    color: var(--c-muted);
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.5rem 0 0;
+    font: 0.8125rem var(--font-mono);
+    color: var(--c-muted);
+  }
+  .layout {
+    display: grid;
+    gap: 3rem;
+  }
+  .layout > :global(.prose) {
+    min-width: 0;
+  }
+  /* The first paragraph reads a size up, in full colour. */
+  .layout :global(.prose > p:first-child) {
+    font-size: 1.1875rem;
+    color: var(--c-text);
+  }
+  .layout :global(.prose figure) {
+    margin: 2rem 0;
+  }
+  .layout :global(.prose figure img) {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+  }
+  .layout :global(.prose figcaption) {
+    margin-top: 0.75rem;
+    font-size: 0.9375rem;
+  }
+  /* Narrow screens: the contents list would come after the post it lists, so only sharing shows. */
+  @media (max-width: 63.99rem) {
+    .layout > :global(.post-aside) {
+      padding-top: 2rem;
+      border-top: 1px solid var(--c-border);
+    }
+    .layout :global(.post-aside nav) {
+      display: none;
+    }
+  }
+  @media (min-width: 64rem) {
+    .layout {
+      grid-template-columns: minmax(0, 42rem) 15rem;
+      justify-content: space-between;
+    }
+    .layout > :global(.post-aside) {
+      position: sticky;
+      top: 2rem;
+      align-self: start;
+    }
+  }
+</style>

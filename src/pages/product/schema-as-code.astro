@@ -1,0 +1,16 @@
+---
+import FeaturePage from '../../components/FeaturePage.astro';
+import SchemaDiff from '../../components/diagrams/SchemaDiff.astro';
+---
+
+<FeaturePage
+  id="schema-as-code"
+  name="Schema as code"
+  path="/product/schema-as-code"
+  docs={[
+    ['schema-files', 'Schema files'],
+    ['content-types', 'Changing content types'],
+  ]}
+>
+  <SchemaDiff />
+</FeaturePage>

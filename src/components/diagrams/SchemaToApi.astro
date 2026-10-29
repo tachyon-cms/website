@@ -1,0 +1,98 @@
+---
+// A content type goes in; a working endpoint comes out. The requests and the
+// response are the README's first-run example, as v0.1.0 answers it.
+import Icon from '../Icon.astro';
+import Code from './Code.astro';
+import Diagram from './Diagram.astro';
+---
+
+<Diagram id="schema-to-api" loop={9000} caption="Real requests and responses from TachyonCMS v0.1.0. An ellipsis marks where a response is trimmed.">
+  <div class="s2a">
+    <div class="pane define">
+      <p class="pane-head">1 · Define a content type</p>
+      <Code
+        lines={[
+          { text: 'POST /api/admin/collections', at: 0, class: 'q' },
+          { text: 'Authorization: Bearer tcs_…', at: 0, class: 'q' },
+          { text: '{', at: 0 },
+          { text: '  "slug": "posts",', at: 0 },
+          { text: '  "fields": [', at: 0 },
+          { text: '    { "name": "title", "type": "text",', at: 500 },
+          { text: '      "required": true, "maxLength": 120 },', at: 500 },
+          { text: '    { "name": "publishedOn", "type": "date",', at: 1000 },
+          { text: '      "dateOnly": true }', at: 1000 },
+          { text: '  ]', at: 1000 },
+          { text: '}', at: 1000 },
+        ]}
+      />
+    </div>
+    <span class="arrow a1" data-at="1700"><Icon name="FiArrowDown" /></span>
+    <div class="pane write">
+      <p class="pane-head">2 · Add a post</p>
+      <Code
+        lines={[
+          { text: 'POST /api/posts', at: 2100, class: 'q' },
+          { text: 'Authorization: Bearer tcs_…', at: 2100, class: 'q' },
+          { text: '{ "title": "Hello, world",', at: 2100 },
+          { text: '  "publishedOn": "2026-10-12" }', at: 2100 },
+        ]}
+      />
+    </div>
+    <span class="arrow a2" data-at="3000"><Icon name="FiArrowDown" /></span>
+    <div class="pane read">
+      <p class="pane-head">3 · Read it back, no sign-in needed</p>
+      <Code
+        lines={[
+          { text: 'GET /api/posts', at: 3400, class: 'q' },
+          { text: '{', at: 3800 },
+          { text: '  "docs": [{', at: 3800 },
+          { text: '    "id": "01a183e3-0e0c-76c0-…",', at: 3800 },
+          { text: '    "title": "Hello, world",', at: 4200, class: 'mark' },
+          { text: '    "publishedOn": "2026-10-12",', at: 4200, class: 'mark' },
+          { text: '    …', at: 4200 },
+          { text: '  }],', at: 4200 },
+          { text: '  "hasNextPage": false,', at: 4700 },
+          { text: '  "limit": 10, "page": 1', at: 4700 },
+          { text: '}', at: 4700 },
+        ]}
+      />
+    </div>
+  </div>
+</Diagram>
+
+<style>
+  .s2a {
+    display: grid;
+    gap: 0.9rem;
+  }
+  @media (min-width: 56rem) {
+    .s2a {
+      grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      grid-template-areas:
+        'define a1 write'
+        'define a1 a2'
+        'define a1 read';
+      align-items: start;
+      gap: 0.75rem 1rem;
+    }
+    .define {
+      grid-area: define;
+      align-self: stretch;
+    }
+    .write {
+      grid-area: write;
+    }
+    .read {
+      grid-area: read;
+    }
+    .a1 {
+      grid-area: a1;
+    }
+    .a2 {
+      grid-area: a2;
+    }
+    .a1 :global(svg) {
+      transform: rotate(-90deg);
+    }
+  }
+</style>

@@ -1,0 +1,13 @@
+---
+// The site's dark/light toggle; ThemeProvider.astro wires up its clicks.
+import ThemeToggle from '../../../src/components/ThemeToggle.astro';
+---
+
+<ThemeToggle />
+
+<style>
+  /* Without JS the toggle couldn't do anything, so it isn't shown. */
+  :global(html:not([data-theme-js]) [data-theme-toggle]) {
+    display: none;
+  }
+</style>

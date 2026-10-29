@@ -1,0 +1,54 @@
+---
+import Icon from '../Icon.astro';
+---
+
+<section id="start" class="band closing" aria-labelledby="start-title">
+  <h2 id="start-title">Pull it. Point it at Postgres. Define something.</h2>
+  <pre><code><span class="q">$</span> docker pull ghcr.io/tachyon-cms/tachyoncms:v0.1.0</code></pre>
+  <p>Or grab a binary for Linux or macOS. The docs take you from there to your first API key.</p>
+  <div class="actions">
+    <a class="btn" href="https://docs.tachyoncms.com/install">Get started <Icon name="FiArrowRight" /></a>
+    <a class="btn ghost" href="https://github.com/tachyon-cms/tachyoncms">
+      <Icon name="FiGithub" /> Star on GitHub
+    </a>
+  </div>
+</section>
+
+<style>
+  .closing {
+    text-align: center;
+  }
+  h2 {
+    max-width: 18ch;
+    margin: 0 auto 1.5rem;
+    font-size: clamp(2rem, 6vw, 3.4rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    text-wrap: balance;
+  }
+  pre {
+    display: inline-block;
+    max-width: 100%;
+    margin: 0 0 1.25rem;
+    padding: 0.8rem 1.2rem;
+    font: 0.875rem/1.5 var(--font-mono);
+    text-align: left;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: 12px;
+  }
+  .q {
+    color: var(--c-muted);
+  }
+  p {
+    color: var(--c-muted);
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+  }
+</style>

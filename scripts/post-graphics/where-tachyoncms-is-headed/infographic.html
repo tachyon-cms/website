@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Where TachyonCMS is headed: infographic</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+  body { width: 1600px; }
+  .frame { padding: 80px 88px; display: grid; gap: 56px; }
+  .top { display: flex; justify-content: space-between; align-items: center; }
+  .top img { height: 44px; }
+  h1 { font-size: 76px; line-height: 1.04; letter-spacing: -0.03em; }
+  .lede { margin-top: 20px; max-width: 1150px; font-size: 30px; line-height: 1.4; color: var(--muted); }
+  .lede b { color: var(--text); font-weight: 600; }
+  h2 { margin-bottom: 24px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .row .box { padding: 32px 36px; }
+  h3 { font-size: 30px; margin-bottom: 12px; }
+  .row p { font-size: 24px; line-height: 1.45; color: var(--muted); }
+  ol { display: grid; gap: 18px; padding: 0; list-style: none; counter-reset: step; }
+  ol li { display: grid; grid-template-columns: 96px 1fr auto; align-items: center; gap: 28px; padding: 28px 36px; }
+  ol li::before { counter-increment: step; content: "0" counter(step); font: 600 34px/1 var(--mono); color: var(--soft); }
+  ol h3 { margin-bottom: 6px; }
+  ol p { font-size: 23px; line-height: 1.4; color: var(--muted); }
+  .tag { padding: 8px 16px; font: 600 18px/1 var(--mono); color: #fff; background: var(--grad); border-radius: 999px; }
+  li.now { border-color: var(--violet); }
+  li.last { border-style: dashed; }
+  .ask { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .ask .box { padding: 30px 32px; }
+  .ask h3 { font-size: 28px; }
+  .ask p { font-size: 22px; line-height: 1.45; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="top"><img src="../../../public/brand/logo-dark.svg" alt=""><span class="eyebrow">Roadmap</span></div>
+  <header>
+    <h1>Where TachyonCMS <span class="grad">is headed</span></h1>
+    <p class="lede">The goal that sets the order: <b>run tachyoncms.com on TachyonCMS itself.</b></p>
+  </header>
+
+  <div class="row">
+    <div class="box"><h3>Works today, in v0.1.0</h3><p>Content types over the API or in a file, filters through relationships, sign-in, scoped API keys, roles, and access rules down to a field.</p></div>
+    <div class="box"><h3>The half that's left</h3><p>Everything an editor needs, from rich text and blocks through to the admin screen.</p></div>
+  </div>
+
+  <section>
+    <h2 class="eyebrow">Next, in this order</h2>
+    <ol>
+      <li class="box now"><div><h3>Rich text and blocks</h3><p>Long-form writing with code samples and tables, and pages built from reusable sections.</p></div><span class="tag">under way</span></li>
+      <li class="box"><div><h3>Drafts, versions and scheduled publishing</h3><p>So nothing goes live before it's meant to.</p></div></li>
+      <li class="box"><div><h3>Media</h3><p>Upload once, reuse anywhere, responsive images.</p></div></li>
+      <li class="box"><div><h3>Live preview</h3><p>See a draft before it's published.</p></div></li>
+      <li class="box"><div><h3>Authoring tools</h3><p>Markdown in and out, and bulk import.</p></div></li>
+      <li class="box last"><div><h3>Then the admin screen</h3><p>The bar: anyone who has used WordPress picks it up without training.</p></div></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2 class="eyebrow">Where you come in</h2>
+    <div class="ask">
+      <div class="box"><h3>Ten open issues</h3><p>Each says which files to change, how to test it and when it's done.</p></div>
+      <div class="box"><h3>Vote on the order</h3><p>Discussion #39 on GitHub, or reply to #35.</p></div>
+      <div class="box"><h3>Pick the first starter</h3><p>Name your front end in Discussion #38.</p></div>
+    </div>
+  </section>
+</div>
+</body>
+</html>

@@ -1,15 +1,35 @@
 ---
-import '../styles/site.css';
+import { Font } from 'astro:assets';
+import '../brand/tokens.css';
+import Seo from '../components/Seo.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import SiteHeader from '../components/SiteHeader.astro';
+import { initTheme } from '../scripts/theme';
 
 interface Props {
   title: string;
   description?: string;
+  /** The page's own path, such as "/roadmap", for its canonical URL. */
+  path: string;
+  /** A social card image, relative to the site. */
+  image?: string;
+  imageAlt?: string;
+  /** A blog post's date, for the article meta tags. */
+  published?: Date;
   /** Pages that only make sense mid-signup stay out of search results. */
   noindex?: boolean;
 }
-const { title, description = 'TachyonCMS is an open-source CMS written in Rust, built in public.', noindex = false } =
-  Astro.props;
-const canonical = new URL(Astro.url.pathname, Astro.site);
+const {
+  title,
+  description = 'TachyonCMS is an open-source CMS written in Rust, built in public.',
+  path,
+  image,
+  imageAlt,
+  published,
+  noindex,
+} = Astro.props;
+// Inlined so it runs before first paint, after the meta tags it updates; scripts/csp.mjs hashes it like any inline script.
+const themeScript = `(${initTheme.toString()})();`;
 ---
 
 <!doctype html>
@@ -17,33 +37,122 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title}</title>
-    <meta name="description" content={description} />
     <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#08090c" />
+    <meta name="theme-color" content="#07060c" />
+    <script is:inline set:html={themeScript} />
+    <Seo title={title} description={description} path={path} image={image} imageAlt={imageAlt} published={published} noindex={noindex} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    {noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
-    <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content={canonical} />
+    <link rel="alternate" type="application/rss+xml" title="TachyonCMS blog" href="/rss.xml" />
+    <Font cssVariable="--font-sans" preload={[{ weight: 400 }]} />
+    <Font cssVariable="--font-mono" />
     <slot name="head" />
   </head>
   <body>
-    <header class="brand">
-      <a href="/" aria-label="TachyonCMS home">
-        <svg class="mark" viewBox="0 0 32 32" aria-hidden="true">
-          <path d="M6 7h20v4h-8v15h-4V11H6z" />
-          <path class="streak" d="M2 15h8v2H2zM0 20h10v2H0z" />
-        </svg>
-        <span>TachyonCMS</span>
-      </a>
-    </header>
-    <slot />
-    <footer>
-      <p>
-        MIT licensed · <a href="https://github.com/tachyon-cms/tachyoncms">Source on GitHub</a> · © 2026 TachyonCMS
-      </p>
-    </footer>
+    <a class="skip" href="#main">Skip to content</a>
+    <SiteHeader path={path} />
+    <main id="main">
+      <slot />
+    </main>
+    <SiteFooter />
   </body>
 </html>
+
+<style is:global>
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    background: var(--c-bg);
+    color: var(--c-text);
+    font: 400 1.0625rem/1.65 var(--font-sans);
+  }
+  main {
+    flex: 1;
+    width: 100%;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+  a {
+    color: var(--c-soft);
+    text-underline-offset: 3px;
+  }
+  :focus-visible {
+    outline: 2px solid var(--c-hi);
+    outline-offset: 3px;
+  }
+  h1,
+  h2,
+  h3 {
+    color: var(--c-text);
+  }
+  p {
+    margin: 0 0 1.25rem;
+  }
+  .skip {
+    position: absolute;
+    left: 16px;
+    top: -4rem;
+    z-index: 10;
+    padding: 0.6rem 1rem;
+    color: var(--c-on-grad);
+    background: var(--c-grad);
+    border-radius: 999px;
+  }
+  .skip:focus {
+    top: 1rem;
+  }
+  /* Call-to-action links: .btn for the gradient one, plus .ghost for the quiet one. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.4rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-decoration: none;
+    color: var(--c-on-grad);
+    background: var(--c-grad);
+    border: 1px solid transparent;
+    border-radius: 999px;
+  }
+  .btn:hover {
+    filter: brightness(1.1);
+  }
+  .btn.ghost {
+    color: var(--c-text);
+    background: var(--c-surface);
+    border-color: var(--c-border);
+  }
+  .btn.ghost:hover {
+    filter: none;
+    border-color: var(--c-soft);
+  }
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0s !important;
+      animation-delay: 0s !important;
+      transition-duration: 0s !important;
+      scroll-behavior: auto !important;
+    }
+  }
+</style>

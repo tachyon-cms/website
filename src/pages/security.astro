@@ -1,0 +1,34 @@
+---
+import FeaturePage from '../components/FeaturePage.astro';
+import Exchange from '../components/diagrams/Exchange.astro';
+---
+
+<FeaturePage
+  id="security"
+  name="Security"
+  path="/security"
+  docs={[
+    ['security-model', 'The security model'],
+    ['deploy/binary', 'Install the binary'],
+  ]}
+>
+  <Exchange
+    id="verify"
+    caption="The check from the v0.1.0 release notes, run against the macOS Apple silicon download."
+    panes={[
+      {
+        head: 'Check a download before you run it',
+        lines: [
+          { text: '$ cosign verify-blob \\', at: 0 },
+          { text: "    --certificate-identity 'https://github.com/tachyon-cms/tachyoncms/.github/workflows/release.yml@refs/heads/main' \\", at: 0 },
+          { text: '    --certificate-oidc-issuer https://token.actions.githubusercontent.com \\', at: 0 },
+          { text: '    --bundle checksums.txt.sigstore.json checksums.txt', at: 0 },
+          { text: 'Verified OK', at: 1400, class: 'ok' },
+          { text: '', at: 2400 },
+          { text: '$ sha256sum --check --ignore-missing checksums.txt', at: 2400 },
+          { text: 'tachyon_0.1.0_aarch64-apple-darwin.tar.gz: OK', at: 3200, class: 'ok' },
+        ],
+      },
+    ]}
+  />
+</FeaturePage>

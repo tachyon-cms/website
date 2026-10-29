@@ -1,6 +1,29 @@
 # TachyonCMS
 
-> An open-source CMS written in Rust, built in public. Not launched yet.
+> An open-source headless CMS written in Rust: one binary and one Postgres database, with a REST API that comes from the content types you define. MIT licensed. The current release, v0.1.0, is pre-alpha and has no admin screen yet.
 
+## The project
+
+- [Why TachyonCMS](https://tachyoncms.com/why): why it exists and who it's for.
+- [Roadmap](https://tachyoncms.com/roadmap): what works today and the order the rest is being built in. There are no dates.
+- [Releases](https://tachyoncms.com/releases): signed binaries for Linux and macOS, and a Docker image.
+- [Security](https://tachyoncms.com/security): how it is kept safe, how to verify a release, and how to report a vulnerability.
+- [Blog](https://tachyoncms.com/blog): releases, plans and notes from building it in public.
+
+## Product
+
+- [Content modelling](https://tachyoncms.com/product/content-modelling): content types, fields, relationships.
+- [Schema as code](https://tachyoncms.com/product/schema-as-code): content types kept in a JSON file you diff and apply.
+- [Querying](https://tachyoncms.com/product/querying): filters, sorting, joins, select and populate.
+- [Sign-in](https://tachyoncms.com/product/sign-in): sessions, bearer tokens and scoped API keys.
+- [Access control](https://tachyoncms.com/product/access-control): roles and access rules down to a single field.
+- [Admin](https://tachyoncms.com/product/admin): not built yet; what it will be held to.
+
+## Compare
+
+- [Comparisons](https://tachyoncms.com/compare): TachyonCMS next to WordPress, Strapi, Contentful, Sanity and Directus, including where it isn't there yet.
+
+## Docs and source
+
+- [Documentation](https://docs.tachyoncms.com): install, concepts, guides, HTTP API and CLI reference.
 - [Source code](https://github.com/tachyon-cms/tachyoncms): the CMS, MIT licensed.
-- [Launch page](https://tachyoncms.com/): sign up to hear when it launches.

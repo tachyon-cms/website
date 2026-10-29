@@ -1,0 +1,79 @@
+import { expect, test } from '@playwright/test';
+
+const discussions = 'https://github.com/tachyon-cms/tachyoncms/discussions';
+const pages = ['/roadmap', '/releases', '/community', '/starters', '/faq', '/brand', '/privacy', '/trademark'];
+
+for (const path of pages) {
+  test(`${path} has one h1 and a title`, async ({ page }) => {
+    await page.goto(path);
+    await expect(page.locator('h1')).toHaveCount(1);
+    expect(await page.title()).toMatch(/· TachyonCMS$/);
+  });
+}
+
+test('project pages fit a phone', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  for (const path of pages) {
+    await page.goto(path);
+    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
+    expect(overflow, path).toBeLessThanOrEqual(0);
+  }
+});
+
+test('the roadmap links the discussion it mirrors and both polls', async ({ page }) => {
+  await page.goto('/roadmap');
+  for (const n of [35, 38, 39]) await expect(page.locator(`main a[href="${discussions}/${n}"]`).first()).toBeVisible();
+  await expect(page.locator('main ol li').first()).toContainText('Rich text and blocks');
+});
+
+test('releases shows the v0.1.0 notes, rendered from Markdown', async ({ page }) => {
+  await page.goto('/releases');
+  await expect(page.locator('main h2', { hasText: 'v0.1.0' })).toBeVisible();
+  await expect(page.locator('main h3', { hasText: 'Verify a download' })).toBeVisible();
+  await expect(page.locator('main pre code')).toContainText('cosign verify-blob');
+  // Once beside the date, and again after the notes, where a reader who got to the end looks.
+  await expect(page.locator('main a[href="https://github.com/tachyon-cms/tachyoncms/releases/tag/v0.1.0"]')).toHaveCount(2);
+});
+
+test('community lists contributors and the no-CLA promise', async ({ page }) => {
+  await page.goto('/community');
+  await expect(page.locator('main a[href="https://github.com/jamesconwaydev"]')).toBeVisible();
+  await expect(page.locator('main')).toContainText('No CLA, ever');
+});
+
+test('starters is headed and points at the front-end poll', async ({ page }) => {
+  await page.goto('/starters');
+  await expect(page.locator('.page-hero').getByText('On the roadmap', { exact: true })).toBeVisible();
+  await expect(page.locator(`main a[href="${discussions}/38"]`).first()).toBeVisible();
+});
+
+test('the FAQ answers the questions people ask first', async ({ page }) => {
+  await page.goto('/faq');
+  const questions = await page.locator('main h2').allTextContents();
+  for (const q of ['Is it production ready?', "What's the license?", 'Do I have to sign a CLA to contribute?', 'How do I report a security issue?', "Where's the admin?"]) {
+    expect(questions).toContain(q);
+  }
+  await expect(page.locator('main')).toContainText('pre-alpha');
+  await expect(page.locator('main a[href="mailto:security@tachyoncms.com"]').first()).toBeVisible();
+});
+
+test('brand offers every logo file as a download', async ({ page }) => {
+  await page.goto('/brand');
+  for (const file of ['logo-dark', 'logo-light', 'mark-dark', 'mark-light']) {
+    await expect(page.locator(`main a[href="/brand/${file}.svg"][download]`)).toHaveCount(1);
+  }
+  await expect(page.locator('main')).toContainText('Instrument Sans');
+  await expect(page.locator('main')).toContainText('IBM Plex Mono');
+});
+
+test('privacy names what the signup sends where', async ({ page }) => {
+  await page.goto('/privacy');
+  for (const text of ['Turnstile', 'Resend', 'no cookies', 'local storage', 'Cloudflare']) {
+    await expect(page.locator('main')).toContainText(text);
+  }
+});
+
+test('trademark sends questions to legal@', async ({ page }) => {
+  await page.goto('/trademark');
+  await expect(page.locator('main a[href="mailto:legal@tachyoncms.com"]')).toBeVisible();
+});

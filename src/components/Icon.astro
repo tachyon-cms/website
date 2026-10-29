@@ -1,0 +1,28 @@
+---
+// Renders a react-icons icon to plain SVG at build time. React never reaches the
+// browser: the markup is a string by the time the page is written.
+import { createElement, type ComponentType } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import * as fi from 'react-icons/fi';
+import * as si from 'react-icons/si';
+
+type IconProps = { size?: string | number; className?: string; 'aria-hidden'?: boolean; focusable?: string };
+// The two-letter prefix of an icon's name says which set it is in. Add a set here to use it.
+const sets: Record<string, Record<string, unknown>> = { Fi: fi, Si: si };
+
+interface Props {
+  name: string;
+  size?: number;
+  class?: string;
+}
+const { name, size = 18, class: className } = Astro.props;
+const icon = sets[name.slice(0, 2)]?.[name] as ComponentType<IconProps> | undefined;
+if (!icon) throw new Error(`Icon: no icon called ${name}`);
+// The CSP refuses style="" attributes, so drop any react-icons adds.
+const svg = renderToStaticMarkup(createElement(icon, { size, className, 'aria-hidden': true, focusable: 'false' })).replace(
+  /\sstyle="[^"]*"/g,
+  '',
+);
+---
+
+<Fragment set:html={svg} />

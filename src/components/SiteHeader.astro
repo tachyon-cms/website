@@ -1,0 +1,124 @@
+---
+import Icon from './Icon.astro';
+import { isCurrent, nav } from '../lib/nav';
+import { formatStars, stars } from '../lib/stars';
+
+interface Props {
+  path: string;
+}
+const { path } = Astro.props;
+const count = await stars();
+---
+
+<header class="site-header">
+  <div class="bar">
+    <a class="home" href="/">
+      <img class="logo-dark" src="/brand/logo-dark.svg" alt="TachyonCMS" width="152" height="24" />
+      <img class="logo-light" src="/brand/logo-light.svg" alt="TachyonCMS" width="152" height="24" />
+    </a>
+    <nav aria-label="Main">
+      <ul>
+        {
+          nav.map(({ href, section, label }) => (
+            <li>
+              <a href={href} aria-current={isCurrent(path, section) ? 'page' : undefined}>
+                {label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <a class="github" href="https://github.com/tachyon-cms/tachyoncms">
+      <Icon name="FiGithub" />
+      <span class="label">GitHub</span>
+      {
+        count !== null && (
+          <span class="stars">
+            <Icon name="FiStar" size={14} />
+            {formatStars(count)}
+            <span class="sr-only"> stars</span>
+          </span>
+        )
+      }
+    </a>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--c-border);
+  }
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1.5rem;
+    max-width: 72rem;
+    margin: 0 auto;
+    padding: 1rem 16px;
+  }
+  .home {
+    display: flex;
+  }
+  .logo-light,
+  :global([data-theme='light']) .logo-dark {
+    display: none;
+  }
+  :global([data-theme='light']) .logo-light {
+    display: block;
+  }
+  nav {
+    order: 3;
+    flex-basis: 100%;
+    overflow-x: auto;
+  }
+  ul {
+    display: flex;
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  nav a {
+    color: var(--c-muted);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  nav a:hover,
+  nav a[aria-current='page'] {
+    color: var(--c-text);
+  }
+  .github {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-left: auto;
+    padding: 0.4rem 0.85rem;
+    color: var(--c-text);
+    text-decoration: none;
+    border: 1px solid var(--c-border);
+    border-radius: 999px;
+  }
+  .github:hover {
+    border-color: var(--c-soft);
+  }
+  .stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding-left: 0.45rem;
+    border-left: 1px solid var(--c-border);
+    font: 0.875rem var(--font-mono);
+    color: var(--c-muted);
+  }
+  @media (min-width: 48rem) {
+    nav {
+      order: 0;
+      flex-basis: auto;
+    }
+    ul {
+      gap: 1.25rem;
+    }
+  }
+</style>

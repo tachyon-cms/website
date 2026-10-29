@@ -1,0 +1,102 @@
+---
+import Icon from '../Icon.astro';
+import SectionHead from './SectionHead.astro';
+
+const release = 'https://github.com/tachyon-cms/tachyoncms/releases/tag/v0.1.0';
+// Plain links, not badge images: a badge would be a request to someone else's server.
+const items = [
+  {
+    icon: 'FiCheckCircle',
+    title: 'Signed releases',
+    text: 'Checksums signed with cosign, and the Docker image signed too.',
+    href: release,
+  },
+  {
+    icon: 'FiFileText',
+    title: 'An SBOM per archive',
+    text: 'SPDX, built from the dependency tree recorded inside the binary.',
+    href: release,
+  },
+  {
+    icon: 'FiGitCommit',
+    title: 'Build provenance',
+    text: 'Every archive and the image carry an attestation of where they were built.',
+    href: release,
+  },
+  {
+    icon: 'FiAward',
+    title: 'OpenSSF Best Practices',
+    text: 'The passing badge, with every answer on the checklist in public.',
+    href: 'https://www.bestpractices.dev/projects/16021',
+  },
+  {
+    icon: 'FiActivity',
+    title: 'OpenSSF Scorecard',
+    text: 'Run against the repo every week, scores on scorecard.dev.',
+    href: 'https://scorecard.dev/viewer/?uri=github.com/tachyon-cms/tachyoncms',
+  },
+];
+---
+
+<section id="trust" class="band" aria-labelledby="trust-title">
+  <SectionHead id="trust-title" eyebrow="Supply chain" title="Don't take the binary on trust. Check it.">
+    <p>A CMS holds your content and your users' passwords. You should be able to prove what you're running.</p>
+  </SectionHead>
+  <ul>
+    {
+      items.map(({ icon, title, text, href }) => (
+        <li>
+          <a href={href}>
+            <Icon name={icon} size={20} class="icon" />
+            <strong>{title}</strong>
+            <span>{text}</span>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</section>
+
+<style>
+  ul {
+    display: grid;
+    gap: 0.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  a {
+    display: grid;
+    gap: 0.4rem;
+    height: 100%;
+    padding: 1.2rem;
+    color: var(--c-text);
+    text-decoration: none;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: 14px;
+  }
+  a:hover {
+    border-color: var(--c-soft);
+  }
+  a :global(.icon) {
+    color: var(--c-hi);
+  }
+  strong {
+    font-weight: 600;
+  }
+  span {
+    font-size: 0.9375rem;
+    color: var(--c-muted);
+  }
+  @media (min-width: 40rem) {
+    ul {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 64rem) {
+    ul {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+</style>

@@ -8,11 +8,21 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  WRANGLER_SEND_METRICS: 'false'
+
 jobs:
+  # The test job: unit tests, both builds, the link check and the browser tests.
   check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version-file: .nvmrc
@@ -20,4 +30,101 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
-      - run: npm run build
+      - run: npm run build:site
+        env:
+          # Lifts the API rate limit for the header's star count.
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: npm run build:docs
+      - name: Every site link resolves, including links into the docs
+        run: node scripts/links.mjs dist docs/dist
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
+
+  # Reads only the lockfile, so it needs no install.
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - run: npm audit --audit-level=moderate
+
+  # No banned words, benchmark numbers or the reference CMS's name in what we publish.
+  claims:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build:site
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: npm run build:docs
+      - run: node scripts/claims.mjs dist docs/dist
+      - name: No tracked source names what it shouldn't
+        run: node scripts/claims.mjs --source
+
+  # 100 in all four categories, mobile and desktop, median of three runs.
+  lighthouse:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        config: [lighthouserc.mobile.json, lighthouserc.json]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run build:site
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - run: npm run build:docs
+      # The locked @lhci/cli, with Lighthouse and its other audited deps pinned by overrides.
+      - run: npx --no-install lhci autorun --config=${{ matrix.config }}
+      - name: Keep the reports when a score misses
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lighthouse-${{ matrix.config }}
+          path: .lighthouseci
+          include-hidden-files: true
+          retention-days: 7
+
+  # The CLI pages are committed; they must match the pinned release's --help.
+  # Its own job: it runs a downloaded binary, so it gets no token, no npm install and no cache.
+  cli-drift:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+          package-manager-cache: false
+      - name: CLI pages match the release binary
+        run: |
+          bin=$(sh docs/scripts/fetch-tachyon.sh "$RUNNER_TEMP/tachyon")
+          node docs/scripts/gen-cli.mjs "$bin" docs/src/content/docs/cli
+          if [ -n "$(git status --porcelain -- docs/src/content/docs/cli)" ]; then
+            git status --short -- docs/src/content/docs/cli
+            git diff -- docs/src/content/docs/cli
+            echo "::error::CLI pages are stale. Run docs/scripts/fetch-tachyon.sh and gen-cli.mjs, then commit."
+            exit 1
+          fi

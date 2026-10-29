@@ -1,40 +1,86 @@
 ---
+import RuleHidesDraft from '../components/diagrams/RuleHidesDraft.astro';
+import SchemaDiff from '../components/diagrams/SchemaDiff.astro';
+import SchemaToApi from '../components/diagrams/SchemaToApi.astro';
+import Closing from '../components/home/Closing.astro';
+import Contribute from '../components/home/Contribute.astro';
+import Developers from '../components/home/Developers.astro';
+import Editors from '../components/home/Editors.astro';
+import Hero from '../components/home/Hero.astro';
+import LatestPosts, { type PostLink } from '../components/home/LatestPosts.astro';
+import SectionHead from '../components/home/SectionHead.astro';
+import Trust from '../components/home/Trust.astro';
 import Base from '../layouts/Base.astro';
+import { publishedPosts } from '../lib/posts';
 
-// Public by design: the site key only identifies the widget. Cloudflare's always-pass test
-// key stands in locally; a production build without the real one fails rather than ship it.
-const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY ?? (import.meta.env.CF_PAGES ? undefined : '1x00000000000000000000AA');
-if (!siteKey) throw new Error('PUBLIC_TURNSTILE_SITE_KEY must be set for a Cloudflare Pages build');
+// The newest published posts. With none, the section stays out of the page.
+const latestPosts: PostLink[] = (await publishedPosts()).slice(0, 3).map((p) => ({
+  title: p.data.title,
+  href: `/blog/${p.id}`,
+  date: p.data.date,
+  summary: p.data.description,
+}));
 ---
 
-<Base title="TachyonCMS · fast for the developer, easy for the editor">
-  <script slot="head" is:inline src="/signup.js" defer></script>
-  <main class="hero">
-    <h1>Fast for the developer. Easy for the editor. No plugins holding it together.</h1>
-    <p class="lede">TachyonCMS is an open-source CMS written in Rust, and we're building it in public.</p>
-    <p>
-      Pick a CMS today and you usually pick a side. One kind is a joy to code against and baffling to whoever
-      publishes the Tuesday newsletter. The other is easy to publish with, and you pay for that in plugins, patches
-      and page speed.
-    </p>
-    <p>
-      We don't think you should have to choose. The core already runs on Postgres. Your content types live in a file
-      you can review like code, and when something's wrong the API names the exact field. The editor's side comes
-      next. And speed? We'll publish the benchmarks before we quote you a single number.
-    </p>
+<Base
+  title="TachyonCMS · a headless CMS in one Rust binary"
+  description="Define your content types and get a REST API with access rules down to the field. One Rust binary, one Postgres database, open source."
+  path="/"
+>
+  <Hero />
 
-    <form class="signup" method="post" action="/api/subscribe">
-      <label for="email">Tell me when it launches</label>
-      <div class="row">
-        <input id="email" name="email" type="email" autocomplete="email" required placeholder="you@example.com" />
-        <button type="submit">Notify me</button>
-      </div>
-      <div class="trap" aria-hidden="true">
-        <label for="website">Leave this empty</label>
-        <input id="website" name="website" type="text" tabindex="-1" autocomplete="off" />
-      </div>
-      <div class="cf-turnstile" data-sitekey={siteKey}></div>
-      <p class="fine">We'll send one email to confirm your address, then write only about the launch. One click unsubscribes.</p>
-    </form>
-  </main>
+  <section id="how" class="band" aria-labelledby="how-title">
+    <SectionHead id="how-title" eyebrow="How it works" title="Write a content type. Read it back over HTTP.">
+      <p>
+        Send a collection to the server and its endpoints exist from that moment. Create, read, update and delete,
+        with filters, sorting and pages. There's no code to generate and nothing to restart.
+      </p>
+    </SectionHead>
+    <SchemaToApi />
+  </section>
+
+  <Developers />
+
+  <section id="rules" class="band" aria-labelledby="rules-title">
+    <SectionHead id="rules-title" eyebrow="Access rules" title="Same request, different answer. That's the rule working.">
+      <p>
+        Everyone reads what's published; authors also read their own drafts. You write that once, in the schema. Ann
+        asks for <code>/api/posts</code> and gets both her posts. Someone signed out asks the same thing and gets one,
+        and a guess at the draft's ID gets a 404. Your front end didn't filter a thing.
+      </p>
+    </SectionHead>
+    <RuleHidesDraft />
+  </section>
+
+  <Editors />
+
+  <section id="schema" class="band" aria-labelledby="schema-title">
+    <SectionHead id="schema-title" eyebrow="Schema as code" title="Rename a field without losing a word of it.">
+      <p>
+        Change <code>title</code> to <code>headline</code> in your schema file and ask what would happen. Leave out
+        the rename and TachyonCMS tells you plainly that it would delete the data. Say it's a rename, and every
+        document keeps its title under the new name.
+      </p>
+    </SectionHead>
+    <SchemaDiff />
+  </section>
+
+  <Trust />
+  <LatestPosts posts={latestPosts} />
+  <Contribute />
+  <Closing />
 </Base>
+
+<style>
+  /* Every home section after the hero is a band with room around it. */
+  :global(main > .band) {
+    padding: clamp(3rem, 8vw, 5.5rem) 0;
+  }
+  :global(main > .band + .band) {
+    border-top: 1px solid var(--c-border);
+  }
+  code {
+    font: 0.9em var(--font-mono);
+    color: var(--c-text);
+  }
+</style>

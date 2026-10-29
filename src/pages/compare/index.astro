@@ -1,0 +1,83 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import PageHero from '../../components/PageHero.astro';
+
+const order = ['wordpress', 'strapi', 'contentful', 'sanity', 'directus'];
+const entries = (await getCollection('compare')).sort((a, b) => order.indexOf(a.id) - order.indexOf(b.id));
+---
+
+<Base
+  title="Compare · TachyonCMS"
+  description="TachyonCMS side by side with WordPress, Strapi, Contentful, Sanity and Directus, with a source for every claim and a straight answer on who should pick which."
+  path="/compare"
+>
+  <PageHero
+    eyebrow="Compare"
+    title="How TachyonCMS stacks up, honestly"
+    lede="You're probably weighing TachyonCMS against something you already know. Each page below puts v0.1.0 beside it, row by row, with a link for every claim about the other product. And each one ends by saying who should pick which, even when the answer isn't us."
+  />
+
+  <ul class="cards">
+    {
+      entries.map(({ id, data }) => (
+        <li>
+          <a href={`/compare/${id}`}>
+            <h2>
+              TachyonCMS and {data.name} <Icon name="FiArrowRight" size={18} />
+            </h2>
+            <p>{data.summary}</p>
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+
+  <p class="note">
+    The short version: TachyonCMS is pre-alpha, and there's no admin screen yet. If someone who doesn't write code needs
+    to publish next week, every product here will serve them better today. The pages say exactly where.
+  </p>
+</Base>
+
+<style>
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 20rem), 1fr));
+    gap: 1rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .cards a {
+    display: block;
+    height: 100%;
+    padding: 1.5rem;
+    text-decoration: none;
+    color: inherit;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: 14px;
+  }
+  .cards a:hover {
+    border-color: var(--c-soft);
+  }
+  .cards h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0 0 0.75rem;
+    font-size: 1.25rem;
+    letter-spacing: -0.01em;
+  }
+  .cards p {
+    margin: 0;
+    font-size: 0.9375rem;
+    color: var(--c-muted);
+  }
+  .note {
+    max-width: 42rem;
+    margin: 2.5rem 0 clamp(3rem, 8vw, 5rem);
+    color: var(--c-muted);
+  }
+</style>

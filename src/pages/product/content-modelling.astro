@@ -1,0 +1,56 @@
+---
+import FeaturePage from '../../components/FeaturePage.astro';
+import Exchange from '../../components/diagrams/Exchange.astro';
+import SchemaToApi from '../../components/diagrams/SchemaToApi.astro';
+---
+
+<FeaturePage
+  id="content-modelling"
+  name="Content modelling"
+  path="/product/content-modelling"
+  docs={[
+    ['content-types', 'Content types'],
+    ['fields', 'Fields'],
+    ['reference/field-types', 'Every field type'],
+  ]}
+>
+  <SchemaToApi />
+  <Exchange
+    id="validation"
+    caption="A real write to TachyonCMS v0.1.0, trimmed, and its full response with the request ID cut short."
+    panes={[
+      {
+        head: 'Two fields, in the articles schema',
+        lines: [
+          '{ "name": "seo", "type": "group", "fields": [',
+          '    { "name": "title", "type": "text",',
+          '      "maxLength": 60 } ] },',
+          '{ "name": "links", "type": "array", "fields": [',
+          '    { "name": "url", "type": "url",',
+          '      "required": true } ] }',
+        ],
+      },
+      {
+        head: 'A write that breaks both',
+        lines: [
+          { text: 'POST /api/articles', at: 600, class: 'q' },
+          { text: 'Authorization: Bearer tcs_…', at: 600, class: 'q' },
+          { text: '{ "title": "Bad links",', at: 600 },
+          { text: '  "seo": { "title": "(70 characters)" },', at: 600 },
+          { text: '  "links": [{ "url": "not a url" }] }', at: 600 },
+          { text: '', at: 1800 },
+          { text: '422 Unprocessable Content', at: 1800, class: 'warn' },
+          { text: '{ "errors": [', at: 2400 },
+          { text: '    { "message": "must be at most 60 characters",', at: 2400, class: 'mark' },
+          { text: '      "path": "seo.title" },', at: 2400, class: 'mark' },
+          { text: '    { "message": "expected an http or https URL",', at: 3000, class: 'mark' },
+          { text: '      "path": "links.0.url" } ],', at: 3000, class: 'mark' },
+          { text: '  "requestId": "01a183f7-f6a9-…",', at: 3600 },
+          { text: '  "status": 422,', at: 3600 },
+          { text: '  "title": "Validation failed",', at: 3600 },
+          { text: '  "type": "about:blank" }', at: 3600 },
+        ],
+      },
+    ]}
+  />
+</FeaturePage>

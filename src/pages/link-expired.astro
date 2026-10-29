@@ -1,10 +1,10 @@
 ---
+import PageHero from '../components/PageHero.astro';
 import Base from '../layouts/Base.astro';
 ---
 
-<Base title="That link has expired · TachyonCMS" noindex>
-  <main class="notice">
-    <h1>That link has expired</h1>
-    <p>Confirmation links last 48 hours. <a href="/">Sign up again</a> and we'll send a fresh one.</p>
-  </main>
+<Base title="That link has expired · TachyonCMS" path="/link-expired" noindex>
+  <PageHero title="That link has expired">
+    <p class="notice">Confirmation links last 48 hours. <a href="/">Sign up again</a> and we'll send a fresh one.</p>
+  </PageHero>
 </Base>

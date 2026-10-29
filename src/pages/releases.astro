@@ -1,0 +1,86 @@
+---
+import PageHero from '../components/PageHero.astro';
+import Prose from '../components/Prose.astro';
+import SignupForm from '../components/SignupForm.astro';
+import Base from '../layouts/Base.astro';
+import { fetchReleases, renderNotes } from '../lib/github';
+
+const releases = await fetchReleases();
+const day = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+---
+
+<Base
+  title="Releases · TachyonCMS"
+  description="Every TachyonCMS release, with its notes, straight from GitHub."
+  path="/releases"
+>
+  <PageHero
+    eyebrow="Releases"
+    title="Releases"
+    lede="Every release, with its notes as they were published on GitHub. Want the next one in your inbox? Leave your address, or watch the repo on GitHub and choose Custom, then Releases."
+  >
+    <SignupForm source="news" />
+  </PageHero>
+
+  <div class="releases">
+    {
+      releases.map((r) => (
+        <article aria-labelledby={`r-${r.tag}`}>
+          <header>
+            <h2 id={`r-${r.tag}`}>{r.name}</h2>
+            <p class="meta">
+              <time datetime={r.published.slice(0, 10)}>{day.format(new Date(r.published))}</time>
+              {r.prerelease && <span class="pre">Pre-release</span>}
+              <a href={r.url}>Downloads on GitHub</a>
+            </p>
+          </header>
+          <Prose>
+            <Fragment set:html={renderNotes(r.body, `${r.tag}-`)} />
+            <p>
+              <a href={r.url}>Downloads on GitHub</a>
+            </p>
+          </Prose>
+        </article>
+      ))
+    }
+  </div>
+</Base>
+
+<style>
+  .page-hero :global(form.signup) {
+    margin-top: 1.5rem;
+  }
+  .releases {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+  article {
+    /* Lets a long line of code scroll inside its block instead of widening the page. */
+    min-width: 0;
+    padding-top: 2rem;
+    border-top: 1px solid var(--c-border);
+  }
+  h2 {
+    margin: 0 0 0.5rem;
+    font: 600 clamp(1.75rem, 4vw, 2.25rem) / 1.1 var(--font-mono);
+    letter-spacing: -0.02em;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 1rem;
+    margin: 0 0 1.5rem;
+    color: var(--c-muted);
+  }
+  .pre {
+    padding: 0.2rem 0.6rem;
+    font: 600 0.75rem/1.2 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c-soft);
+    border: 1px solid var(--c-border);
+    border-radius: 999px;
+  }
+</style>

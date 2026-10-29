@@ -1,0 +1,43 @@
+---
+import Icon from '../Icon.astro';
+import SectionHead from './SectionHead.astro';
+---
+
+<section id="contribute" class="contribute" aria-labelledby="contribute-title">
+  <SectionHead id="contribute-title" eyebrow="Get involved" title="Want in? Start with something small.">
+    <p>
+      TachyonCMS is young enough that one pull request changes it. The good first issues are real and sized for an
+      evening: a CLI message that could say more, a validator that lets a bad email through, a header the API should
+      send. Rust helps for most of them. Docs and copy fixes count just as much.
+    </p>
+  </SectionHead>
+  <div class="actions">
+    <a
+      class="btn"
+      href="https://github.com/tachyon-cms/tachyoncms/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+    >
+      <Icon name="FiGitPullRequest" /> Good first issues
+    </a>
+    <a class="btn ghost" href="https://github.com/tachyon-cms/tachyoncms/blob/main/CONTRIBUTING.md">
+      <Icon name="FiBookOpen" /> Read CONTRIBUTING.md
+    </a>
+  </div>
+</section>
+
+<style>
+  .contribute {
+    margin-top: clamp(1rem, 4vw, 2rem);
+    padding: clamp(1.75rem, 5vw, 3rem);
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: 20px;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .contribute .btn.ghost {
+    background: var(--c-bg);
+  }
+</style>

@@ -1,0 +1,17 @@
+---
+import FeaturePage from '../../components/FeaturePage.astro';
+import RuleHidesDraft from '../../components/diagrams/RuleHidesDraft.astro';
+---
+
+<FeaturePage
+  id="access-control"
+  name="Access control"
+  path="/product/access-control"
+  docs={[
+    ['access-rules', 'Access rules'],
+    ['roles', 'Roles'],
+    ['security-model', 'The security model'],
+  ]}
+>
+  <RuleHidesDraft />
+</FeaturePage>

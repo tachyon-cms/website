@@ -1,0 +1,4 @@
+12c5f6e4b5dad884d5cecf04c8e5776c225349392a286199a57de795a1bf719e  tachyon_0.1.0_aarch64-apple-darwin.tar.gz
+1e536b1c6fbb25e37aeffdab9afc5664aa883aae6cec725133d009c640285341  tachyon_0.1.0_aarch64-unknown-linux-musl.tar.gz
+2f8766ef2f7214a0ded213e50a8be4c8f3da60ebc2642dbd49f35814812d3516  tachyon_0.1.0_x86_64-apple-darwin.tar.gz
+049785db04072d6f5a2e39605e72de289f2a7d78c393115b2b59de84d3e0218a  tachyon_0.1.0_x86_64-unknown-linux-musl.tar.gz

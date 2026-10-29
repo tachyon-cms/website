@@ -1,0 +1,163 @@
+---
+import LinkCards from '../components/LinkCards.astro';
+import PageHero from '../components/PageHero.astro';
+import Prose from '../components/Prose.astro';
+import Base from '../layouts/Base.astro';
+
+const discussions = 'https://github.com/tachyon-cms/tachyoncms/discussions';
+const issues =
+  'https://github.com/tachyon-cms/tachyoncms/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22%2C%22help+wanted%22';
+
+const next = [
+  ['Rich text and blocks', 'Long-form writing with code samples and tables, and pages built from reusable sections.'],
+  ['Drafts, versions and scheduled publishing', "So nothing goes live before it's meant to."],
+  ['Media', 'Upload once, reuse anywhere, with responsive images.'],
+  ['Live preview', "Look at a draft before it's published."],
+  ['Authoring tools', 'Markdown in and out, and bulk import.'],
+];
+---
+
+<Base
+  title="Roadmap · TachyonCMS"
+  description="What TachyonCMS does today, the order the rest is being built in, and where you can change that order."
+  path="/roadmap"
+>
+  <PageHero
+    eyebrow="Roadmap"
+    title="What's next, and in what order"
+    lede="The developer half shipped in v0.1.0. Everything an editor touches comes next, and the order is set by one goal: running this site on TachyonCMS itself."
+  />
+
+  <div class="roadmap">
+    <section aria-labelledby="today">
+      <h2 id="today">Works today</h2>
+      <Prose>
+        <p>
+          Content types defined over the API or kept in a JSON file you diff and apply. Twenty-odd field types, including
+          relationships, groups, arrays and map points. Filters that reach through relationships and into lists, joins,
+          and <code>select</code> and <code>populate</code> so you fetch only what you need. Sign-in with sessions or
+          bearer tokens, scoped API keys, roles, and access rules down to a single field.
+        </p>
+        <p>
+          That's <a href="/releases">v0.1.0</a>, and it's pre-alpha. The{' '}
+          <a href="https://github.com/tachyon-cms/tachyoncms/blob/v0.1.0/README.md#what-works-today">README</a> has the
+          full list, with examples.
+        </p>
+      </Prose>
+    </section>
+
+    <section aria-labelledby="next">
+      <h2 id="next">Being built, in this order</h2>
+      <ol class="steps">
+        {
+          next.map(([title, text], i) => (
+            <li>
+              <h3>
+                {title}
+                {i === 0 && <span class="now">Under way</span>}
+              </h3>
+              <p>{text}</p>
+            </li>
+          ))
+        }
+      </ol>
+      <Prose>
+        <p>
+          After those comes the admin screen. The bar for it: anyone who has used WordPress can pick it up without
+          training. <a href="/product/admin">Here's what it's being built on.</a>
+        </p>
+        <p>None of this is in v0.1.0, and none of it has a date. What you're looking at is the order.</p>
+      </Prose>
+    </section>
+
+    <section aria-labelledby="say">
+      <h2 id="say">Think the order's wrong?</h2>
+      <Prose>
+        <p>
+          I'd much rather hear it now than after it ships. Two polls are open, and the roadmap itself started as a
+          discussion you can reply to.
+        </p>
+      </Prose>
+      <LinkCards
+        links={[
+          {
+            href: `${discussions}/39`,
+            title: 'Vote on what comes next',
+            text: 'Drafts, media, live preview, Markdown import, the admin or GraphQL: which do you need first?',
+          },
+          {
+            href: `${discussions}/38`,
+            title: 'Pick the first starter',
+            text: 'Astro, Next.js, SvelteKit, Nuxt, Remix or React Router, or something else. The winner gets built first.',
+          },
+          { href: `${discussions}/35`, title: 'Reply to the roadmap', text: 'Discussion #35, where this page started.' },
+        ]}
+      />
+      <Prose>
+        <p>
+          Rather build than vote? I've opened <a href={issues}>a set of issues</a> that are ready to pick up. Each one says which files to
+          change, how to test it, and when it's done. Say you're taking one, and it's yours.
+        </p>
+      </Prose>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .roadmap {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+  h2 {
+    margin: 0 0 1.25rem;
+    font-size: 1.625rem;
+    letter-spacing: -0.02em;
+  }
+  .steps {
+    display: grid;
+    gap: 0.75rem;
+    max-width: 42rem;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+  }
+  .steps li {
+    position: relative;
+    padding: 1rem 1.25rem 1rem 3.5rem;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: 14px;
+    counter-increment: step;
+  }
+  .steps li::before {
+    content: counter(step);
+    position: absolute;
+    top: 1rem;
+    left: 1.25rem;
+    font: 600 1.125rem/1.4 var(--font-mono);
+    color: var(--c-soft);
+  }
+  .steps h3 {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin: 0 0 0.25rem;
+    font-size: 1.125rem;
+  }
+  .steps p {
+    margin: 0;
+    color: var(--c-muted);
+  }
+  .now {
+    padding: 0.2rem 0.6rem;
+    font: 600 0.75rem/1.2 var(--font-mono);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--c-on-grad);
+    background: var(--c-grad);
+    border-radius: 999px;
+  }
+</style>

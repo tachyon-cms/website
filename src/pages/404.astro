@@ -1,10 +1,10 @@
 ---
+import PageHero from '../components/PageHero.astro';
 import Base from '../layouts/Base.astro';
 ---
 
-<Base title="Nothing here · TachyonCMS" noindex>
-  <main class="notice">
-    <h1>Nothing here</h1>
-    <p>That page doesn't exist. <a href="/">Head back to the start</a>.</p>
-  </main>
+<Base title="Nothing here · TachyonCMS" path="/404" noindex>
+  <PageHero title="Nothing here">
+    <p class="notice">That page doesn't exist. <a href="/">Head back to the start</a>.</p>
+  </PageHero>
 </Base>

@@ -1,0 +1,83 @@
+---
+import SignupForm from '../SignupForm.astro';
+import SectionHead from './SectionHead.astro';
+
+// The order on /roadmap (Discussion #35). None of this exists yet, and none of it has a date.
+const coming = [
+  ['Rich text and blocks', 'Under way'],
+  ['Drafts, versions and scheduled publishing', 'Next'],
+  ['Media, with responsive images', ''],
+  ['Live preview', ''],
+  ['Authoring tools: Markdown in and out, bulk import', ''],
+  ['The admin screen', 'After those'],
+];
+---
+
+<section id="editors" class="band editors" aria-labelledby="editors-title">
+  <div class="text">
+    <SectionHead id="editors-title" eyebrow="For editors · On the roadmap" title="The admin isn't built yet. Here's the bar it has to clear.">
+      <p>
+        If you're the one publishing the Tuesday newsletter, TachyonCMS has nothing for you today. It's an API. Here's
+        where it's headed: an admin that comes after the editing basics below, held to one test. Someone who has only ever
+        used WordPress should pick it up without training, from adding a content type to scheduling a post.
+      </p>
+    </SectionHead>
+    <ol class="coming">
+      {
+        coming.map(([what, when]) => (
+          <li>
+            <span>{what}</span>
+            {when && <span class="when">{when}</span>}
+          </li>
+        ))
+      }
+    </ol>
+    <p class="links">
+      <a href="/roadmap">The whole roadmap</a> · <a href="https://github.com/tachyon-cms/tachyoncms">Watch the repo</a>
+    </p>
+  </div>
+  <div class="form">
+    <SignupForm source="editors" />
+  </div>
+</section>
+
+<style>
+  .editors {
+    display: grid;
+    gap: 2rem;
+    align-items: start;
+  }
+  .coming {
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--c-border);
+  }
+  .coming li {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--c-border);
+  }
+  .when {
+    font: 0.8125rem/1.8 var(--font-mono);
+    color: var(--c-muted);
+  }
+  .links {
+    margin: 0;
+    color: var(--c-muted);
+  }
+  @media (min-width: 60rem) {
+    .editors {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 3rem;
+    }
+    .form {
+      position: sticky;
+      top: 2rem;
+      margin-top: 2.6rem;
+    }
+  }
+</style>

@@ -1,34 +1,31 @@
 # tachyoncms.com
 
-The website for [TachyonCMS](https://github.com/tachyon-cms/tachyoncms). For now it's a launch page with an email signup; the full site will run on TachyonCMS itself.
+This repo holds the two websites for [TachyonCMS](https://github.com/tachyon-cms/tachyoncms):
 
-## How it fits together
+- **tachyoncms.com**, at the repo root: an [Astro](https://astro.build) static site, plus the email signup in `functions/` (Cloudflare Pages Functions) with its logic in `server/`.
+- **docs.tachyoncms.com**, in `docs/`: an Astro [Starlight](https://starlight.astro.build) site, an npm workspace of this repo.
 
-- **Pages** are static [Astro](https://astro.build) in `src/pages`, sharing one stylesheet at `public/site.css`.
-- **Signup** runs on Cloudflare Pages Functions (`functions/`, logic in `server/`). A visitor passes Cloudflare Turnstile, gets a signed confirmation link by email through Resend, and joins the launch segment only after clicking it. Unconfirmed addresses aren't stored anywhere.
-- **Security headers** for static pages live in `public/_headers`; the functions set the same ones in `server/signup.ts`.
+To work on either, see [CONTRIBUTING.md](CONTRIBUTING.md). It covers setup and every check CI runs.
 
-## Working on it
+## Deploying
 
-```sh
-npm ci
-npm run dev        # the pages, at http://localhost:4321
-npm test           # signup logic
-npm run typecheck  # functions
-npm run build      # type-check the pages and build to dist/
-```
+- **The site** deploys through Cloudflare Pages' Git integration: Pages builds every push, and `main` goes to production. `.github/workflows/rebuild-site.yml` calls a Pages deploy hook (the `PAGES_DEPLOY_HOOK` secret) once a day, so a blog post dated for today goes live.
+- **The docs** deploy to Cloudflare Workers static assets from `.github/workflows/deploy-docs.yml`, on every push to `main` and once a day. It needs the `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID` secrets.
 
-To try the signup end to end, copy `.dev.vars.example` to `.dev.vars`, fill it in, then `npm run build && npm run preview`.
+Security headers for both live in `headers.base`. Each build adds a content security policy hashed from its own output (`scripts/csp.mjs`).
 
 ## Settings in Cloudflare Pages
 
 | Name | Kind | What it is |
 | --- | --- | --- |
 | `PUBLIC_TURNSTILE_SITE_KEY` | build variable | Turnstile widget site key |
+| `GITHUB_TOKEN` | secret, optional | Read-only GitHub token. The build reads the star count, releases and contributors from GitHub's API, and this lifts the anonymous rate limit. If a call fails, the header shows no star count and the pages use the snapshots in `src/data`. |
 | `TURNSTILE_SECRET_KEY` | secret | Turnstile secret key |
 | `RESEND_API_KEY` | secret | Resend key with sending and contacts access |
 | `RESEND_SEGMENT_ID` | secret | Segment confirmed addresses join |
 | `SIGNING_SECRET` | secret | Long random string that signs confirmation links |
 | `MAIL_FROM` | variable | Sender, such as `TachyonCMS <launch@tachyoncms.com>` |
 
-Copyright © 2026 TachyonCMS. All rights reserved.
+## License
+
+The code is under the [MIT License](LICENSE). The TachyonCMS name and logo aren't: the [trademark page](https://tachyoncms.com/trademark) says how you can use them.

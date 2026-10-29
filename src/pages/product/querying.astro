@@ -1,0 +1,51 @@
+---
+import FeaturePage from '../../components/FeaturePage.astro';
+import Exchange from '../../components/diagrams/Exchange.astro';
+---
+
+<FeaturePage
+  id="querying"
+  name="Querying"
+  path="/product/querying"
+  docs={[
+    ['querying', 'Querying'],
+    ['relationships', 'Relationships'],
+    ['joins-and-virtual-fields', 'Joins and virtual fields'],
+    ['reference/filters', 'Every filter operator'],
+  ]}
+>
+  <Exchange
+    id="query"
+    caption="A real request to TachyonCMS v0.1.0 and its full response, with the IDs cut short."
+    panes={[
+      {
+        head: 'Guides, by title, with the author’s name',
+        lines: [
+          { text: 'GET /api/articles', at: 0, class: 'q' },
+          { text: '  ?where[category][equals]=guides', at: 400 },
+          { text: '  &sort=title', at: 800 },
+          { text: '  &select[title]=true', at: 1200 },
+          { text: '  &select[author]=true', at: 1200 },
+          { text: '  &populate[users][name]=true', at: 1600 },
+        ],
+      },
+      {
+        head: 'What comes back',
+        lines: [
+          { text: '{ "docs": [', at: 2400 },
+          { text: '    { "author": { "id": "01a183f7-d956-…",', at: 2400 },
+          { text: '                  "name": "Ann" },', at: 2400, class: 'mark' },
+          { text: '      "id": "01a183f7-f6bd-…",', at: 2400 },
+          { text: '      "title": "Getting started with Rust" },', at: 2400 },
+          { text: '    { "author": { "id": "01a183f7-d956-…",', at: 2900 },
+          { text: '                  "name": "Ann" },', at: 2900, class: 'mark' },
+          { text: '      "id": "01a183f7-f6db-…",', at: 2900 },
+          { text: '      "title": "Writing access rules" }', at: 2900 },
+          { text: '  ],', at: 3400 },
+          { text: '  "hasNextPage": false,', at: 3400 },
+          { text: '  "limit": 10, "page": 1 }', at: 3400 },
+        ],
+      },
+    ]}
+  />
+</FeaturePage>

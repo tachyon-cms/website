@@ -1,0 +1,28 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  path: string;
+  image?: string;
+  imageAlt?: string;
+  /** A blog post's date: the page becomes an og:type article with its published time. */
+  published?: Date;
+  noindex?: boolean;
+}
+const { title, description, path, image, imageAlt, published, noindex = false } = Astro.props;
+const canonical = new URL(path, Astro.site);
+const imageUrl = image && new URL(image, Astro.site);
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+{noindex ? <meta name="robots" content="noindex" /> : <link rel="canonical" href={canonical} />}
+<meta property="og:site_name" content="TachyonCMS" />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content={published ? 'article' : 'website'} />
+{published && <meta property="article:published_time" content={published.toISOString()} />}
+<meta property="og:url" content={canonical} />
+{imageUrl && <meta property="og:image" content={imageUrl} />}
+{imageUrl && imageAlt && <meta property="og:image:alt" content={imageAlt} />}
+<meta name="twitter:card" content={imageUrl ? 'summary_large_image' : 'summary'} />

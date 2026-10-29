@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>v0.1.0: social card</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+  body { width: 1200px; height: 630px; overflow: hidden; }
+  .frame { height: 100%; padding: 60px 72px; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto 1fr auto; }
+  .top { display: flex; justify-content: space-between; align-items: center; }
+  .top img { height: 40px; }
+  h1 { align-self: center; font-size: 84px; line-height: 1.02; letter-spacing: -0.04em; font-weight: 700; }
+  .bottom { display: grid; gap: 22px; }
+  pre { padding: 22px 28px; font-size: 26px; color: var(--text); }
+  pre span { color: var(--hi); }
+  ul { display: flex; gap: 12px; padding: 0; list-style: none; font: 400 18px/1 var(--mono); color: var(--muted); }
+  .eyebrow span { text-transform: none; }
+  li { white-space: nowrap; padding: 10px 14px; border: 2px solid var(--border); border-radius: 999px; }
+  li b { color: var(--text); font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="top"><img src="../../../public/brand/logo-dark.svg" alt=""><span class="eyebrow">Release · <span>v0.1.0</span></span></div>
+  <h1>Run it<br><span class="grad">without building it.</span></h1>
+  <div class="bottom">
+    <pre class="box"><span>$</span> docker pull ghcr.io/tachyon-cms/tachyoncms:v0.1.0</pre>
+    <ul>
+      <li><b>Linux</b> x86_64 · arm64</li>
+      <li><b>macOS</b> Intel · Apple silicon</li>
+      <li><b>Signed</b> checksums and image</li>
+      <li><b>Pre-alpha</b></li>
+    </ul>
+  </div>
+</div>
+</body>
+</html>

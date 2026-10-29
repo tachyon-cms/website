@@ -1,0 +1,49 @@
+---
+import FeaturePage from '../components/FeaturePage.astro';
+import Exchange from '../components/diagrams/Exchange.astro';
+---
+
+<FeaturePage
+  id="why"
+  name="Why TachyonCMS"
+  path="/why"
+  docs={[
+    ['concepts', 'How it fits together'],
+    ['install', 'Install it'],
+    ['get-involved', 'Get involved'],
+  ]}
+>
+  <Exchange
+    id="first-run"
+    loop={8500}
+    caption="The v0.1.0 Docker image beside a Postgres container. The database address is cut short and the log lines are trimmed to their messages."
+    panes={[
+      {
+        head: 'Start it',
+        lines: [
+          { text: '$ docker run -p 3000:3000 \\', at: 0 },
+          { text: '    -e TACHYON_DATABASE_URL=postgres://… \\', at: 0 },
+          { text: '    -e TACHYON_PUBLIC_URL=http://localhost:3000 \\', at: 0 },
+          { text: '    ghcr.io/tachyon-cms/tachyoncms:v0.1.0', at: 0 },
+          { text: 'listening addr=0.0.0.0:3000', at: 1000, class: 'ok' },
+          { text: 'setup needed: create the first Admin with', at: 1600, class: 'warn' },
+          { text: '  POST /api/setup', at: 1600, class: 'warn' },
+        ],
+      },
+      {
+        head: 'Make the first Admin',
+        lines: [
+          { text: 'POST /api/setup', at: 2800, class: 'q' },
+          { text: '{ "email": "you@example.com", "name": "You",', at: 2800 },
+          { text: '  "password": "a long passphrase you will remember" }', at: 2800 },
+          { text: '', at: 3600 },
+          { text: '{ "email": "you@example.com", "id": "01a18406-4df1-…",', at: 3600 },
+          { text: '  "name": "You", "role": "admin", … }', at: 3600, class: 'mark' },
+          { text: '', at: 5000 },
+          { text: 'POST /api/setup (again)', at: 5000, class: 'q' },
+          { text: '409 Setup has already been done. Sign in instead.', at: 5600, class: 'warn' },
+        ],
+      },
+    ]}
+  />
+</FeaturePage>

@@ -1,0 +1,231 @@
+---
+import tokens from '../brand/tokens.css?raw';
+import PageHero from '../components/PageHero.astro';
+import Prose from '../components/Prose.astro';
+import Base from '../layouts/Base.astro';
+
+// Read from the stylesheet the site itself uses, so this page can't fall out of step with it.
+const hexes = (block: string) => Object.fromEntries([...block.matchAll(/--c-([\w-]+):\s*(#[0-9a-f]{6})/gi)].map((m) => [m[1], m[2]]));
+const [dark, light] = tokens.split('[data-theme="light"]').map(hexes);
+const roles: [string, string][] = [
+  ['bg', 'Background'],
+  ['surface', 'Cards and panels'],
+  ['border', 'Borders'],
+  ['text', 'Text'],
+  ['muted', 'Secondary text'],
+  ['violet', 'Gradient start'],
+  ['pink', 'Gradient end'],
+  ['hi', 'Highlight, and code'],
+  ['soft', 'Accents and links'],
+];
+const colours = roles.map(([token, role]) => ({ token, role, dark: dark[token], light: light[token] ?? dark[token] }));
+if (colours.some((c) => !c.dark)) throw new Error('brand: a colour is missing from src/brand/tokens.css');
+
+const logos = [
+  { file: 'logo-dark.svg', label: 'Logo, for dark backgrounds', tile: 'on-dark', width: 202, height: 32 },
+  { file: 'logo-light.svg', label: 'Logo, for light backgrounds', tile: 'on-light', width: 202, height: 32 },
+  { file: 'mark-dark.svg', label: 'Mark, for dark backgrounds', tile: 'on-dark', width: 32, height: 32 },
+  { file: 'mark-light.svg', label: 'Mark, for light backgrounds', tile: 'on-light', width: 32, height: 32 },
+];
+---
+
+<Base
+  title="Brand · TachyonCMS"
+  description="The TachyonCMS logo and mark to download, the colours and fonts, and how to write the name."
+  path="/brand"
+>
+  <PageHero
+    eyebrow="Brand"
+    title="Logos, colours and the name"
+    lede="Writing about TachyonCMS, or putting it on a slide? Everything you need is here, and all of it is free to use for that."
+  />
+
+  <div class="brand">
+    <section aria-labelledby="logos">
+      <h2 id="logos">Logo and mark</h2>
+      <ul class="logos">
+        {
+          logos.map((l) => (
+            <li>
+              <div class:list={['tile', l.tile]}>
+                <img src={`/brand/${l.file}`} alt="" width={l.width} height={l.height} />
+              </div>
+              <a href={`/brand/${l.file}`} download>
+                {l.label} <span>SVG</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+      <Prose>
+        <p>
+          Give the logo room, at least the mark's height on every side. Don't recolour it, stretch it, or set it on a
+          background that fights the gradient. The <a href="/trademark">trademark page</a> covers where you can use it.
+        </p>
+      </Prose>
+    </section>
+
+    <section aria-labelledby="name">
+      <h2 id="name">Writing the name</h2>
+      <Prose>
+        <p>
+          <strong>TachyonCMS</strong>: one word, capital T, capital CMS. Not "Tachyon CMS", "TachyonCms" or "Tachyon" on its
+          own. In code and commands it's lower case, because that's what you type: <code>tachyon serve</code>,{' '}
+          <code>ghcr.io/tachyon-cms/tachyoncms</code>.
+        </p>
+      </Prose>
+    </section>
+
+    <section aria-labelledby="colours">
+      <h2 id="colours">Colours</h2>
+      <Prose>
+        <p>Dark is the default. The light theme swaps in its own values where contrast needs it.</p>
+      </Prose>
+      <div class="table">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Use</th>
+              <th scope="col">Dark</th>
+              <th scope="col">Light</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              colours.map((c) => (
+                <tr>
+                  <th scope="row">{c.role}</th>
+                  {[c.dark, c.light].map((hex) => (
+                    <td>
+                      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+                        <rect width="19" height="19" x="0.5" y="0.5" rx="5" fill={hex} stroke="currentColor" stroke-opacity="0.3" />
+                      </svg>
+                      <code>{hex}</code>
+                    </td>
+                  ))}
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="fonts">
+      <h2 id="fonts">Fonts</h2>
+      <div class="fonts">
+        <div>
+          <p class="sample sans">Instrument Sans</p>
+          <p>Headings and text. Free under the SIL Open Font License.</p>
+        </div>
+        <div>
+          <p class="sample mono">IBM Plex Mono</p>
+          <p>Code, labels and numbers. Free under the SIL Open Font License.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .brand {
+    display: grid;
+    gap: clamp(2.5rem, 6vw, 4rem);
+    padding-bottom: clamp(3rem, 8vw, 5rem);
+  }
+  h2 {
+    margin: 0 0 1.25rem;
+    font-size: 1.625rem;
+    letter-spacing: -0.02em;
+  }
+  .logos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 1rem;
+    margin: 0 0 1.5rem;
+    padding: 0;
+    list-style: none;
+  }
+  .logos li {
+    display: grid;
+    gap: 0.6rem;
+  }
+  .tile {
+    display: grid;
+    place-items: center;
+    height: 8rem;
+    padding: 1rem;
+    border: 1px solid var(--c-border);
+    border-radius: 14px;
+  }
+  /* The two backgrounds the logo files are drawn for, whatever the page's theme. */
+  .on-dark {
+    background: #07060c;
+  }
+  .on-light {
+    background: #faf8ff;
+  }
+  .tile img {
+    max-width: 100%;
+    height: 2.5rem;
+    width: auto;
+  }
+  .logos a span {
+    font: 600 0.75rem var(--font-mono);
+    color: var(--c-muted);
+  }
+  .table {
+    max-width: 42rem;
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  :where(th, td) {
+    padding: 0.6rem 0.75rem 0.6rem 0;
+    text-align: left;
+    border-bottom: 1px solid var(--c-border);
+  }
+  thead th {
+    font-size: 0.875rem;
+    color: var(--c-muted);
+  }
+  td {
+    white-space: nowrap;
+  }
+  td svg {
+    vertical-align: middle;
+    margin-right: 0.5rem;
+  }
+  td code {
+    font-family: var(--font-mono);
+  }
+  .fonts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+    gap: 1rem;
+  }
+  .fonts > div {
+    padding: 1.25rem;
+    background: var(--c-surface);
+    border: 1px solid var(--c-border);
+    border-radius: 14px;
+  }
+  .fonts p {
+    margin: 0;
+    color: var(--c-muted);
+  }
+  .fonts .sample {
+    margin-bottom: 0.5rem;
+    font-size: 1.75rem;
+    line-height: 1.2;
+    color: var(--c-text);
+  }
+  .sans {
+    font-family: var(--font-sans);
+  }
+  .mono {
+    font-family: var(--font-mono);
+  }
+</style>

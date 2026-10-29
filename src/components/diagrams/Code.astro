@@ -1,0 +1,21 @@
+---
+// A block of code for a diagram, one line per entry. A line with `at` is a piece
+// the player reveals at that time; JSON keys and `$` prompts get coloured here,
+// so the diagrams can be written as plain text.
+export type Line = string | { text: string; at?: number; class?: string };
+
+interface Props {
+  lines: Line[];
+}
+const { lines } = Astro.props;
+
+const escape = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+function paint(text: string) {
+  const html = escape(text);
+  if (html.startsWith('$ ')) return `<span class="q">$</span> ${html.slice(2)}`;
+  return html.replace(/"([^"]+)"(?=:)/g, '<span class="k">"$1"</span>');
+}
+const rows = lines.map((l) => (typeof l === 'string' ? { text: l } : l));
+---
+
+<pre>{rows.map((r) => <span data-at={r.at} class={r.class} set:html={paint(r.text) || ' '} />)}</pre>
