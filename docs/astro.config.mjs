@@ -58,11 +58,7 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'TachyonCMS',
-      logo: {
-        dark: '../public/brand/logo-dark.svg',
-        light: '../public/brand/logo-light.svg',
-        replacesTitle: true,
-      },
+      logo: { src: '../public/brand/logo-dark.svg', replacesTitle: true },
       social: [{ icon: 'github', label: 'TachyonCMS on GitHub', href: 'https://github.com/tachyon-cms/tachyoncms' }],
       customCss: ['./src/styles/brand.css'],
       components: {
@@ -71,9 +67,9 @@ export default defineConfig({
         // The topics render as tabs in the header, so the sidebar drops the plugin's topic list.
         Header: './src/components/TopicTabs.astro',
         Sidebar: '@astrojs/starlight/components/Sidebar.astro',
-        // Dark by default whatever the OS prefers, with the site's light toggle.
+        // Dark only: an empty provider, so nothing switches to light, and no picker.
         ThemeProvider: './src/components/ThemeProvider.astro',
-        ThemeSelect: './src/components/ThemeSelect.astro',
+        ThemeSelect: './src/components/ThemeProvider.astro',
       },
       editLink: { baseUrl: 'https://github.com/tachyon-cms/website/edit/main/docs/' },
       plugins: [

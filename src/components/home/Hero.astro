@@ -57,8 +57,8 @@ const count = await stars();
     inset: -2rem -16px auto;
     height: 34rem;
     background:
-      radial-gradient(60% 70% at 15% 10%, color-mix(in srgb, var(--c-violet) 30%, transparent), transparent 70%),
-      radial-gradient(40% 50% at 85% 30%, color-mix(in srgb, var(--c-pink) 16%, transparent), transparent 70%);
+      radial-gradient(60% 70% at 15% 10%, color-mix(in srgb, var(--c-blue) 30%, transparent), transparent 70%),
+      radial-gradient(40% 50% at 85% 30%, color-mix(in srgb, var(--c-blue) 16%, transparent), transparent 70%);
     pointer-events: none;
   }
   .eyebrow {
@@ -66,7 +66,7 @@ const count = await stars();
     font: 600 0.8125rem/1 var(--font-mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--c-soft);
+    color: var(--c-blue-soft);
   }
   h1 {
     max-width: 14ch;
@@ -93,7 +93,7 @@ const count = await stars();
     margin-left: 0.15rem;
     font: 600 0.875rem/1 var(--font-mono);
     color: var(--c-muted);
-    border-left: 1px solid var(--c-border);
+    border-left: 1px solid var(--c-line);
   }
   .status {
     max-width: 34rem;
@@ -106,19 +106,19 @@ const count = await stars();
     gap: 1px;
     margin: 0;
     align-self: center;
-    background: var(--c-border);
-    border: 1px solid var(--c-border);
+    background: var(--c-line);
+    border: 1px solid var(--c-line);
     border-radius: 16px;
     overflow: hidden;
   }
   .facts div {
     padding: 1.1rem 1.4rem;
-    background: var(--c-surface);
+    background: var(--c-panel);
   }
   dt {
     font: 700 1.6rem/1.1 var(--font-sans);
     letter-spacing: -0.02em;
-    color: var(--c-hi);
+    color: var(--c-blue);
   }
   dd {
     margin: 0.3rem 0 0;

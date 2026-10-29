@@ -32,10 +32,10 @@ const { id, loop, caption } = Astro.props;
   }
   .diagram .pane {
     min-width: 0;
-    background: var(--c-surface);
-    border: 1px solid var(--c-border);
+    background: var(--c-panel);
+    border: 1px solid var(--c-line);
     border-radius: 14px;
-    box-shadow: 0 24px 60px -36px color-mix(in srgb, var(--c-violet) 70%, transparent);
+    box-shadow: 0 24px 60px -36px color-mix(in srgb, var(--c-blue) 70%, transparent);
   }
   .diagram .pane-head {
     display: flex;
@@ -47,14 +47,14 @@ const { id, loop, caption } = Astro.props;
     letter-spacing: 0.06em;
     text-transform: uppercase;
     color: var(--c-muted);
-    border-bottom: 1px solid var(--c-border);
+    border-bottom: 1px solid var(--c-line);
   }
   .diagram .pane-head::before {
     content: '';
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 50%;
-    background: var(--c-grad);
+    background: var(--c-blue);
   }
   /* Wrapped rather than scrolled, so no line hides off the edge of a phone. */
   .diagram pre {
@@ -77,22 +77,22 @@ const { id, loop, caption } = Astro.props;
   }
   /* Code colours: keys, quiet punctuation, a good outcome, a warning. */
   .diagram .k {
-    color: var(--c-soft);
+    color: var(--c-blue-soft);
   }
   .diagram .q {
     color: var(--c-muted);
   }
   .diagram .ok {
-    color: var(--c-ok);
+    color: var(--c-blue-soft);
   }
   .diagram .warn {
-    color: var(--c-hi);
+    color: var(--c-blue);
   }
   .diagram .mark {
     margin-inline: calc(-1 * var(--pad));
     padding-inline: var(--pad);
-    box-shadow: inset 2px 0 0 var(--c-hi);
-    background: color-mix(in srgb, var(--c-pink) 10%, transparent);
+    box-shadow: inset 2px 0 0 var(--c-blue);
+    background: color-mix(in srgb, var(--c-blue) 10%, transparent);
   }
   .diagram .arrow {
     display: grid;
@@ -101,8 +101,8 @@ const { id, loop, caption } = Astro.props;
     justify-self: center;
     width: 2.25rem;
     height: 2.25rem;
-    color: var(--c-on-grad);
-    background: var(--c-grad);
+    color: var(--c-on-blue);
+    background: var(--c-blue);
     border-radius: 50%;
   }
 
@@ -127,7 +127,7 @@ const { id, loop, caption } = Astro.props;
   }
   @keyframes diagram-pulse {
     from {
-      box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-pink) 60%, transparent);
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-blue) 60%, transparent);
     }
     to {
       box-shadow: 0 0 0 14px transparent;
@@ -135,7 +135,7 @@ const { id, loop, caption } = Astro.props;
   }
   @keyframes diagram-glow {
     from {
-      background: color-mix(in srgb, var(--c-pink) 35%, transparent);
+      background: color-mix(in srgb, var(--c-blue) 35%, transparent);
     }
   }
 </style>

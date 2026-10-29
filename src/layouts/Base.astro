@@ -4,7 +4,6 @@ import '../brand/tokens.css';
 import Seo from '../components/Seo.astro';
 import SiteFooter from '../components/SiteFooter.astro';
 import SiteHeader from '../components/SiteHeader.astro';
-import { initTheme } from '../scripts/theme';
 
 interface Props {
   title: string;
@@ -28,8 +27,6 @@ const {
   published,
   noindex,
 } = Astro.props;
-// Inlined so it runs before first paint, after the meta tags it updates; scripts/csp.mjs hashes it like any inline script.
-const themeScript = `(${initTheme.toString()})();`;
 ---
 
 <!doctype html>
@@ -38,8 +35,7 @@ const themeScript = `(${initTheme.toString()})();`;
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="dark" />
-    <meta name="theme-color" content="#07060c" />
-    <script is:inline set:html={themeScript} />
+    <meta name="theme-color" content="#0c0d0d" />
     <Seo title={title} description={description} path={path} image={image} imageAlt={imageAlt} published={published} noindex={noindex} />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="alternate" type="application/rss+xml" title="TachyonCMS blog" href="/rss.xml" />
@@ -83,11 +79,11 @@ const themeScript = `(${initTheme.toString()})();`;
     padding: 0 16px;
   }
   a {
-    color: var(--c-soft);
+    color: var(--c-blue-soft);
     text-underline-offset: 3px;
   }
   :focus-visible {
-    outline: 2px solid var(--c-hi);
+    outline: 2px solid var(--c-blue);
     outline-offset: 3px;
   }
   h1,
@@ -104,14 +100,14 @@ const themeScript = `(${initTheme.toString()})();`;
     top: -4rem;
     z-index: 10;
     padding: 0.6rem 1rem;
-    color: var(--c-on-grad);
-    background: var(--c-grad);
+    color: var(--c-on-blue);
+    background: var(--c-blue);
     border-radius: 999px;
   }
   .skip:focus {
     top: 1rem;
   }
-  /* Call-to-action links: .btn for the gradient one, plus .ghost for the quiet one. */
+  /* Call-to-action links: .btn for the blue one, plus .ghost for the quiet one. */
   .btn {
     display: inline-flex;
     align-items: center;
@@ -120,8 +116,8 @@ const themeScript = `(${initTheme.toString()})();`;
     font-weight: 600;
     line-height: 1.2;
     text-decoration: none;
-    color: var(--c-on-grad);
-    background: var(--c-grad);
+    color: var(--c-on-blue);
+    background: var(--c-blue);
     border: 1px solid transparent;
     border-radius: 999px;
   }
@@ -130,12 +126,12 @@ const themeScript = `(${initTheme.toString()})();`;
   }
   .btn.ghost {
     color: var(--c-text);
-    background: var(--c-surface);
-    border-color: var(--c-border);
+    background: var(--c-panel);
+    border-color: var(--c-line);
   }
   .btn.ghost:hover {
     filter: none;
-    border-color: var(--c-soft);
+    border-color: var(--c-blue-soft);
   }
   .sr-only {
     position: absolute;

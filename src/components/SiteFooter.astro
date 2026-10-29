@@ -1,5 +1,4 @@
 ---
-import ThemeToggle from './ThemeToggle.astro';
 
 const groups = [
   {
@@ -71,7 +70,6 @@ const groups = [
     </nav>
     <div class="base">
       <p>MIT licensed and built in public. © 2026 TachyonCMS</p>
-      <ThemeToggle />
     </div>
   </div>
 </footer>
@@ -79,7 +77,7 @@ const groups = [
 <style>
   .site-footer {
     margin-top: 6rem;
-    border-top: 1px solid var(--c-border);
+    border-top: 1px solid var(--c-line);
     font-size: 0.9375rem;
   }
   .inner {
@@ -97,7 +95,7 @@ const groups = [
     font: 600 0.8125rem/1 var(--font-mono);
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: var(--c-soft);
+    color: var(--c-blue-soft);
   }
   ul {
     margin: 0;
@@ -124,7 +122,7 @@ const groups = [
     gap: 1rem;
     margin-top: 3rem;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--c-border);
+    border-top: 1px solid var(--c-line);
   }
   .base p {
     margin: 0;

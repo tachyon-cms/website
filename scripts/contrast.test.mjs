@@ -1,5 +1,6 @@
 // Checks the brand colour tokens and logo files against WCAG 2.2 contrast
-// minimums in both themes: 4.5:1 for text, 3:1 for accents and graphics.
+// minimums: 4.5:1 for text, 3:1 for decorative meta text and graphics.
+// The site and docs are dark only, so there is one theme to check.
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -27,72 +28,55 @@ export function ratio(a, b) {
   return (hi + 0.05) / (lo + 0.05);
 }
 
-// Dark is the default; light overrides it, so light inherits anything it doesn't set.
-const dark = block(":root");
-const themes = { dark, light: { ...dark, ...block('[data-theme="light"]') } };
+const t = block(":root");
 
-// --c-soft is the link colour; --c-on-grad is the label on the violet-to-pink button,
-// so it has to clear both ends of the gradient.
-const text = [
-  ["--c-text", "--c-bg"], ["--c-text", "--c-surface"],
-  ["--c-muted", "--c-bg"], ["--c-muted", "--c-surface"],
-  ["--c-soft", "--c-bg"], ["--c-soft", "--c-surface"],
-  ["--c-hi", "--c-bg"], ["--c-hi", "--c-surface"],
-  ["--c-ok", "--c-bg"], ["--c-ok", "--c-surface"],
-  ["--c-on-grad", "--c-violet"], ["--c-on-grad", "--c-pink"],
+test("there is no light theme", () => {
+  assert.doesNotMatch(css, /data-theme|prefers-color-scheme|color-scheme:\s*light/);
+  assert.match(css, /color-scheme:\s*dark/);
+});
+
+// --c-blue-soft is the link colour; --c-on-blue is the label on blue buttons.
+const pairs = [
+  ["--c-text", "--c-bg", 4.5], ["--c-text", "--c-panel", 4.5],
+  ["--c-muted", "--c-bg", 4.5], ["--c-muted", "--c-panel", 4.5],
+  ["--c-blue-soft", "--c-bg", 4.5], ["--c-blue-soft", "--c-panel", 4.5],
+  ["--c-on-blue", "--c-blue", 4.5],
+  // Dim is for decorative and meta text only, never body copy.
+  ["--c-dim", "--c-bg", 3],
 ];
-
-for (const [name, t] of Object.entries(themes)) {
-  for (const [fg, bg] of text) {
-    test(`${name}: ${fg} on ${bg} is at least 4.5:1`, () => {
-      const r = ratio(t[fg], t[bg]);
-      assert.ok(r >= 4.5, `${t[fg]} on ${t[bg]} is ${r.toFixed(2)}:1`);
-    });
-  }
-  for (const accent of ["--c-violet", "--c-pink"]) {
-    test(`${name}: ${accent} on --c-bg is at least 3:1`, () => {
-      const r = ratio(t[accent], t["--c-bg"]);
-      assert.ok(r >= 3, `${t[accent]} on ${t["--c-bg"]} is ${r.toFixed(2)}:1`);
-    });
-  }
-  test(`${name}: --c-grad runs from --c-violet to --c-pink`, () => {
-    assert.match(t["--c-grad"], /var\(--c-violet\)[^)]*var\(--c-pink\)/);
+for (const [fg, bg, min] of pairs) {
+  test(`${fg} on ${bg} is at least ${min}:1`, () => {
+    const r = ratio(t[fg], t[bg]);
+    assert.ok(r >= min, `${t[fg]} on ${t[bg]} is ${r.toFixed(2)}:1`);
   });
 }
 
 // The docs map the tokens onto Starlight (docs/src/styles/brand.css). Links use
-// accent-high in dark and accent in light; the current sidebar item puts
-// text-invert (accent-low in dark, black in light) on the link colour.
+// accent-high; the current sidebar item puts text-invert (accent-low) on it.
 const docs = read("../docs/src/styles/brand.css");
-const darkDocs = block(":root", docs);
-const docsThemes = {
-  dark: { theme: themes.dark, sl: darkDocs, link: "--sl-color-accent-high", invert: "--sl-color-accent-low" },
-  light: { theme: themes.light, sl: { ...darkDocs, ...block('[data-theme="light"]', docs) }, link: "--sl-color-accent", invert: "--sl-color-black" },
-};
-for (const [name, { theme, sl, link, invert }] of Object.entries(docsThemes)) {
-  const colour = (v) => (sl[v].startsWith("var(") ? theme[sl[v].slice(4, -1)] : sl[v]);
-  const pairs = [
-    ["--sl-color-white", "--sl-color-black"], ["--sl-color-gray-1", "--sl-color-black"],
-    ["--sl-color-gray-2", "--sl-color-black"], ["--sl-color-gray-3", "--sl-color-black"],
-    ["--sl-color-gray-2", "--sl-color-gray-6"], ["--sl-color-gray-3", "--sl-color-gray-6"],
-    ["--sl-color-gray-2", "--sl-color-gray-7"], ["--sl-color-gray-3", "--sl-color-gray-7"],
-    ["--sl-color-accent-high", "--sl-color-accent-low"],
-    [link, "--sl-color-black"], [link, "--sl-color-gray-6"], [invert, link],
-  ];
-  for (const [fg, bg] of pairs) {
-    test(`docs ${name}: ${fg} on ${bg} is at least 4.5:1`, () => {
-      const r = ratio(colour(fg), colour(bg));
-      assert.ok(r >= 4.5, `${colour(fg)} on ${colour(bg)} is ${r.toFixed(2)}:1`);
-    });
-  }
+const sl = block(":root", docs);
+const colour = (v) => (sl[v].startsWith("var(") ? t[sl[v].slice(4, -1)] : sl[v]);
+test("the docs have no light theme", () => assert.doesNotMatch(docs, /data-theme/));
+const docsPairs = [
+  ["--sl-color-white", "--sl-color-black"], ["--sl-color-gray-1", "--sl-color-black"],
+  ["--sl-color-gray-2", "--sl-color-black"], ["--sl-color-gray-3", "--sl-color-black"],
+  ["--sl-color-gray-2", "--sl-color-gray-6"], ["--sl-color-gray-3", "--sl-color-gray-6"],
+  ["--sl-color-gray-2", "--sl-color-gray-7"], ["--sl-color-gray-3", "--sl-color-gray-7"],
+  ["--sl-color-accent-high", "--sl-color-accent-low"],
+  ["--sl-color-accent-high", "--sl-color-black"], ["--sl-color-accent-high", "--sl-color-gray-6"],
+  ["--sl-color-accent-low", "--sl-color-accent-high"],
+];
+for (const [fg, bg] of docsPairs) {
+  test(`docs: ${fg} on ${bg} is at least 4.5:1`, () => {
+    const r = ratio(colour(fg), colour(bg));
+    assert.ok(r >= 4.5, `${colour(fg)} on ${colour(bg)} is ${r.toFixed(2)}:1`);
+  });
 }
 
 // The logo files are drawn by brand/build.mjs. Every colour in them is a graphic on
-// that theme's background, so it needs 3:1; the favicon brings its own dark tile.
+// the page background, so it needs 3:1; the favicon brings its own dark tile.
 const logos = {
-  "brand/logo-dark.svg": themes.dark["--c-bg"], "brand/mark-dark.svg": themes.dark["--c-bg"],
-  "brand/logo-light.svg": themes.light["--c-bg"], "brand/mark-light.svg": themes.light["--c-bg"],
-  "favicon.svg": "#07060c",
+  "brand/logo-dark.svg": t["--c-bg"], "brand/mark-dark.svg": t["--c-bg"], "favicon.svg": "#07060c",
 };
 for (const [file, bg] of Object.entries(logos)) {
   test(`${file} is at least 3:1 on ${bg} and has no inline styles`, () => {

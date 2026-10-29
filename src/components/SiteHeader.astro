@@ -13,8 +13,7 @@ const count = await stars();
 <header class="site-header">
   <div class="bar">
     <a class="home" href="/">
-      <img class="logo-dark" src="/brand/logo-dark.svg" alt="TachyonCMS" width="152" height="24" />
-      <img class="logo-light" src="/brand/logo-light.svg" alt="TachyonCMS" width="152" height="24" />
+      <img src="/brand/logo-dark.svg" alt="TachyonCMS" width="152" height="24" />
     </a>
     <nav aria-label="Main">
       <ul>
@@ -47,7 +46,7 @@ const count = await stars();
 
 <style>
   .site-header {
-    border-bottom: 1px solid var(--c-border);
+    border-bottom: 1px solid var(--c-line);
   }
   .bar {
     display: flex;
@@ -60,13 +59,6 @@ const count = await stars();
   }
   .home {
     display: flex;
-  }
-  .logo-light,
-  :global([data-theme='light']) .logo-dark {
-    display: none;
-  }
-  :global([data-theme='light']) .logo-light {
-    display: block;
   }
   nav {
     order: 3;
@@ -97,18 +89,18 @@ const count = await stars();
     padding: 0.4rem 0.85rem;
     color: var(--c-text);
     text-decoration: none;
-    border: 1px solid var(--c-border);
+    border: 1px solid var(--c-line);
     border-radius: 999px;
   }
   .github:hover {
-    border-color: var(--c-soft);
+    border-color: var(--c-blue-soft);
   }
   .stars {
     display: inline-flex;
     align-items: center;
     gap: 0.25rem;
     padding-left: 0.45rem;
-    border-left: 1px solid var(--c-border);
+    border-left: 1px solid var(--c-line);
     font: 0.875rem var(--font-mono);
     color: var(--c-muted);
   }

@@ -12,21 +12,16 @@ for (const path of pages) {
   });
 }
 
-test('the theme toggle switches to light and remembers it', async ({ page }) => {
+test('the site is dark only, whatever the OS or a stored choice says', async ({ page }) => {
+  await page.emulateMedia({ colorScheme: 'light' });
+  // The old toggle's key: a returning visitor may still have it.
+  await page.addInitScript(() => localStorage.setItem('theme', 'light'));
   await page.goto('/');
-  await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'light');
-  await page.locator('[data-theme-toggle]').click();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  expect(await page.evaluate(() => localStorage.getItem('theme'))).toBe('light');
-  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#faf8ff');
-  await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute('content', 'light');
-  await page.goto('/confirmed');
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  // A saved theme applies to the browser chrome before first paint too.
-  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#faf8ff');
-  await page.locator('[data-theme-toggle]').click();
-  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#07060c');
+  await expect(page.locator('html')).not.toHaveAttribute('data-theme');
+  await expect(page.locator('meta[name="theme-color"]')).toHaveAttribute('content', '#0c0d0d');
   await expect(page.locator('meta[name="color-scheme"]')).toHaveAttribute('content', 'dark');
+  await expect(page.locator('[data-theme-toggle]')).toHaveCount(0);
+  expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(12, 13, 13)');
 });
 
 test.describe('without JavaScript', () => {
@@ -36,7 +31,7 @@ test.describe('without JavaScript', () => {
     await page.goto('/');
     await expect(page.locator('html')).not.toHaveAttribute('data-theme', 'light');
     const bg = await page.evaluate(() => getComputedStyle(document.body).backgroundColor);
-    expect(bg).toBe('rgb(7, 6, 12)');
+    expect(bg).toBe('rgb(12, 13, 13)');
     for (const el of ['header', 'main', 'footer', 'form.signup']) await expect(page.locator(el).first()).toBeVisible();
   });
 });
@@ -79,13 +74,12 @@ test('the header links the GitHub repo', async ({ page }) => {
   await expect(page.locator('header a[href="https://github.com/tachyon-cms/tachyoncms"]')).toHaveCount(1);
 });
 
-test('the footer lists every contact address and the theme toggle', async ({ page }) => {
+test('the footer lists every contact address', async ({ page }) => {
   await page.goto('/');
   const footer = page.locator('footer');
   for (const box of ['hello', 'security', 'conduct', 'legal', 'sponsors']) {
     await expect(footer.locator(`a[href="mailto:${box}@tachyoncms.com"]`)).toHaveCount(1);
   }
-  await expect(footer.locator('[data-theme-toggle]')).toBeVisible();
 });
 
 test.describe('at phone width', () => {

@@ -144,14 +144,15 @@ test('"Edit page" points at the website repo', async ({ page }) => {
   );
 });
 
-test('dark is the default even when the OS prefers light, and the toggle switches', async ({ page }) => {
+test('the docs are dark only, even with the OS and a stored choice set to light', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' });
-  await page.goto('/');
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
-  await page.locator('[data-theme-toggle]:visible').click();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  await page.goto('/cli');
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
+  await page.addInitScript(() => localStorage.setItem('starlight-theme', 'light'));
+  for (const link of ['/', '/cli']) {
+    await page.goto(link);
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('starlight-theme-select, [data-theme-toggle]')).toHaveCount(0);
+    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(12, 13, 13)');
+  }
 });
 
 test('no horizontal overflow on a phone', async ({ page }) => {
@@ -166,10 +167,9 @@ test('no horizontal overflow on a phone', async ({ page }) => {
 test.describe('without JS', () => {
   test.use({ javaScriptEnabled: false });
 
-  test('the theme toggle is hidden, since it could not work', async ({ page }) => {
+  test('the page renders dark, with no theme picker', async ({ page }) => {
     await page.goto('/');
-    const toggles = await page.locator('[data-theme-toggle]').all();
-    expect(toggles.length).toBeGreaterThan(0);
-    for (const toggle of toggles) await expect(toggle).toBeHidden();
+    await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+    await expect(page.locator('starlight-theme-select, [data-theme-toggle]')).toHaveCount(0);
   });
 });

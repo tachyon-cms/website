@@ -6,20 +6,20 @@ import Base from '../layouts/Base.astro';
 
 // Read from the stylesheet the site itself uses, so this page can't fall out of step with it.
 const hexes = (block: string) => Object.fromEntries([...block.matchAll(/--c-([\w-]+):\s*(#[0-9a-f]{6})/gi)].map((m) => [m[1], m[2]]));
-const [dark, light] = tokens.split('[data-theme="light"]').map(hexes);
+const values = hexes(tokens);
 const roles: [string, string][] = [
   ['bg', 'Background'],
-  ['surface', 'Cards and panels'],
-  ['border', 'Borders'],
+  ['panel', 'Cards and panels'],
+  ['line', 'Lines'],
   ['text', 'Text'],
   ['muted', 'Secondary text'],
-  ['violet', 'Gradient start'],
-  ['pink', 'Gradient end'],
-  ['hi', 'Highlight, and code'],
-  ['soft', 'Accents and links'],
+  ['dim', 'Labels and meta'],
+  ['blue', 'Accent and buttons'],
+  ['blue-soft', 'Links'],
+  ['blue-deep', 'Accent backgrounds'],
 ];
-const colours = roles.map(([token, role]) => ({ token, role, dark: dark[token], light: light[token] ?? dark[token] }));
-if (colours.some((c) => !c.dark)) throw new Error('brand: a colour is missing from src/brand/tokens.css');
+const colours = roles.map(([token, role]) => ({ token, role, hex: values[token] }));
+if (colours.some((c) => !c.hex)) throw new Error('brand: a colour is missing from src/brand/tokens.css');
 
 const logos = [
   { file: 'logo-dark.svg', label: 'Logo, for dark backgrounds', tile: 'on-dark', width: 202, height: 32 },
@@ -79,15 +79,14 @@ const logos = [
     <section aria-labelledby="colours">
       <h2 id="colours">Colours</h2>
       <Prose>
-        <p>Dark is the default. The light theme swaps in its own values where contrast needs it.</p>
+        <p>TachyonCMS is dark only, so there's one set: near-black, quiet greys and one electric blue.</p>
       </Prose>
       <div class="table">
         <table>
           <thead>
             <tr>
               <th scope="col">Use</th>
-              <th scope="col">Dark</th>
-              <th scope="col">Light</th>
+              <th scope="col">Colour</th>
             </tr>
           </thead>
           <tbody>
@@ -95,14 +94,12 @@ const logos = [
               colours.map((c) => (
                 <tr>
                   <th scope="row">{c.role}</th>
-                  {[c.dark, c.light].map((hex) => (
-                    <td>
-                      <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
-                        <rect width="19" height="19" x="0.5" y="0.5" rx="5" fill={hex} stroke="currentColor" stroke-opacity="0.3" />
-                      </svg>
-                      <code>{hex}</code>
-                    </td>
-                  ))}
+                  <td>
+                    <svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true">
+                      <rect width="19" height="19" x="0.5" y="0.5" rx="5" fill={c.hex} stroke="currentColor" stroke-opacity="0.3" />
+                    </svg>
+                    <code>{c.hex}</code>
+                  </td>
                 </tr>
               ))
             }
@@ -115,11 +112,11 @@ const logos = [
       <h2 id="fonts">Fonts</h2>
       <div class="fonts">
         <div>
-          <p class="sample sans">Instrument Sans</p>
+          <p class="sample sans">Inter</p>
           <p>Headings and text. Free under the SIL Open Font License.</p>
         </div>
         <div>
-          <p class="sample mono">IBM Plex Mono</p>
+          <p class="sample mono">Geist Mono</p>
           <p>Code, labels and numbers. Free under the SIL Open Font License.</p>
         </div>
       </div>
@@ -155,12 +152,12 @@ const logos = [
     place-items: center;
     height: 8rem;
     padding: 1rem;
-    border: 1px solid var(--c-border);
+    border: 1px solid var(--c-line);
     border-radius: 14px;
   }
   /* The two backgrounds the logo files are drawn for, whatever the page's theme. */
   .on-dark {
-    background: #07060c;
+    background: #0c0d0d;
   }
   .on-light {
     background: #faf8ff;
@@ -185,7 +182,7 @@ const logos = [
   :where(th, td) {
     padding: 0.6rem 0.75rem 0.6rem 0;
     text-align: left;
-    border-bottom: 1px solid var(--c-border);
+    border-bottom: 1px solid var(--c-line);
   }
   thead th {
     font-size: 0.875rem;
@@ -208,8 +205,8 @@ const logos = [
   }
   .fonts > div {
     padding: 1.25rem;
-    background: var(--c-surface);
-    border: 1px solid var(--c-border);
+    background: var(--c-panel);
+    border: 1px solid var(--c-line);
     border-radius: 14px;
   }
   .fonts p {

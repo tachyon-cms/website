@@ -22,14 +22,14 @@ const family = (name, cssVariable, pkg, weights, fallbacks) => ({
 });
 
 export const fonts = [
-  family("Instrument Sans", "--font-sans", "instrument-sans", [400, 600, 700], ["system-ui", "sans-serif"]),
-  family("IBM Plex Mono", "--font-mono", "ibm-plex-mono", [400, 600], ["ui-monospace", "monospace"]),
+  family("Inter", "--font-sans", "inter", [400, 500, 600, 700], ["system-ui", "sans-serif"]),
+  family("Geist Mono", "--font-mono", "geist-mono", [400, 500], ["ui-monospace", "monospace"]),
 ];
 
-// The docs load three files, not five: Lighthouse counts every font a long page
-// requests before first paint, and two more cost the mobile 100. Bold text falls
+// The docs load three files, not six: Lighthouse counts every font a long page
+// requests before first paint, and the extra faces cost the mobile 100. Bold text falls
 // back to the 600 face and bold code to a synthesized 400.
 export const docsFonts = [
-  family("Instrument Sans", "--font-sans", "instrument-sans", [400, 600], ["system-ui", "sans-serif"]),
-  family("IBM Plex Mono", "--font-mono", "ibm-plex-mono", [400], ["ui-monospace", "monospace"]),
+  family("Inter", "--font-sans", "inter", [400, 600], ["system-ui", "sans-serif"]),
+  family("Geist Mono", "--font-mono", "geist-mono", [400], ["ui-monospace", "monospace"]),
 ];

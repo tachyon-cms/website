@@ -62,8 +62,8 @@ test('brand offers every logo file as a download', async ({ page }) => {
   for (const file of ['logo-dark', 'logo-light', 'mark-dark', 'mark-light']) {
     await expect(page.locator(`main a[href="/brand/${file}.svg"][download]`)).toHaveCount(1);
   }
-  await expect(page.locator('main')).toContainText('Instrument Sans');
-  await expect(page.locator('main')).toContainText('IBM Plex Mono');
+  await expect(page.locator('main')).toContainText('Inter');
+  await expect(page.locator('main')).toContainText('Geist Mono');
 });
 
 test('privacy names what the signup sends where', async ({ page }) => {
