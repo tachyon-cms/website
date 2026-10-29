@@ -35,8 +35,8 @@ function* walk(dir) {
     else if (/\.(svg|html|astro|css|mjs|js|ts|md|mdx|json|txt)$/.test(entry.name)) yield url;
   }
 }
-test("the old T mark is gone from public/, src/ and the docs", () => {
-  for (const dir of ["public/", "src/", "docs/src/", "docs/public/"]) {
+test("the old T mark is gone from the site, the docs and the files that draw the logo", () => {
+  for (const dir of ["public/", "src/", "docs/src/", "docs/public/", "brand/", "scripts/post-graphics/"]) {
     for (const url of walk(new URL(dir, root))) {
       assert.ok(!readFileSync(url, "utf8").includes(oldMark), `${url.pathname} still has the old T mark`);
     }
