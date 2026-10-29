@@ -293,7 +293,18 @@ test.describe('the hero', () => {
     test('still streaks stand in for the field, clear of the copy', async ({ page }) => {
       await page.goto('/');
       await expect(page.locator('.hero .still')).toBeVisible();
-      const copyRight = await page.locator('.hero h1').evaluate((h) => h.getBoundingClientRect().right);
+      // The right edge of everything in the copy column: kicker, h1, lede, buttons,
+      // install line and status, each by its own box and by its text.
+      const copyRight = await page.locator('.hero .copy').evaluate((copy) => {
+        const rights = [copy, ...copy.querySelectorAll('*')].map((el) => el.getBoundingClientRect().right);
+        const walker = document.createTreeWalker(copy, NodeFilter.SHOW_TEXT);
+        const range = document.createRange();
+        for (let n = walker.nextNode(); n; n = walker.nextNode()) {
+          range.selectNodeContents(n);
+          rights.push(range.getBoundingClientRect().right);
+        }
+        return Math.max(...rights);
+      });
       const lefts = await page.locator('.hero .still rect').evaluateAll((rs) => rs.map((r) => r.getBoundingClientRect().left));
       expect(lefts.length).toBeGreaterThan(3);
       for (const left of lefts) expect(left).toBeGreaterThan(copyRight);
