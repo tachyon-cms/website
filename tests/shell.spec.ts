@@ -23,6 +23,19 @@ for (const path of pages) {
   });
 }
 
+// Pages without a card of their own share the brand's social preview; posts keep theirs.
+for (const path of ['/', '/why', '/product/access-control', '/blog']) {
+  test(`${path} unfurls with the brand's social card`, async ({ page }) => {
+    await page.goto(path);
+    const meta = (key: string) => page.locator(`meta[property="${key}"]`);
+    await expect(meta('og:image')).toHaveAttribute('content', 'https://tachyoncms.com/brand/social-preview.png');
+    await expect(meta('og:image:width')).toHaveAttribute('content', '1280');
+    await expect(meta('og:image:height')).toHaveAttribute('content', '640');
+    await expect(meta('og:image:alt')).toHaveAttribute('content', /^TachyonCMS: .{40,}/);
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
+  });
+}
+
 test('the site is dark only, whatever the OS or a stored choice says', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' });
   // The old toggle's key: a returning visitor may still have it.
