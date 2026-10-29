@@ -187,7 +187,7 @@ test.describe('the hero', () => {
       return max;
     }, samples);
 
-  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 1100, height: 800 }, { width: 390, height: 844 }]) {
     test.describe(`at ${viewport.width} px`, () => {
       test.use({ viewport });
 
@@ -203,6 +203,22 @@ test.describe('the hero', () => {
         await expect(page.locator('.hero canvas')).toHaveClass(/\bon\b/);
         expect(await behindCopy(page, 1)).toBeLessThanOrEqual(8);
       });
+    });
+  }
+
+  // Below 1200 px the hero stays stacked: copy over panels. So that it isn't a left
+  // column with nothing beside it, the copy keeps to its own width, the streaks run
+  // in the room to its right, and the panels sit to the right below it.
+  for (const width of [1024, 1100]) {
+    test(`at ${width} px the hero is stacked, the panels set to the right`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 800 });
+      await page.goto('/');
+      const hero = (await page.locator('.hero').boundingBox())!;
+      const copy = (await page.locator('.hero .copy').boundingBox())!;
+      const vis = (await page.locator('.hero .vis').boundingBox())!;
+      expect(vis.y).toBeGreaterThanOrEqual(copy.y + copy.height);
+      expect(copy.width).toBeLessThanOrEqual(hero.width * 0.6);
+      expect(Math.abs(vis.x + vis.width - (hero.x + hero.width))).toBeLessThanOrEqual(1);
     });
   }
 
@@ -272,4 +288,31 @@ test('a warning in a diagram reads differently from a good outcome', async ({ pa
   const d = page.locator('[data-diagram="schema-diff"]');
   const colour = (sel: string) => d.locator(sel).first().evaluate((el) => getComputedStyle(el).color);
   expect(await colour('.warn')).not.toBe(await colour('.ok'));
+});
+
+// At 320 px the image name is wider than the line, so it breaks, but only at a slash.
+test('at 320 px the docker image name breaks only at its slashes', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto('/');
+  for (const sel of ['.hero .install .img', '#start .img']) {
+    const lines = await page.locator(sel).evaluate((el) => {
+      const range = document.createRange();
+      const text = el.textContent!;
+      const tops: number[] = [];
+      const ends: string[] = [];
+      const walk = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+      for (let n = walk.nextNode(); n; n = walk.nextNode()) {
+        for (let i = 0; i < n.textContent!.length; i++) {
+          range.setStart(n, i);
+          range.setEnd(n, i + 1);
+          const top = Math.round(range.getBoundingClientRect().top);
+          if (tops.length && top !== tops.at(-1)) ends.push(text[tops.length - 1]);
+          tops.push(top);
+        }
+      }
+      return ends;
+    });
+    expect(lines.length, sel).toBeGreaterThan(0);
+    for (const end of lines) expect(end, sel).toBe('/');
+  }
 });

@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { overflowing } from './fit';
 
 const docs = 'https://docs.tachyoncms.com';
 
@@ -92,14 +93,16 @@ test('every signup form promises the same list', async ({ page }) => {
   await expect(page.locator('main')).toContainText("write only when there's a release or news of the admin");
 });
 
-test('nothing runs off the side of a phone', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  for (const path of all) {
-    await page.goto(path);
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-    expect(overflow, path).toBeLessThanOrEqual(0);
-  }
-});
+// 320 px is the WCAG reflow width; 390 is a common phone.
+for (const width of [320, 390]) {
+  test(`nothing runs off the side of a ${width} px phone`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    for (const path of ['/', ...all]) {
+      await page.goto(path);
+      expect(await overflowing(page), path).toEqual([]);
+    }
+  });
+}
 
 const compare = ['wordpress', 'strapi', 'contentful', 'sanity', 'directus'];
 
@@ -124,14 +127,15 @@ for (const slug of compare) {
   });
 }
 
-test('compare pages fit a phone', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  for (const path of ['/compare', ...compare.map((s) => `/compare/${s}`)]) {
-    await page.goto(path);
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-    expect(overflow, path).toBeLessThanOrEqual(0);
-  }
-});
+for (const width of [320, 390]) {
+  test(`compare pages fit a ${width} px phone`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    for (const path of ['/compare', ...compare.map((s) => `/compare/${s}`)]) {
+      await page.goto(path);
+      expect(await overflowing(page), path).toEqual([]);
+    }
+  });
+}
 
 test.describe('the still header', () => {
   for (const path of all) {
@@ -149,13 +153,22 @@ test.describe('the still header', () => {
     });
   }
 
-  test('it stays put: nothing in it animates', async ({ page }) => {
-    await page.goto('/security');
-    const moving = await page.locator('.page-hero, .page-hero *').evaluateAll((els) =>
-      els.filter((el) => getComputedStyle(el).animationName !== 'none').length,
-    );
-    expect(moving).toBe(0);
-  });
+  for (const path of all) {
+    test(`${path}: it stays put, nothing in it animates or transitions`, async ({ page }) => {
+      await page.goto(path);
+      const moving = await page.locator('.page-hero, .page-hero *').evaluateAll((els) =>
+        els
+          .filter((el) => {
+            const css = getComputedStyle(el);
+            const timed = css.transitionDuration.split(',').some((d) => parseFloat(d) > 0);
+            return css.animationName !== 'none' || timed;
+          })
+          .map((el) => el.tagName),
+      );
+      expect(moving).toEqual([]);
+      await expect(page.locator('.page-hero svg :is(animate, animateTransform, animateMotion, set)')).toHaveCount(0);
+    });
+  }
 });
 
 test('every page is dark', async ({ page }) => {
@@ -169,4 +182,56 @@ test('on a phone the product tabs show the current page', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/security');
   await expect(page.locator('nav.product-nav a[aria-current="page"]')).toBeInViewport({ ratio: 1 });
+});
+
+// The tabs sit in a scrolling row, and a scroller clips whatever reaches past its
+// edges, a focus ring included. Every ring has to show in full.
+for (const width of [1440, 390]) {
+  test(`at ${width} px each product tab's focus ring shows in full`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto('/product/querying');
+    const tabs = page.locator('nav.product-nav a');
+    await tabs.first().focus();
+    for (let i = 0; i < (await tabs.count()); i++) {
+      if (i) await page.keyboard.press('Tab');
+      await expect(tabs.nth(i)).toBeFocused();
+      const cut = () => tabs.nth(i).evaluate((a) => {
+        const css = getComputedStyle(a);
+        const grow = parseFloat(css.outlineOffset) + parseFloat(css.outlineWidth);
+        const r = a.getBoundingClientRect();
+        const nav = a.parentElement!;
+        const n = nav.getBoundingClientRect();
+        const bottom = n.bottom - parseFloat(getComputedStyle(nav).borderBottomWidth);
+        const ring = { top: r.top - grow, bottom: r.bottom + grow, left: r.left - grow, right: r.right + grow };
+        return [
+          ring.top < n.top && 'top',
+          ring.bottom > bottom && 'bottom',
+          ring.left < Math.max(n.left, 0) && 'left',
+          ring.right > Math.min(n.right, innerWidth) && 'right',
+        ].filter(Boolean);
+      });
+      await expect.poll(cut, { message: `tab ${i}` }).toEqual([]);
+    }
+  });
+}
+
+test('the heading weight is preloaded with the body weight, and no unused mono face ships', async ({ page }) => {
+  for (const path of ['/', '/product/querying']) {
+    await page.goto(path);
+    const faces = await page.evaluate(() => {
+      const rules = [...document.styleSheets].flatMap((s) => [...s.cssRules]).filter((r) => r instanceof CSSFontFaceRule);
+      return rules.map((r) => ({
+        family: r.style.getPropertyValue('font-family').replace(/"/g, ''),
+        weight: r.style.getPropertyValue('font-weight'),
+        src: r.style.getPropertyValue('src'),
+      }));
+    });
+    const preloads = await page.locator('link[rel="preload"][as="font"]').evaluateAll((ls) => ls.map((l) => new URL((l as HTMLLinkElement).href).pathname));
+    const preloaded = (family: string) =>
+      faces.filter((f) => f.family.startsWith(family) && !f.family.includes('fallback') && preloads.some((p) => f.src.includes(p))).map((f) => f.weight).sort();
+    expect(preloaded('Inter'), path).toEqual(['400', '600']);
+    expect(preloaded('Geist Mono'), path).toEqual(['400']);
+    const mono = faces.filter((f) => f.family.includes('Geist Mono') && !f.family.includes('fallback')).map((f) => f.weight);
+    expect(mono, path).toEqual(['400']);
+  }
 });

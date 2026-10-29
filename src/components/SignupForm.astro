@@ -99,9 +99,10 @@ if (!siteKey) throw new Error('PUBLIC_TURNSTILE_SITE_KEY must be set for a Cloud
   /* Hidden from people, still in the form for bots that fill every field. */
   .trap {
     position: absolute;
-    left: -10000px;
     width: 1px;
     height: 1px;
     overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 </style>

@@ -5,9 +5,11 @@
 <div class="prose"><slot /></div>
 
 <style>
+  /* A flag or a path in inline code can be longer than a phone is wide. */
   .prose {
     max-width: 42rem;
     color: var(--c-muted);
+    overflow-wrap: break-word;
   }
   .prose :global(:where(h2, h3)) {
     color: var(--c-text);

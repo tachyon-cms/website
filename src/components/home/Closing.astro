@@ -5,7 +5,7 @@ import Icon from '../Icon.astro';
 <section id="start" class="band closing" aria-labelledby="start-title">
   <div class="backdrop" aria-hidden="true"></div>
   <h2 id="start-title">Pull it. Point it at Postgres. Define something.</h2>
-  <pre><code><span class="q">$</span> docker pull <span class="img">ghcr.io/tachyon-cms/tachyoncms:v0.1.0</span></code></pre>
+  <pre><code><span class="q">$</span> docker pull <span class="img">ghcr.io/<wbr /><span class="nb">tachyon-cms/</span><wbr />tachyoncms:v0.1.0</span></code></pre>
   <p>Or grab a binary for Linux or macOS. The docs take you from there to your first API key.</p>
   <div class="actions">
     <a class="btn" href="https://docs.tachyoncms.com/install">Get started <Icon name="FiArrowRight" /></a>
@@ -67,9 +67,16 @@ import Icon from '../Icon.astro';
     margin-right: 4px;
     color: var(--c-blue);
   }
-  /* On a phone the line breaks after "pull", never inside the image name. */
-  .img {
+  /* On a phone the line breaks after "pull", and below 360 px, where the name alone
+   * is too wide, at its slashes. */
+  .img,
+  .nb {
     white-space: nowrap;
+  }
+  @media (max-width: 359.98px) {
+    .img {
+      white-space: normal;
+    }
   }
   p {
     color: var(--c-muted);

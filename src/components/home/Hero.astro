@@ -35,9 +35,9 @@ const still = [
     <svg class="still">
       <defs>
         <linearGradient id="hero-still">
-          <stop offset="0" stop-color="#3da9ff" stop-opacity="0"></stop>
-          <stop offset="0.85" stop-color="#3da9ff" stop-opacity="0.5"></stop>
-          <stop offset="1" stop-color="#bfe2ff" stop-opacity="0.8"></stop>
+          <stop class="blue" offset="0" stop-opacity="0"></stop>
+          <stop class="blue" offset="0.85" stop-opacity="0.5"></stop>
+          <stop class="soft" offset="1" stop-opacity="0.8"></stop>
         </linearGradient>
       </defs>
       {
@@ -66,7 +66,7 @@ const still = [
         <Icon name="SiGithub" size={16} /> Star on GitHub{count !== null && <span class="count">{formatStars(count)}</span>}
       </a>
     </div>
-    <p class="install"><span aria-hidden="true">$</span> <code>docker pull <span>ghcr.io/tachyon-cms/tachyoncms:v0.1.0</span></code></p>
+    <p class="install"><span aria-hidden="true">$</span> <code>docker pull <span class="img">ghcr.io/<wbr /><span class="nb">tachyon-cms/</span><wbr />tachyoncms:v0.1.0</span></code></p>
     <p class="status">
       <a href="https://github.com/tachyon-cms/tachyoncms/releases/tag/v0.1.0">v0.1.0</a> is pre-alpha. The content
       API, sign-in and access rules work; keep it off public networks for now.
@@ -131,11 +131,17 @@ const still = [
   .hero {
     position: relative;
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 48px;
     padding: 56px 0 64px;
   }
   .hero > :not(.backdrop) {
     position: relative;
+  }
+  /* Stacked, the copy keeps to its own width, so the streaks run in the room to its
+   * right, and the panels sit to the right below it. */
+  .copy {
+    max-width: 34rem;
   }
 
   /* Full width, whatever the page width. body clips the sideways overflow 100vw makes
@@ -172,6 +178,12 @@ const still = [
   }
   .field.on ~ .still {
     opacity: 0;
+  }
+  .still .blue {
+    stop-color: var(--c-blue);
+  }
+  .still .soft {
+    stop-color: var(--c-blue-soft);
   }
   .glow {
     position: absolute;
@@ -267,9 +279,16 @@ const still = [
   .install code {
     font: inherit;
   }
-  /* On a phone the line breaks after "pull", never inside the image name. */
-  .install code span {
+  /* On a phone the line breaks after "pull", and below 360 px, where the name alone
+   * is too wide, at its slashes. */
+  .install .img,
+  .install .nb {
     white-space: nowrap;
+  }
+  @media (max-width: 359.98px) {
+    .install .img {
+      white-space: normal;
+    }
   }
   .status {
     max-width: 30rem;
@@ -282,6 +301,8 @@ const still = [
   /* The schema and the response */
   .vis {
     display: grid;
+    justify-self: end;
+    width: 100%;
     max-width: 34rem;
   }
   .panel {
@@ -303,7 +324,7 @@ const still = [
     margin: 0;
     padding: 14px 16px;
     font: 400 12.5px/1.75 var(--font-mono);
-    color: #c9cbcf;
+    color: var(--c-code);
     white-space: pre;
     overflow: hidden;
   }
@@ -342,22 +363,15 @@ const still = [
     display: none;
   }
 
-  /* Small laptops: copy and panels side by side, the panels still stacked with
-   * their short wires, since the fixed wire geometry below needs 1200 px. */
-  @media (min-width: 1024px) and (max-width: 1199.98px) {
-    .hero {
-      grid-template-columns: minmax(0, 1fr) 30rem;
-      align-items: center;
-      gap: 40px;
-      padding: 80px 0;
-    }
-  }
   @media (min-width: 1200px) {
     .hero {
       grid-template-columns: 1.05fr 1fr;
       align-items: center;
       gap: 40px;
       padding: 96px 0;
+    }
+    .copy {
+      max-width: none;
     }
     .still {
       display: block;

@@ -448,4 +448,18 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
       display: block;
     }
   }
+  /* At the 320 px reflow width the logo, the button and the menu only just fit. */
+  @media (max-width: 359.98px) {
+    .bar,
+    .end {
+      gap: 8px;
+    }
+    .brand {
+      gap: 8px;
+      font-size: 16px;
+    }
+    .cta {
+      padding: 0 11px;
+    }
+  }
 </style>

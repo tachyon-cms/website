@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { overflowing } from './fit';
 
 const discussions = 'https://github.com/tachyon-cms/tachyoncms/discussions';
 const pages = ['/roadmap', '/releases', '/community', '/starters', '/faq', '/brand', '/privacy', '/trademark'];
@@ -11,14 +12,15 @@ for (const path of pages) {
   });
 }
 
-test('project pages fit a phone', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  for (const path of pages) {
-    await page.goto(path);
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-    expect(overflow, path).toBeLessThanOrEqual(0);
-  }
-});
+for (const width of [320, 390]) {
+  test(`project pages fit a ${width} px phone`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    for (const path of pages) {
+      await page.goto(path);
+      expect(await overflowing(page), path).toEqual([]);
+    }
+  });
+}
 
 test('the roadmap links the discussion it mirrors and both polls', async ({ page }) => {
   await page.goto('/roadmap');

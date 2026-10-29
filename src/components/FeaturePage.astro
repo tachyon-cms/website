@@ -103,15 +103,21 @@ const inProduct = product.some(([href]) => href === path);
   if (nav && current && nav.scrollWidth > nav.clientWidth) {
     nav.scrollLeft = current.offsetLeft - nav.offsetLeft - (nav.clientWidth - current.offsetWidth) / 2;
   }
+  // Chrome leaves a half-visible tab where it is when it takes focus, its ring cut
+  // off by the edge; bring the whole tab in.
+  nav?.addEventListener('focusin', (e) => (e.target as HTMLElement).scrollIntoView({ block: 'nearest', inline: 'nearest' }));
 </script>
 
 <style>
   /* A row of tabs under the site header, its line running the full width. */
+  /* The tabs carry their own side padding, so the row is pulled out by as much to
+   * keep the first label on the page edge. */
   .product-nav {
     display: flex;
-    gap: 28px;
+    gap: 12px;
+    margin: 0 -8px;
     overflow-x: auto;
-    scrollbar-width: none;
+    scroll-padding-inline: 8px;
     /* The border is drawn out past the box to both screen edges; a pseudo-element
      * would be clipped by the scrolling. */
     border-bottom: 1px solid;
@@ -121,18 +127,23 @@ const inProduct = product.some(([href]) => href === path);
   @media (max-width: 899.98px) {
     .product-nav {
       margin-right: -16px;
-      padding-right: 16px;
+      padding-right: 8px;
+      scrollbar-width: none;
     }
   }
   .product-nav a {
     position: relative;
     z-index: 1;
     flex: none;
-    padding: 14px 0 13px;
+    padding: 14px 8px 13px;
     font-size: 14px;
     color: var(--c-muted);
     text-decoration: none;
     border-bottom: 1px solid transparent;
+  }
+  /* Drawn inside the tab: the row scrolls, and a scroller clips anything past its edges. */
+  .product-nav a:focus-visible {
+    outline-offset: -2px;
   }
   .product-nav a:hover {
     color: var(--c-text);
@@ -151,13 +162,17 @@ const inProduct = product.some(([href]) => href === path);
     border: 1px solid color-mix(in srgb, var(--c-blue) 35%, transparent);
     border-radius: 999px;
   }
+  /* minmax(0, 1fr): a long line of code scrolls inside its block rather than
+   * widening the column past the screen. */
   .sample {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 48px;
     padding-top: 64px;
   }
   .body {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 48px;
     padding: 72px 0 24px;
   }
