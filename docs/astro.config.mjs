@@ -58,15 +58,34 @@ export default defineConfig({
   integrations: [
     starlight({
       title: 'TachyonCMS',
-      // The mark beside the title as live text, the same lockup as the site header.
-      logo: { src: '../public/brand/mark.svg' },
       social: [{ icon: 'github', label: 'TachyonCMS on GitHub', href: 'https://github.com/tachyon-cms/tachyoncms' }],
       customCss: ['./src/styles/brand.css'],
+      // One dark theme: with no light theme there is nothing for the OS or a stored
+      // choice to switch the code blocks to. They sit on the panel colour, like the site's.
+      expressiveCode: {
+        themes: ['starlight-dark'],
+        useStarlightDarkModeSwitch: false,
+        useStarlightUiThemeColors: true,
+        styleOverrides: {
+          codeBackground: 'var(--c-panel)',
+          borderColor: 'var(--c-line)',
+          borderRadius: '10px',
+          frames: {
+            editorTabBarBackground: 'var(--c-bg)',
+            terminalTitlebarBackground: 'var(--c-bg)',
+            editorBackground: 'var(--c-panel)',
+            terminalBackground: 'var(--c-panel)',
+            frameBoxShadowCssValue: 'none',
+          },
+        },
+      },
       components: {
         // Adds the <Font> tags; Starlight has no other hook into the head for them.
         Head: './src/components/Head.astro',
         // The topics render as tabs in the header, so the sidebar drops the plugin's topic list.
         Header: './src/components/TopicTabs.astro',
+        // The site header's lockup, with the mark inline so it can draw itself in.
+        SiteTitle: './src/components/SiteTitle.astro',
         Sidebar: '@astrojs/starlight/components/Sidebar.astro',
         // Dark only: an empty provider, so nothing switches to light, and no picker.
         ThemeProvider: './src/components/ThemeProvider.astro',

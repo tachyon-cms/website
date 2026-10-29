@@ -1,0 +1,30 @@
+---
+// The site header's lockup: the slipstream mark, which draws itself in and replays on
+// hover, beside the live "TachyonCMS" wordmark. The Mark component is the site's own.
+import Mark from '../../../src/components/Mark.astro';
+const { siteTitle, siteTitleHref } = Astro.locals.starlightRoute;
+---
+
+<a href={siteTitleHref} class="site-title brand">
+  <Mark />
+  <span translate="no">{siteTitle}</span>
+</a>
+
+<style>
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+    color: var(--c-text);
+    text-decoration: none;
+    border-radius: 6px;
+  }
+  span {
+    overflow: hidden;
+  }
+</style>

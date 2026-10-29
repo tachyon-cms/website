@@ -33,27 +33,17 @@ const here = `/${Astro.locals.starlightRoute.id}`;
   /* The fixed header grows by a tab row. Starlight sizes the sidebar, content offset
    * and scroll padding from --sl-nav-height, so they all move down with it. */
   :global(:root) {
-    --tc-bar: 3.5rem;
+    --tc-bar: 4rem;
     --tc-tabs: 2.75rem;
     --sl-nav-height: calc(var(--tc-bar) + var(--tc-tabs));
   }
-  @media (min-width: 50em) {
-    :global(:root) {
-      --tc-bar: 4rem;
-    }
-  }
 
-  /* The mark and title as the site header sets them; the menu button centres on the bar. */
-  :global(.site-title) {
-    gap: 10px;
-    font-size: 17px;
-    font-weight: 600;
-    letter-spacing: -0.02em;
-    color: var(--sl-color-white);
+  /* The site header's translucent bar: the page scrolls up behind it, blurred. */
+  :global(header.header) {
+    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(12px);
   }
-  :global(.site-title img) {
-    height: 26px;
-  }
+  /* The menu button centres on the bar, not on the bar and tabs together. */
   :global(.sl-menu-button) {
     top: calc((var(--tc-bar) - var(--sl-menu-button-size)) / 2);
   }
@@ -75,7 +65,7 @@ const here = `/${Astro.locals.starlightRoute.id}`;
     margin-block-start: var(--sl-nav-pad-y);
     margin-inline: calc(-1 * var(--sl-nav-pad-x));
     padding-inline: var(--sl-nav-pad-x);
-    border-top: 1px solid var(--sl-color-hairline-shade);
+    border-top: 1px solid var(--c-line);
     display: flex;
     gap: 1rem;
     justify-content: space-between;
@@ -101,25 +91,25 @@ const here = `/${Astro.locals.starlightRoute.id}`;
     list-style: none;
   }
 
+  /* Set like the site header's links: quiet until hovered or current. */
   a {
     display: flex;
     align-items: center;
     height: 100%;
     /* Room for the inset focus ring. */
     padding-inline: 0.25rem;
-    font-size: var(--sl-text-sm);
-    font-weight: 600;
-    color: var(--sl-color-gray-3);
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--c-muted);
     text-decoration: none;
     white-space: nowrap;
     border-block: 2px solid transparent;
   }
   a:hover {
-    color: var(--sl-color-white);
+    color: var(--c-text);
   }
   .site {
     flex: none;
-    font-weight: 400;
   }
   /* No room beside the tabs on a phone; the Overview page links the site instead. */
   @media (max-width: 29.99em) {
@@ -133,7 +123,7 @@ const here = `/${Astro.locals.starlightRoute.id}`;
     outline-offset: -2px;
   }
   a[aria-current] {
-    color: var(--c-blue);
+    color: var(--c-text);
     border-block-end-color: var(--c-blue);
   }
 </style>

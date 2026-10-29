@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test';
+import { overflowing } from '../../tests/fit';
 
 const topics = [
   { label: 'Docs', link: '/' },
@@ -147,22 +148,128 @@ test('"Edit page" points at the website repo', async ({ page }) => {
 test('the docs are dark only, even with the OS and a stored choice set to light', async ({ page }) => {
   await page.emulateMedia({ colorScheme: 'light' });
   await page.addInitScript(() => localStorage.setItem('starlight-theme', 'light'));
-  for (const link of ['/', '/cli']) {
+  for (const link of ['/', '/cli', '/access-rules']) {
     await page.goto(link);
+    await page.waitForLoadState('load');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(page.locator('starlight-theme-select, [data-theme-toggle]')).toHaveCount(0);
-    expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(12, 13, 13)');
+    const bg = await page.evaluate(() =>
+      [document.documentElement, document.body].map((el) => getComputedStyle(el).backgroundColor),
+    );
+    expect(bg, link).toEqual(['rgb(12, 13, 13)', 'rgb(12, 13, 13)']);
   }
+  // Code blocks sit on the panel colour in the one dark theme, whatever the OS asks for.
+  await expect(page.locator('.expressive-code pre').first()).toHaveCSS('background-color', 'rgb(17, 19, 21)');
 });
 
-test('no horizontal overflow on a phone', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  for (const link of [...topics.map((t) => t.link), '/access-rules', '/deploy/docker', '/tutorials/build-a-blog', '/reference/http-api', '/reference/http-api/documents', '/reference/field-types', '/reference/errors', '/cli/tachyon-schema-apply']) {
-    await page.goto(link);
-    const overflow = await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
-    expect(overflow, link).toBeLessThanOrEqual(0);
-  }
+test('code blocks ship one dark theme, with nothing to switch to', async ({ page }) => {
+  await page.goto('/access-rules');
+  const themed = await page.evaluate(() =>
+    [...document.styleSheets]
+      .flatMap((s) => [...s.cssRules].map((r) => r.cssText))
+      .filter((t) => t.includes('.expressive-code') && /prefers-color-scheme|data-theme="light"/.test(t)),
+  );
+  expect(themed).toEqual([]);
 });
+
+test('the header carries the mark and the wordmark, like the site header', async ({ page }) => {
+  await page.goto('/reference');
+  const brand = page.locator('header a.brand');
+  await expect(brand).toHaveAttribute('href', '/');
+  await expect(brand).toHaveText('TachyonCMS');
+  await expect(brand.locator('svg.mark .stroke')).toHaveCount(3);
+  // The old <img> logo is gone: the mark is inline so it can draw itself in.
+  await expect(page.locator('header img')).toHaveCount(0);
+  await expect(page.locator('header').getByRole('button', { name: /search/i })).toBeVisible();
+});
+
+test('the header mark draws itself in on load, and pointing at it replays the draw', async ({ page }) => {
+  await page.goto('/');
+  const mark = page.locator('header .brand .mark');
+  await expect(mark).toHaveClass(/\bdraw\b/);
+  await expect(page.locator('html')).not.toHaveClass(/\bmark-pending\b/);
+  const stroke = mark.locator('.stroke').first();
+  await expect.poll(() => stroke.evaluate((p) => getComputedStyle(p).strokeDashoffset)).toBe('0px');
+  await page.evaluate(() => {
+    (window as any).draws = 0;
+    addEventListener('animationstart', (e) => e.animationName.endsWith('mark-draw') && (window as any).draws++);
+  });
+  await page.locator('header .brand').hover();
+  await expect.poll(() => page.evaluate(() => (window as any).draws)).toBe(3);
+});
+
+test('with reduced motion the header mark is drawn from the start', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.goto('/');
+  const running = await page.evaluate(
+    () => document.getAnimations().filter((a) => (a.effect as KeyframeEffect | null)?.target?.closest('.mark')).length,
+  );
+  expect(running).toBe(0);
+  const offsets = await page
+    .locator('header .brand .mark .stroke')
+    .evaluateAll((paths) => paths.map((p) => getComputedStyle(p).strokeDashoffset));
+  expect(offsets).toEqual(['0px', '0px', '0px']);
+});
+
+test('the docs preload Inter 400 and 600 and Geist Mono 400, and nothing else', async ({ page }) => {
+  await page.goto('/access-rules');
+  const preloads = await page
+    .locator('link[rel="preload"][as="font"]')
+    .evaluateAll((ls) => ls.map((l) => new URL((l as HTMLLinkElement).href).pathname));
+  const faces = await page.evaluate(() =>
+    [...document.styleSheets]
+      .flatMap((s) => [...s.cssRules])
+      .filter((r) => r instanceof CSSFontFaceRule)
+      .map((r) => ({
+        family: r.style.getPropertyValue('font-family').replace(/"/g, ''),
+        weight: r.style.getPropertyValue('font-weight'),
+        src: r.style.getPropertyValue('src'),
+      })),
+  );
+  const preloaded = (family: string) =>
+    faces
+      .filter((f) => f.family.startsWith(family) && !f.family.includes('fallback') && preloads.some((p) => f.src.includes(p)))
+      .map((f) => f.weight)
+      .sort();
+  expect(preloaded('Inter')).toEqual(['400', '600']);
+  expect(preloaded('Geist Mono')).toEqual(['400']);
+  expect(preloads).toHaveLength(3);
+});
+
+// Only the preloaded faces: Inter 400 or 600 (headings, bold and table headers at 600)
+// and Geist Mono 400. A 700 bold would fetch an unpreloaded face or be synthesised.
+test('docs pages set type in the preloaded weights', async ({ page }) => {
+  const found: string[] = [];
+  for (const link of ['/', '/access-rules', '/reference/http-api', '/reference/field-types', '/cli/tachyon-schema-apply']) {
+    await page.goto(link);
+    const off = await page.locator('body').evaluate((body) =>
+      [...body.querySelectorAll('*')]
+        .filter((el) => el.checkVisibility() && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim()))
+        .map((el) => ({ el, css: getComputedStyle(el) }))
+        .filter(({ css }) => {
+          const family = css.fontFamily.split(',')[0];
+          if (family.includes('Geist Mono')) return css.fontWeight !== '400';
+          if (family.includes('Inter')) return !['400', '600'].includes(css.fontWeight);
+          return true;
+        })
+        .map(({ el, css }) => `${el.tagName.toLowerCase()}.${el.className} ${css.fontFamily.split(',')[0]} ${css.fontWeight}`),
+    );
+    found.push(...[...new Set(off)].map((o) => `${link}: ${o}`));
+  }
+  expect(found).toEqual([]);
+});
+
+// 320 px is the WCAG reflow width; 390 is a common phone.
+for (const width of [320, 390]) {
+  test(`nothing runs off the side of a ${width} px phone`, async ({ page }) => {
+    await page.setViewportSize({ width, height: 844 });
+    for (const link of [...topics.map((t) => t.link), '/access-rules', '/deploy/docker', '/tutorials/build-a-blog', '/reference/http-api', '/reference/http-api/documents', '/reference/field-types', '/reference/errors', '/cli/tachyon-schema-apply']) {
+      await page.goto(link);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth), link).toBeLessThanOrEqual(0);
+      expect(await overflowing(page), link).toEqual([]);
+    }
+  });
+}
 
 test.describe('without JS', () => {
   test.use({ javaScriptEnabled: false });
@@ -171,5 +278,13 @@ test.describe('without JS', () => {
     await page.goto('/');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(page.locator('starlight-theme-select, [data-theme-toggle]')).toHaveCount(0);
+  });
+
+  test('the header mark is drawn', async ({ page }) => {
+    await page.goto('/');
+    const offsets = await page
+      .locator('header .brand .mark .stroke')
+      .evaluateAll((paths) => paths.map((p) => getComputedStyle(p).strokeDashoffset));
+    expect(offsets).toEqual(['0px', '0px', '0px']);
   });
 });
