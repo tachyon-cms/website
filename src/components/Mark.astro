@@ -21,6 +21,9 @@ const { size = 26, animate = true } = Astro.props;
 </svg>
 
 <script>
+  // If the 1.5 s fallback already showed the finished mark, drawing it in now would
+  // blank it and start over, so only hover replays it.
+  const late = !document.documentElement.classList.contains('mark-pending');
   for (const mark of document.querySelectorAll<SVGElement>('.mark[data-animate]')) {
     const draw = () => {
       mark.classList.remove('draw');
@@ -28,7 +31,7 @@ const { size = 26, animate = true } = Astro.props;
       void mark.getBoundingClientRect();
       mark.classList.add('draw');
     };
-    draw();
+    if (!late) draw();
     mark.closest('.brand')?.addEventListener('pointerenter', draw);
   }
   document.documentElement.classList.remove('mark-pending');

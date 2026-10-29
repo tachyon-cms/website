@@ -79,13 +79,22 @@ const {
     background: var(--c-bg);
     color: var(--c-text);
     font: 400 1.0625rem/1.65 var(--font-sans);
+    /* The home hero's backdrop is 100vw wide, which overshoots where a scrollbar
+     * takes up room. Nothing else on the site should reach past the edge. */
+    overflow-x: clip;
   }
+  /* The same width and gutters as the header and footer. */
   main {
     flex: 1;
     width: 100%;
-    max-width: 72rem;
+    max-width: 1240px;
     margin: 0 auto;
-    padding: 0 16px;
+    padding: 0 24px;
+  }
+  @media (max-width: 899.98px) {
+    main {
+      padding: 0 16px;
+    }
   }
   a {
     color: var(--c-blue-soft);
@@ -117,31 +126,41 @@ const {
   .skip:focus {
     top: 1rem;
   }
-  /* Call-to-action links: .btn for the blue one, plus .ghost for the quiet one. */
+  /* Call-to-action links: .btn is the blue one, .btn.ghost the quiet one beside it.
+   * The header's Get started is a .btn at a smaller size. */
   .btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.8rem 1.4rem;
-    font-weight: 600;
-    line-height: 1.2;
+    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    padding: 0 20px;
+    font: 600 15px/1 var(--font-sans);
+    white-space: nowrap;
     text-decoration: none;
     color: var(--c-on-blue);
     background: var(--c-blue);
     border: 1px solid transparent;
-    border-radius: 999px;
+    border-radius: 9px;
   }
   .btn:hover {
-    filter: brightness(1.1);
+    background: var(--c-blue-soft);
   }
   .btn.ghost {
     color: var(--c-text);
-    background: var(--c-panel);
-    border-color: var(--c-line);
+    background: transparent;
+    border-color: var(--c-line-2);
   }
   .btn.ghost:hover {
-    filter: none;
-    border-color: var(--c-blue-soft);
+    background: rgb(255 255 255 / 0.04);
+    border-color: var(--c-dim);
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .btn {
+      transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease;
+    }
   }
   .sr-only {
     position: absolute;

@@ -343,3 +343,29 @@ test('pointing at the brand replays the draw-in', async ({ page }) => {
   await page.locator('header .brand').hover();
   await expect.poll(() => page.evaluate(() => (window as any).draws)).toBe(3);
 });
+
+test('a mark script that runs after the fallback leaves the mark drawn, not redrawn', async ({ page }) => {
+  // Fire Base's 1.5 s fallback at once, so the mark's module runs "late".
+  await page.addInitScript(() => {
+    const later = window.setTimeout;
+    window.setTimeout = ((fn: () => void, ms?: number, ...rest: unknown[]) =>
+      ms === 1500 ? (fn(), 0) : later(fn, ms, ...rest)) as typeof window.setTimeout;
+  });
+  await page.goto('/');
+  await expect(page.locator('html')).not.toHaveClass(/mark-pending/);
+  await expect(page.locator('header .mark')).not.toHaveClass(/\bdraw\b/);
+});
+
+test('the open sheet refits when the screen changes size', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 600 });
+  await page.goto('/');
+  await page.locator('header details.mobile summary').click();
+  const sheet = page.locator('header .sheet');
+  // The fit happens on the toggle event, which lands a moment after the click.
+  await expect.poll(() => sheet.evaluate((s) => s.style.maxHeight)).not.toBe('');
+  await page.setViewportSize({ width: 390, height: 420 });
+  await expect.poll(async () => {
+    const box = (await sheet.boundingBox())!;
+    return box.y + box.height;
+  }).toBeLessThanOrEqual(420);
+});

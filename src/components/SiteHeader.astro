@@ -68,7 +68,7 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
           )
         }
       </a>
-      <a class="cta" href="https://docs.tachyoncms.com/install">Get started</a>
+      <a class="btn cta" href="https://docs.tachyoncms.com/install">Get started</a>
       <details class="mobile">
         <summary>
           <span class="burger" aria-hidden="true"><i></i><i></i></span>
@@ -141,11 +141,17 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
   addEventListener('pageshow', (e) => e.persisted && menus.forEach((d) => close(d)));
   // The sheet ends at the bottom of the screen wherever the header sits, which is
   // lower while the announcement bar is still in view. CSS alone can't know that.
+  // Refit whenever the screen changes size while it's open, a phone turned on its side
+  // included.
   const sheet = document.querySelector<HTMLElement>('.site-header .sheet');
-  sheet?.parentElement?.addEventListener('toggle', () => {
-    const header = sheet.closest('header');
-    if (header) sheet.style.maxHeight = `${innerHeight - header.getBoundingClientRect().bottom}px`;
-  });
+  const fit = () => {
+    const header = sheet?.closest('header');
+    if (sheet && header && (sheet.parentElement as HTMLDetailsElement).open)
+      sheet.style.maxHeight = `${innerHeight - header.getBoundingClientRect().bottom}px`;
+  };
+  sheet?.parentElement?.addEventListener('toggle', fit);
+  addEventListener('resize', fit);
+  addEventListener('orientationchange', fit);
 </script>
 
 <style>
@@ -314,19 +320,11 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     border-left: 1px solid var(--c-line-2);
     color: var(--c-text);
   }
+  /* The global .btn, at header size. */
   .cta {
-    display: inline-flex;
-    align-items: center;
     height: 36px;
     padding: 0 16px;
     font-size: 14px;
-    font-weight: 600;
-    color: var(--c-on-blue);
-    background: var(--c-blue);
-    border-radius: 9px;
-  }
-  .cta:hover {
-    background: var(--c-blue-soft);
   }
 
   /* Mobile menu */
@@ -424,8 +422,7 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
     .sheet {
       animation: menu-in 0.14s ease-out;
     }
-    .menu a,
-    .cta {
+    .menu a {
       transition: background-color 0.15s ease;
     }
     .gh {

@@ -1,4 +1,9 @@
 ---
+// The home hero. Behind it, a full-width field of speed streaks (src/scripts/field.ts)
+// over a masked grid and a slow blue glow. Beside the copy, a posts schema and what
+// GET /api/posts returned for it: the README's blog example as v0.1.0 answers a
+// signed-out caller, the same output the diagrams further down show.
+import Code from '../diagrams/Code.astro';
 import Icon from '../Icon.astro';
 import { formatStars, stars } from '../../lib/stars';
 
@@ -6,129 +11,344 @@ const count = await stars();
 ---
 
 <section id="top" class="hero" aria-labelledby="hero-title">
+  <div class="backdrop" aria-hidden="true">
+    <canvas class="field" aria-hidden="true"></canvas>
+    <div class="glow"></div>
+    <div class="grid"></div>
+  </div>
+
   <div class="copy">
-    <p class="eyebrow">Open source · Rust · Postgres</p>
-    <h1 id="hero-title">Describe your content. Get the API back.</h1>
+    <p class="kicker">Open-source headless CMS, written in Rust</p>
+    <h1 id="hero-title">Content at the speed of your code.</h1>
     <p class="lede">
-      One Rust binary, one Postgres database, and a REST API built from the content types you define. Access rules
-      reach down to a single field. Schema changes can sit in a pull request like any other code. What's missing is the admin for your
-      editors. It's on the roadmap, and all of it is built in public.
+      Describe your content and get the API back. <strong>One Rust binary, one Postgres database</strong>, and access
+      rules that reach down to a single field.
     </p>
     <div class="actions">
       <a class="btn" href="https://docs.tachyoncms.com/install">Get started <Icon name="FiArrowRight" /></a>
       <a class="btn ghost" href="https://github.com/tachyon-cms/tachyoncms">
-        <Icon name="FiGithub" /> Star on GitHub{count !== null && <span class="count">{formatStars(count)}</span>}
+        <Icon name="SiGithub" size={16} /> Star on GitHub{count !== null && <span class="count">{formatStars(count)}</span>}
       </a>
     </div>
+    <p class="install"><span aria-hidden="true">$</span> <code>docker pull <span>ghcr.io/tachyon-cms/tachyoncms:v0.1.0</span></code></p>
     <p class="status">
       <a href="https://github.com/tachyon-cms/tachyoncms/releases/tag/v0.1.0">v0.1.0</a> is pre-alpha. The content
       API, sign-in and access rules work; keep it off public networks for now.
     </p>
   </div>
-  <dl class="facts">
-    <div>
-      <dt>1 binary</dt>
-      <dd>Linux and macOS builds, or a Docker image.</dd>
+
+  <!-- The same exchange is told in full, with captions, in the access rules section. -->
+  <div class="vis" aria-hidden="true">
+    <div class="panel schema">
+      <p class="head">schema · posts</p>
+      <Code
+        lines={[
+          '{',
+          '  "slug": "posts",',
+          '  "access": { "read": { "or": [',
+          '    { "published": true },',
+          '    { "author": "$user.id" }',
+          '  ] } },',
+          '  "fields": [ … ]',
+          '}',
+        ]}
+      />
     </div>
-    <div>
-      <dt>1 database</dt>
-      <dd>Postgres, and nothing else to run beside it.</dd>
+    <!-- Out of the schema's right edge and down into the response's top. -->
+    <svg class="streak" viewBox="0 0 240 170">
+      <defs>
+        <linearGradient id="hero-streak" gradientUnits="userSpaceOnUse" x1="30" x2="180" y1="0" y2="0">
+          <stop offset="0" stop-color="#3da9ff" stop-opacity="0"></stop>
+          <stop offset="1" stop-color="#bfe2ff"></stop>
+        </linearGradient>
+      </defs>
+      <path pathLength="100" d="M30 40 C100 40 140 70 140 160"></path>
+      <path pathLength="100" d="M30 60 C110 60 160 90 160 160"></path>
+      <path pathLength="100" d="M30 80 C120 80 180 110 180 160"></path>
+    </svg>
+    <div class="panel response">
+      <p class="head">GET /api/posts</p>
+      <Code
+        lines={[
+          '{ "docs": [',
+          '    { "title": "Hello, world",',
+          '      "published": true }',
+          '  ],',
+          '  "hasNextPage": false }',
+        ]}
+      />
     </div>
-    <div>
-      <dt>0 unsafe blocks</dt>
-      <dd>A lint forbids unsafe Rust in every crate.</dd>
-    </div>
-  </dl>
+  </div>
 </section>
+
+<script>
+  import { startField } from '../../scripts/field';
+
+  const canvas = document.querySelector<HTMLCanvasElement>('.hero .field');
+  // Only once the page has loaded and gone idle, so the headline paints first and
+  // stays the largest paint, and the field never competes with it.
+  const go = () => canvas && startField(canvas);
+  const start = () => ('requestIdleCallback' in window ? requestIdleCallback(go, { timeout: 1000 }) : setTimeout(go, 200));
+  if (document.readyState === 'complete') start();
+  else addEventListener('load', start, { once: true });
+</script>
 
 <style>
   .hero {
     position: relative;
     display: grid;
-    gap: 2.5rem;
-    padding: clamp(3rem, 9vw, 6.5rem) 0 clamp(2.5rem, 6vw, 4.5rem);
-    isolation: isolate;
+    gap: 48px;
+    padding: 56px 0 64px;
   }
-  /* The glow sits behind the copy, never under a line of small text it could wash out. */
-  .hero::before {
-    content: '';
+  .hero > :not(.backdrop) {
+    position: relative;
+  }
+
+  /* Full width, whatever the page width. body clips the sideways overflow 100vw makes
+   * when a scrollbar takes up room. */
+  .backdrop {
     position: absolute;
-    z-index: -1;
-    inset: -2rem -16px auto;
-    height: 34rem;
-    background:
-      radial-gradient(60% 70% at 15% 10%, color-mix(in srgb, var(--c-blue) 30%, transparent), transparent 70%),
-      radial-gradient(40% 50% at 85% 30%, color-mix(in srgb, var(--c-blue) 16%, transparent), transparent 70%);
+    top: 0;
+    bottom: 0;
+    left: calc(50% - 50vw);
+    width: 100vw;
+    overflow: hidden;
+    border-bottom: 1px solid var(--c-line);
     pointer-events: none;
   }
-  .eyebrow {
-    margin: 0 0 1.25rem;
-    font: 600 0.8125rem/1 var(--font-mono);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+  .field {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+  }
+  .field.on {
+    opacity: 1;
+  }
+  .glow {
+    position: absolute;
+    top: -320px;
+    right: -200px;
+    width: 900px;
+    height: 900px;
+    opacity: 0.85;
+    background: radial-gradient(
+      closest-side,
+      color-mix(in srgb, var(--c-blue) 22%, transparent),
+      color-mix(in srgb, var(--c-blue) 6%, transparent) 55%,
+      transparent
+    );
+  }
+  /* The streaks ride these rows: the field's lanes are multiples of the same 64 px. */
+  .grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--c-line) 1px, transparent 1px), linear-gradient(90deg, var(--c-line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    -webkit-mask-image: radial-gradient(80% 70% at 70% 40%, #000 20%, transparent 75%);
+    mask-image: radial-gradient(80% 70% at 70% 40%, #000 20%, transparent 75%);
+    opacity: 0.55;
+  }
+
+  /* Copy */
+  .kicker {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0 0 22px;
+    font: 400 12.5px/1.4 var(--font-mono);
+    letter-spacing: 0.02em;
     color: var(--c-blue-soft);
   }
+  .kicker::before {
+    content: '';
+    flex: none;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--c-blue);
+    box-shadow: 0 0 12px var(--c-blue);
+  }
   h1 {
-    max-width: 14ch;
-    margin: 0 0 1.5rem;
-    font-size: clamp(2.6rem, 8vw, 4.75rem);
-    font-weight: 700;
+    max-width: 11ch;
+    margin: 0;
+    font-size: clamp(3rem, 6vw + 0.5rem, 4.5rem);
+    font-weight: 600;
     line-height: 1;
     letter-spacing: -0.045em;
-    text-wrap: balance;
   }
   .lede {
-    max-width: 38rem;
-    font-size: clamp(1.125rem, 2.2vw, 1.3rem);
+    max-width: 30rem;
+    margin: 24px 0 0;
+    font-size: clamp(1.0625rem, 1vw + 0.8rem, 1.1875rem);
+    line-height: 1.55;
     color: var(--c-muted);
+  }
+  .lede strong {
+    font-weight: 500;
+    color: var(--c-text);
   }
   .actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
-    margin: 2rem 0 1.25rem;
+    gap: 12px;
+    margin-top: 32px;
   }
   .count {
-    padding-left: 0.6rem;
-    margin-left: 0.15rem;
-    font: 600 0.875rem/1 var(--font-mono);
+    padding-left: 10px;
+    margin-left: 2px;
+    font: 400 13px/1 var(--font-mono);
     color: var(--c-muted);
-    border-left: 1px solid var(--c-line);
+    border-left: 1px solid var(--c-line-2);
   }
-  .status {
-    max-width: 34rem;
-    margin: 0;
-    font-size: 0.9375rem;
+  .install {
+    display: inline-flex;
+    gap: 12px;
+    margin: 28px 0 0;
+    padding: 11px 14px;
+    font: 400 13px/1.5 var(--font-mono);
     color: var(--c-muted);
-  }
-  .facts {
-    display: grid;
-    gap: 1px;
-    margin: 0;
-    align-self: center;
-    background: var(--c-line);
-    border: 1px solid var(--c-line);
-    border-radius: 16px;
-    overflow: hidden;
-  }
-  .facts div {
-    padding: 1.1rem 1.4rem;
     background: var(--c-panel);
+    border: 1px solid var(--c-line);
+    border-radius: 9px;
   }
-  dt {
-    font: 700 1.6rem/1.1 var(--font-sans);
-    letter-spacing: -0.02em;
+  .install > span {
     color: var(--c-blue);
   }
-  dd {
-    margin: 0.3rem 0 0;
-    font-size: 0.9375rem;
+  .install code {
+    font: inherit;
+  }
+  /* On a phone the line breaks after "pull", never inside the image name. */
+  .install code span {
+    white-space: nowrap;
+  }
+  .status {
+    max-width: 30rem;
+    margin: 20px 0 0;
+    font-size: 0.875rem;
+    line-height: 1.55;
     color: var(--c-muted);
   }
-  @media (min-width: 60rem) {
+
+  /* The schema and the response */
+  .vis {
+    display: grid;
+    max-width: 34rem;
+  }
+  .panel {
+    min-width: 0;
+    background: linear-gradient(var(--c-panel), var(--c-bg));
+    border: 1px solid var(--c-line-2);
+    border-radius: 14px;
+    box-shadow: 0 30px 80px -30px #000;
+  }
+  .head {
+    margin: 0;
+    padding: 10px 14px;
+    font: 400 11.5px/1.4 var(--font-mono);
+    color: var(--c-muted);
+    border-bottom: 1px solid var(--c-line);
+  }
+  .panel :global(pre) {
+    margin: 0;
+    padding: 14px 16px;
+    font: 400 12.5px/1.75 var(--font-mono);
+    color: #c9cbcf;
+    white-space: pre;
+    overflow: hidden;
+  }
+  .panel :global(pre > span) {
+    display: block;
+  }
+  .panel :global(.k) {
+    color: var(--c-blue-soft);
+  }
+  .schema {
+    width: min(100%, 330px);
+  }
+  .response {
+    justify-self: end;
+    width: min(92%, 360px);
+    margin-top: -10px;
+  }
+  .streak {
+    display: none;
+  }
+  .streak path {
+    fill: none;
+    stroke: url(#hero-streak);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+
+  @media (min-width: 1080px) {
     .hero {
-      grid-template-columns: minmax(0, 1fr) 19rem;
+      grid-template-columns: 1.05fr 1fr;
       align-items: center;
+      gap: 40px;
+      padding: 96px 0;
+    }
+    .vis {
+      position: relative;
+      display: block;
+      max-width: none;
+      height: 480px;
+    }
+    .schema,
+    .response,
+    .streak {
+      position: absolute;
+    }
+    .schema {
+      top: 20px;
+      left: 0;
+    }
+    .response {
+      top: 230px;
+      right: 0;
+      width: 360px;
+      margin: 0;
+    }
+    .streak {
+      display: block;
+      top: 70px;
+      left: 300px;
+      width: 240px;
+      height: 170px;
+    }
+  }
+
+  /* Only the background moves on its own; with less motion asked for, it's a still. */
+  @media (prefers-reduced-motion: no-preference) {
+    .glow {
+      animation: hero-breathe 9s ease-in-out infinite;
+    }
+    .streak path {
+      stroke-dasharray: 22 128;
+      animation: hero-fly 2.4s cubic-bezier(0.6, 0, 0.2, 1) infinite;
+    }
+    .streak path:nth-child(3) {
+      animation-delay: 0.25s;
+    }
+    .streak path:nth-child(4) {
+      animation-delay: 0.5s;
+    }
+  }
+  @keyframes hero-breathe {
+    50% {
+      transform: translate(-60px, 40px) scale(1.12);
+      opacity: 1;
+    }
+  }
+  @keyframes hero-fly {
+    from {
+      stroke-dashoffset: 150;
+    }
+    to {
+      stroke-dashoffset: 0;
     }
   }
 </style>

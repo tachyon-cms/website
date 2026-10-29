@@ -112,3 +112,68 @@ test('the sections run in order', async ({ page }) => {
     .evaluateAll((els) => els.map((el) => el.id));
   expect(order).toEqual(['top', 'how', 'developers', 'rules', 'editors', 'schema', 'trust', 'latest', 'contribute', 'start']);
 });
+
+test.describe('the hero', () => {
+  // Counts requestAnimationFrame calls, so a test can tell whether the field is running.
+  const countFrames = () => {
+    const w = window as unknown as { __frames: number };
+    w.__frames = 0;
+    const raf = window.requestAnimationFrame.bind(window);
+    window.requestAnimationFrame = (cb) => {
+      w.__frames++;
+      return raf(cb);
+    };
+  };
+  const frames = (page: Page) => page.evaluate(() => (window as unknown as { __frames: number }).__frames);
+  const idle = async (page: Page) => {
+    const before = await frames(page);
+    await page.waitForTimeout(500);
+    return (await frames(page)) - before;
+  };
+
+  test('has the headline, the canvas and the pre-alpha line', async ({ page }) => {
+    await page.goto('/');
+    const hero = page.locator('.hero');
+    await expect(hero.locator('h1')).toHaveText('Content at the speed of your code.');
+    await expect(hero.locator('canvas')).toHaveAttribute('aria-hidden', 'true');
+    await expect(hero).toContainText('v0.1.0 is pre-alpha.');
+    await expect(hero).toContainText('docker pull ghcr.io/tachyon-cms/tachyoncms:v0.1.0');
+  });
+
+  test.describe('with reduced motion', () => {
+    test.use({ reducedMotion: 'reduce' });
+
+    test('runs no frame loop, and still draws the streaks', async ({ page }) => {
+      await page.addInitScript(countFrames);
+      await page.goto('/');
+      await expect(page.locator('.hero canvas')).toHaveClass(/\bon\b/);
+      expect(await idle(page)).toBe(0);
+      expect(await frames(page)).toBe(0);
+    });
+  });
+
+  test('stops while the tab is hidden and starts again when it comes back', async ({ page }) => {
+    await page.addInitScript(countFrames);
+    await page.goto('/');
+    await expect.poll(() => frames(page)).toBeGreaterThan(5);
+    const setHidden = (hidden: boolean) =>
+      page.evaluate((hidden) => {
+        Object.defineProperty(document, 'hidden', { configurable: true, get: () => hidden });
+        Object.defineProperty(document, 'visibilityState', { configurable: true, get: () => (hidden ? 'hidden' : 'visible') });
+        document.dispatchEvent(new Event('visibilitychange'));
+      }, hidden);
+    await setHidden(true);
+    expect(await idle(page)).toBe(0);
+    await setHidden(false);
+    expect(await idle(page)).toBeGreaterThan(5);
+  });
+
+  test('stops once the hero is scrolled away', async ({ page }) => {
+    await page.addInitScript(countFrames);
+    await page.goto('/');
+    await expect.poll(() => frames(page)).toBeGreaterThan(5);
+    await page.locator('#trust').scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    expect(await idle(page)).toBe(0);
+  });
+});
