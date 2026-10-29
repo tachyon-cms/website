@@ -4,6 +4,7 @@ import starlight from '@astrojs/starlight';
 import starlightSidebarTopics from 'starlight-sidebar-topics';
 import starlightLinksValidator from 'starlight-links-validator';
 import { docsFonts } from '../brand/fonts.mjs';
+import { codeTheme } from './code-theme.mjs';
 
 // Starlight fetches the Pagefind UI (about 95 KB of script) as soon as the page is idle,
 // which Lighthouse counts against mobile first paint. This loads it when a reader reaches
@@ -60,10 +61,10 @@ export default defineConfig({
       title: 'TachyonCMS',
       social: [{ icon: 'github', label: 'TachyonCMS on GitHub', href: 'https://github.com/tachyon-cms/tachyoncms' }],
       customCss: ['./src/styles/brand.css'],
-      // One dark theme: with no light theme there is nothing for the OS or a stored
-      // choice to switch the code blocks to. They sit on the panel colour, like the site's.
+      // One dark theme in the brand code colours (code-theme.mjs): with no light theme
+      // there is nothing for the OS or a stored choice to switch the code blocks to.
       expressiveCode: {
-        themes: ['starlight-dark'],
+        themes: [codeTheme],
         useStarlightDarkModeSwitch: false,
         useStarlightUiThemeColors: true,
         styleOverrides: {
@@ -86,6 +87,8 @@ export default defineConfig({
         Header: './src/components/TopicTabs.astro',
         // The site header's lockup, with the mark inline so it can draw itself in.
         SiteTitle: './src/components/SiteTitle.astro',
+        // GitHub and tachyoncms.com at the foot of the phone menu.
+        MobileMenuFooter: './src/components/MobileMenuFooter.astro',
         Sidebar: '@astrojs/starlight/components/Sidebar.astro',
         // Dark only: an empty provider, so nothing switches to light, and no picker.
         ThemeProvider: './src/components/ThemeProvider.astro',

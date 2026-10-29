@@ -1,0 +1,34 @@
+---
+// The foot of the phone menu. The header has no room for GitHub or the site link
+// on a phone, so both sit here. Starlight's footer also holds the theme and language
+// pickers, which the docs don't have (dark only, one language).
+import SocialIcons from '@astrojs/starlight/components/SocialIcons.astro';
+---
+
+<div class="foot">
+  <div class="social"><SocialIcons /></div>
+  <a class="site" href="https://tachyoncms.com">tachyoncms.com</a>
+</div>
+
+<style>
+  .foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-block: 1rem;
+    border-top: 1px solid var(--c-line);
+  }
+  .social {
+    display: flex;
+    gap: 1rem;
+  }
+  .site {
+    font-size: 14px;
+    color: var(--c-muted);
+    text-decoration: none;
+  }
+  .site:hover {
+    color: var(--c-text);
+  }
+</style>

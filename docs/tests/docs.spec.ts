@@ -1,5 +1,13 @@
 import { expect, test } from '@playwright/test';
+import { readFileSync } from 'node:fs';
 import { overflowing } from '../../tests/fit';
+
+// The brand tokens as the browser reports them, rgb(r, g, b).
+const token = (name: string) => {
+  const css = readFileSync(new URL('../../src/brand/tokens.css', import.meta.url), 'utf8');
+  const hex = css.match(new RegExp(`${name}:\\s*#([0-9a-f]{6})`, 'i'))![1];
+  return `rgb(${[0, 2, 4].map((i) => parseInt(hex.slice(i, i + 2), 16)).join(', ')})`;
+};
 
 const topics = [
   { label: 'Docs', link: '/' },
@@ -150,7 +158,6 @@ test('the docs are dark only, even with the OS and a stored choice set to light'
   await page.addInitScript(() => localStorage.setItem('starlight-theme', 'light'));
   for (const link of ['/', '/cli', '/access-rules']) {
     await page.goto(link);
-    await page.waitForLoadState('load');
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(page.locator('starlight-theme-select, [data-theme-toggle]')).toHaveCount(0);
     const bg = await page.evaluate(() =>
@@ -170,6 +177,29 @@ test('code blocks ship one dark theme, with nothing to switch to', async ({ page
       .filter((t) => t.includes('.expressive-code') && /prefers-color-scheme|data-theme="light"/.test(t)),
   );
   expect(themed).toEqual([]);
+});
+
+// The site's code samples colour JSON keys --c-blue-soft and strings --c-code-string;
+// the docs add --c-blue for literals such as true, so a boolean never reads as an error.
+test('code blocks colour keys, strings and booleans with the brand code tokens', async ({ page }) => {
+  await page.goto('/reference/http-api/documents');
+  const colours = await page
+    .locator('.expressive-code pre')
+    .filter({ hasText: '"conditional"' })
+    .first()
+    .evaluate((pre) => {
+      const of = (text: string) => {
+        const span = [...pre.querySelectorAll('span')].find((s) => s.children.length === 0 && s.textContent!.replace(/"/g, '') === text);
+        return span ? getComputedStyle(span).color : `no span "${text}"`;
+      };
+      return { key: of('create'), string: of('conditional'), boolean: of('true'), plain: getComputedStyle(pre).color };
+    });
+  expect(colours).toEqual({
+    key: token('--c-blue-soft'),
+    string: token('--c-code-string'),
+    boolean: token('--c-blue'),
+    plain: token('--c-code'),
+  });
 });
 
 test('the header carries the mark and the wordmark, like the site header', async ({ page }) => {
@@ -252,11 +282,33 @@ test('docs pages set type in the preloaded weights', async ({ page }) => {
           if (family.includes('Inter')) return !['400', '600'].includes(css.fontWeight);
           return true;
         })
-        .map(({ el, css }) => `${el.tagName.toLowerCase()}.${el.className} ${css.fontFamily.split(',')[0]} ${css.fontWeight}`),
+        .map(({ el, css }) => `${el.tagName.toLowerCase()}.${el.getAttribute('class') ?? ''} ${css.fontFamily.split(',')[0]} ${css.fontWeight}`),
     );
     found.push(...[...new Set(off)].map((o) => `${link}: ${o}`));
   }
   expect(found).toEqual([]);
+});
+
+// On a phone the header has no room for GitHub or the site link, so both live in the
+// menu, below the sidebar.
+test('on a phone, the menu reaches GitHub and tachyoncms.com', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/access-rules');
+  await page.getByRole('button', { name: 'Menu' }).click();
+  const menu = page.locator('#starlight__sidebar');
+  for (const [name, href] of [
+    ['TachyonCMS on GitHub', 'https://github.com/tachyon-cms/tachyoncms'],
+    ['tachyoncms.com', 'https://tachyoncms.com'],
+  ]) {
+    const link = menu.getByRole('link', { name, exact: true });
+    await expect(link).toHaveAttribute('href', href);
+    await link.scrollIntoViewIfNeeded();
+    await expect(link).toBeInViewport();
+  }
+  // Tab reaches the site link too, not only the pointer.
+  await menu.getByRole('link', { name: 'TachyonCMS on GitHub', exact: true }).focus();
+  await page.keyboard.press('Tab');
+  await expect(menu.getByRole('link', { name: 'tachyoncms.com', exact: true })).toBeFocused();
 });
 
 // 320 px is the WCAG reflow width; 390 is a common phone.

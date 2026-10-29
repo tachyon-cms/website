@@ -138,25 +138,37 @@ for (const width of [320, 390]) {
 
 // Only the preloaded faces, and only our two families: Geist Mono 400, and Inter 400
 // or 600 for everything else, headings, bold and table headers included. Text that
-// falls back to the browser's own monospace, or synthesises a bold, fails here.
+// falls back to the browser's own monospace, or synthesises a bold, fails here. The
+// whole body is checked, the announcement bar, header and footer included, with the
+// Product menu open on the home page and the phone sheet open once.
+const offWeight = (page: import('@playwright/test').Page) =>
+  page.locator('body').evaluate((body) =>
+    [...body.querySelectorAll('*')]
+      .filter((el) => el.checkVisibility() && [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim()))
+      .map((el) => ({ el, css: getComputedStyle(el) }))
+      .filter(({ css }) => {
+        const family = css.fontFamily.split(',')[0];
+        if (family.includes('Geist Mono')) return css.fontWeight !== '400';
+        if (family.includes('Inter')) return !['400', '600'].includes(css.fontWeight);
+        return true;
+      })
+      .map(({ el, css }) => `${el.tagName.toLowerCase()}.${el.getAttribute('class') ?? ''} ${css.fontFamily.split(',')[0]} ${css.fontWeight}`),
+  );
+
 test('every page sets type in the preloaded weights', async ({ page }) => {
   const found: string[] = [];
+  const note = (where: string, off: string[]) => found.push(...[...new Set(off)].map((o) => `${where}: ${o}`));
   for (const path of ['/', ...inner]) {
     await page.goto(path);
-    const off = await page.locator('main').evaluate((main) =>
-      [...main.querySelectorAll('*')]
-        .filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim()))
-        .map((el) => ({ el, css: getComputedStyle(el) }))
-        .filter(({ css }) => {
-          const family = css.fontFamily.split(',')[0];
-          if (family.includes('Geist Mono')) return css.fontWeight !== '400';
-          if (family.includes('Inter')) return !['400', '600'].includes(css.fontWeight);
-          return true;
-        })
-        .map(({ el, css }) => `${el.tagName.toLowerCase()}.${el.className} ${css.fontFamily.split(',')[0]} ${css.fontWeight}`),
-    );
-    found.push(...[...new Set(off)].map((o) => `${path}: ${o}`));
+    note(path, await offWeight(page));
   }
+  await page.goto('/');
+  await page.locator('nav[aria-label="Main"] details summary').click();
+  note('/ with the Product menu open', await offWeight(page));
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.locator('details.mobile summary').click();
+  note('/ with the phone sheet open', await offWeight(page));
   expect(found).toEqual([]);
 });
 
