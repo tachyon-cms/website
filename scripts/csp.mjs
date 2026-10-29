@@ -13,7 +13,8 @@
 //   --allow-script    adds an origin to script-src, and --allow-frame one to frame-src.
 //                     The site uses both for Turnstile on the signup form.
 //
-// The policy is appended to the last block of the base file, so that block must be /*.
+// The policy goes at the end of the base file's /* block, which must exist. Blocks after
+// it (for narrower paths) are left as they are.
 
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -122,8 +123,14 @@ function main([dist, baseFile, ...flags]) {
     console.error(`csp: policy line is ${line.length} chars, longer than ${MAX_LINE} characters (Cloudflare _headers limit). Move inline code into files.`);
     return 1;
   }
-  const base = readFileSync(baseFile, "utf8").replace(/\n*$/, "\n");
-  writeFileSync(join(dist, "_headers"), base + line + "\n");
+  const blocks = readFileSync(baseFile, "utf8").trim().split(/\n\s*\n/);
+  const all = blocks.findIndex((b) => b.split("\n").find((l) => !l.startsWith("#")) === "/*");
+  if (all < 0) {
+    console.error("csp: the base headers file has no /* block");
+    return 1;
+  }
+  blocks[all] += "\n" + line;
+  writeFileSync(join(dist, "_headers"), blocks.join("\n\n") + "\n");
   console.log(`csp: ${found.scripts.length} script and ${found.styles.length} style hashes`);
   return 0;
 }

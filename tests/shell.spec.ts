@@ -57,6 +57,23 @@ test('the CSP lets Turnstile load', async ({ request }) => {
   expect(csp).not.toContain("'unsafe-inline'");
 });
 
+test('the logo and post media may be embedded elsewhere; nothing else may', async ({ request }) => {
+  const corp = async (path: string) => {
+    const res = await request.get(path);
+    expect(res.status(), path).toBe(200);
+    return res.headers()['cross-origin-resource-policy'];
+  };
+  // Exactly one value: Cloudflare joins a header set by two matching rules.
+  expect(await corp('/brand/logo-dark.svg')).toBe('cross-origin');
+  expect(await corp('/media/blog/v0-1-0/card.png')).toBe('cross-origin');
+  expect(await corp('/')).toBe('same-origin');
+  expect(await corp('/brand')).toBe('same-origin');
+  // The narrower rules add to /*, so the rest of the headers still apply.
+  const logo = (await request.get('/brand/logo-dark.svg')).headers();
+  expect(logo['x-content-type-options']).toBe('nosniff');
+  expect(logo['content-security-policy']).toContain("default-src 'self'");
+});
+
 test('the header links the GitHub repo', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('header a[href="https://github.com/tachyon-cms/tachyoncms"]')).toHaveCount(1);

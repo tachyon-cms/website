@@ -9,3 +9,14 @@
   Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-origin
+
+# The logo and post images are free to embed (see /trademark). A matching rule adds
+# its headers after earlier ones, so this has to follow /* and drop its value first;
+# otherwise Cloudflare joins the two into one header.
+/brand/*
+  ! Cross-Origin-Resource-Policy
+  Cross-Origin-Resource-Policy: cross-origin
+
+/media/*
+  ! Cross-Origin-Resource-Policy
+  Cross-Origin-Resource-Policy: cross-origin

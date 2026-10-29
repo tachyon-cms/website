@@ -18,6 +18,29 @@ function baseHeaders(): [string, string][] {
     });
 }
 
+/** headers.base as [path, lines] blocks, comments dropped, in file order. */
+const blocks = headersBase
+  .trim()
+  .split(/\n\s*\n/)
+  .map((b) => b.split('\n').filter((l) => !l.startsWith('#')))
+  .map(([path, ...lines]) => [path, lines.map((l) => l.trim())] as const);
+
+describe('headers.base', () => {
+  it('keeps resources same-origin everywhere but the logo and media', () => {
+    const at = (path: string) => blocks.findIndex(([p]) => p === path);
+    expect(baseHeaders()).toContainEqual(['Cross-Origin-Resource-Policy', 'same-origin']);
+    for (const path of ['/brand/*', '/media/*']) {
+      // Cloudflare applies matching rules in file order and joins a repeated header,
+      // so the narrow rule must follow /* and drop its value before setting its own.
+      expect(at(path), path).toBeGreaterThan(at('/*'));
+      expect(blocks[at(path)][1], path).toEqual([
+        '! Cross-Origin-Resource-Policy',
+        'Cross-Origin-Resource-Policy: cross-origin',
+      ]);
+    }
+  });
+});
+
 const env: Env = {
   RESEND_API_KEY: 're_test',
   RESEND_SEGMENT_ID: 'seg_1',

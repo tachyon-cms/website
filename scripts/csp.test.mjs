@@ -12,7 +12,7 @@ import { spawnSync } from "node:child_process";
 const script = new URL("./csp.mjs", import.meta.url).pathname;
 const base = "/*\n  X-Content-Type-Options: nosniff\n";
 
-function site(pages) {
+function site(pages, baseText = base) {
   const dir = mkdtempSync(join(tmpdir(), "csp-"));
   const dist = join(dir, "dist");
   for (const [name, html] of Object.entries(pages)) {
@@ -21,12 +21,12 @@ function site(pages) {
     writeFileSync(file, html);
   }
   const baseFile = join(dir, "headers.base");
-  writeFileSync(baseFile, base);
+  writeFileSync(baseFile, baseText);
   return { dist, baseFile };
 }
 
-function run(pages, flags = []) {
-  const { dist, baseFile } = site(pages);
+function run(pages, flags = [], baseText = base) {
+  const { dist, baseFile } = site(pages, baseText);
   const r = spawnSync(process.execPath, [script, dist, baseFile, ...flags], { encoding: "utf8" });
   let headers = "";
   try { headers = readFileSync(join(dist, "_headers"), "utf8"); } catch {}
@@ -43,6 +43,23 @@ test("hashes inline script", () => {
   assert.ok(r.headers.startsWith(base), "keeps the base headers");
   assert.match(r.headers, /^  Content-Security-Policy: default-src 'self'; script-src 'self' /m);
   assert.ok(r.headers.includes(sha("a()")));
+});
+
+test("puts the policy in the /* block and leaves narrower blocks after it", () => {
+  const narrow = "/brand/*\n  ! Cross-Origin-Resource-Policy\n  Cross-Origin-Resource-Policy: cross-origin\n";
+  const r = run({ "index.html": page("<p>hi</p>") }, [], `/_astro/*\n  Cache-Control: immutable\n\n${base}\n# note\n${narrow}`);
+  assert.equal(r.code, 0, r.stderr);
+  const blocks = r.headers.trim().split("\n\n");
+  assert.equal(blocks.length, 3);
+  assert.match(blocks[1], /^\/\*\n.*\n  Content-Security-Policy: /s);
+  assert.ok(blocks[2].endsWith(narrow.trim()), blocks[2]);
+  assert.equal(r.headers.split("Content-Security-Policy").length - 1, 1);
+});
+
+test("fails without a /* block", () => {
+  const r = run({ "index.html": page("<p>hi</p>") }, [], "/x/*\n  A: b\n");
+  assert.equal(r.code, 1);
+  assert.match(r.stderr, /no \/\* block/);
 });
 
 test("hashes inline style", () => {
