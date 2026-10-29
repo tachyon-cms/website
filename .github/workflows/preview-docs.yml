@@ -9,10 +9,10 @@ name: Preview docs
 # Cloudflare token:
 # - build runs the branch's npm ci and docs build with no secrets, and hands on
 #   only the built static files as an artifact.
-# - upload has the secrets but checks out nothing and installs nothing from the
-#   branch. It runs a pinned wrangler with install scripts off, and takes the
-#   Worker config from main, so a branch can't change the Worker's name or add
-#   bindings to its preview.
+# - upload has the secrets and never checks out the branch. It checks out main,
+#   installs wrangler from main's lockfile with install scripts off, and takes
+#   the Worker config from main, so a branch can't change the Worker's name, add
+#   bindings to its preview, or choose what runs with the token.
 #
 # Preview URLs are public (Cloudflare sends noindex) and stay up after the
 # branch is deleted. See CONTRIBUTING.md.
@@ -66,21 +66,35 @@ jobs:
           else
             echo "::notice::CLOUDFLARE_API_TOKEN or CLOUDFLARE_ACCOUNT_ID is not set, so no docs preview was made."
           fi
+      # main, never the branch: wrangler and every dependency under it come from
+      # main's lockfile, with install scripts off, and so does the Worker config.
+      - if: steps.secrets.outputs.ready == 'true'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: main
+          persist-credentials: false
+      - if: steps.secrets.outputs.ready == 'true'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
+      # The docs workspace holds wrangler; the root's own dev tools aren't needed.
+      - if: steps.secrets.outputs.ready == 'true'
+        run: npm ci --ignore-scripts --workspace docs
+      # The branch's files land outside the checkout, beside main's config, so
+      # nothing from the branch sits where npm or wrangler look for config.
       - if: steps.secrets.outputs.ready == 'true'
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: docs-dist
-          path: preview/dist
-      # The config comes from main, not the branch, and the Worker's name with it.
+          path: ${{ runner.temp }}/preview/dist
       - if: steps.secrets.outputs.ready == 'true'
         name: Take the Worker config from main
         id: config
         env:
-          GH_TOKEN: ${{ github.token }}
-          REPO: ${{ github.repository }}
+          PREVIEW: ${{ runner.temp }}/preview
         run: |
-          gh api "repos/$REPO/contents/docs/wrangler.jsonc?ref=main" -H "Accept: application/vnd.github.raw" > preview/wrangler.jsonc
-          name=$(sed '/^[[:space:]]*\/\//d' preview/wrangler.jsonc | jq -er .name)
+          cp docs/wrangler.jsonc "$PREVIEW/wrangler.jsonc"
+          name=$(sed '/^[[:space:]]*\/\//d' docs/wrangler.jsonc | jq -er .name)
           echo "name=$name" >> "$GITHUB_OUTPUT"
       # `versions upload` doesn't change the Worker's settings, so turn preview URLs
       # on here. docs/wrangler.jsonc sets preview_urls too, so a main deploy keeps
@@ -100,16 +114,15 @@ jobs:
             --data '{"enabled":false,"previews_enabled":true}' > /dev/null
       - if: steps.secrets.outputs.ready == 'true'
         name: Upload a preview version
-        working-directory: preview
+        working-directory: ${{ runner.temp }}/preview
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           WRANGLER_SEND_METRICS: 'false'
           WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler.ndjson
-          npm_config_ignore_scripts: 'true'
           BRANCH: ${{ github.ref_name }}
         run: |
-          npx --yes wrangler@4.155.0 versions upload -c wrangler.jsonc --message "$BRANCH ${GITHUB_SHA::7}"
+          "$GITHUB_WORKSPACE/node_modules/.bin/wrangler" versions upload -c wrangler.jsonc --message "$BRANCH ${GITHUB_SHA::7}"
           url=$(jq -r 'select(.type == "version-upload") | .preview_url // empty' "$WRANGLER_OUTPUT_FILE_PATH")
           if [ -z "$url" ]; then
             echo "::error::wrangler uploaded the version but gave no preview URL."

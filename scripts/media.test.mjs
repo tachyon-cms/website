@@ -48,9 +48,10 @@ export function decode(png) {
 }
 
 // Every colour in the old palette, from the near-black background to the pink, is a
-// purple: red and blue both above green. Every token in the new palette has red
-// below green, and blending or anti-aliasing two such colours can't lift red past
-// green, so one purple pixel means part of the old look survived.
+// purple: red and blue both above green. No token in the new palette is: the greys
+// and blues have red below green, and the amber has blue below it. The graphics use
+// only the greys and blues, whose blends and anti-aliasing keep red below green, so
+// one purple pixel means part of the old look survived.
 const isOldLook = (r, g, b) => r > g && b > g;
 const rgb = (hex) => [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
 
