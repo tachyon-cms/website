@@ -23,6 +23,7 @@ npm run typecheck
 npm test                                  # unit tests and script tests
 npm run build:site && npm run build:docs
 node scripts/claims.mjs dist docs/dist    # banned words, benchmark numbers
+node scripts/claims.mjs --source          # the hashed name, in tracked source
 node scripts/links.mjs dist docs/dist     # every site link resolves
 npx playwright install chromium           # once
 npm run test:e2e                          # browser tests for both builds

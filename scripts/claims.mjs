@@ -14,10 +14,17 @@
 //     "length:hex" line per name. Every substring of that length in every word
 //     is hashed, so "<name>cms", "<name>cms.com" and "@<name>cms/next" all
 //     match. The name itself is never printed.
+//
+//   node scripts/claims.mjs --source
+//
+// Checks every text file git tracks for the hashed name only, so it can't creep in
+// through code, comments, tests or config either. Banned words and numbers are copy
+// rules, so source is spared those.
 
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { join, relative } from "node:path";
+import { execFileSync } from "node:child_process";
 import { parse } from "parse5";
 
 const banned = new RegExp(
@@ -74,10 +81,12 @@ function* htmlText(html) {
   }
 }
 
-function check(text, line, report) {
+function check(text, line, report, nameOnly = false) {
   const at = (i) => line + (text.slice(0, i).match(/\n/g)?.length ?? 0);
-  for (const m of text.matchAll(banned)) report(at(m.index), `banned word "${m[0]}"`);
-  for (const m of text.matchAll(benchmark)) report(at(m.index), `benchmark number "${m[0]}"`);
+  if (!nameOnly) {
+    for (const m of text.matchAll(banned)) report(at(m.index), `banned word "${m[0]}"`);
+    for (const m of text.matchAll(benchmark)) report(at(m.index), `benchmark number "${m[0]}"`);
+  }
   for (const m of text.matchAll(/[\p{L}\p{N}]+/gu)) {
     const word = m[0].toLowerCase();
     const hit = [...hashes].some(([len, set]) => {
@@ -97,11 +106,23 @@ function* files(dir) {
 
 const dirs = process.argv.slice(2);
 if (!dirs.length) {
-  console.error("usage: node scripts/claims.mjs <dir>...");
+  console.error("usage: node scripts/claims.mjs <dir>... | --source");
   process.exit(2);
 }
 
 let problems = 0;
+if (dirs[0] === "--source") {
+  const tracked = execFileSync("git", ["ls-files", "-z"], { encoding: "utf8" }).split("\0").filter(Boolean);
+  for (const file of tracked) {
+    const buf = readFileSync(file);
+    if (buf.includes(0)) continue; // binary
+    check(buf.toString("utf8"), 1, (line) => {
+      problems++;
+      console.log(`${file}:${line}: hashed name`);
+    }, true);
+  }
+  dirs.length = 0;
+}
 for (const dir of dirs) {
   for (const file of files(dir)) {
     const src = readFileSync(file, "utf8");

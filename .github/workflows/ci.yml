@@ -70,6 +70,8 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
       - run: npm run build:docs
       - run: node scripts/claims.mjs dist docs/dist
+      - name: No tracked source names what it shouldn't
+        run: node scripts/claims.mjs --source
 
   # 100 in all four categories, mobile and desktop, median of three runs.
   lighthouse:

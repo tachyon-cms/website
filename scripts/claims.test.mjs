@@ -108,6 +108,43 @@ test("checks .txt files as text", () => {
   assert.match(r.out, /llms\.txt:2: banned word/);
 });
 
+// A throwaway git repo, since --source reads the files git tracks.
+function runSource(files) {
+  const dir = mkdtempSync(join(tmpdir(), "claims-src-"));
+  for (const [name, text] of Object.entries(files)) {
+    mkdirSync(join(dir, name, ".."), { recursive: true });
+    writeFileSync(join(dir, name), text);
+  }
+  writeFileSync(join(dir, "untracked.ts"), `const ${fakeName} = 1;\n`);
+  spawnSync("git", ["init", "-q"], { cwd: dir });
+  spawnSync("git", ["add", ...Object.keys(files)], { cwd: dir });
+  const hashFile = join(dir, "..", `${dir.split("/").pop()}.hashes`);
+  writeFileSync(hashFile, `${fakeName.length}:${fakeHash}\n`);
+  const r = spawnSync(process.execPath, [script, "--source"], {
+    cwd: dir,
+    encoding: "utf8",
+    env: { ...process.env, CLAIMS_HASHES: hashFile },
+  });
+  return { code: r.status, out: r.stdout + r.stderr };
+}
+
+test("--source passes clean tracked files, copy rules aside", () => {
+  const r = runSource({ "server/a.ts": "// A seamless 4ms helper.\nexport const body = 1;\n", "img.bin": "x\0y" });
+  assert.equal(r.code, 0, r.out);
+});
+
+test("--source finds the hashed name in tracked code, without printing it", () => {
+  const r = runSource({
+    "server/a.ts": `const ok = 1;\nconst [${fakeName}Body] = parts;\n`,
+    ".github/workflows/ci.yml": `name: ${fakeName.toUpperCase()}\n`,
+  });
+  assert.equal(r.code, 1, r.out);
+  assert.match(r.out, /server\/a\.ts:2: hashed name/);
+  assert.match(r.out, /\.github\/workflows\/ci\.yml:1: hashed name/);
+  assert.doesNotMatch(r.out, /untracked/);
+  assert.doesNotMatch(r.out, new RegExp(fakeName, "i"));
+});
+
 test("the real hashes file holds only sha256 hex lines", () => {
   const lines = readFileSync(new URL("./claims.hashes", import.meta.url), "utf8")
     .split("\n").filter((l) => l && !l.startsWith("#"));
