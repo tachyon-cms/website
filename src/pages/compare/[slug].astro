@@ -122,8 +122,9 @@ const withCode = (text: string) =>
   td:nth-child(2) {
     color: var(--c-text);
   }
-  /* A chip in the text's own colour, as in the prose. */
-  code {
+  /* A chip in the text's own colour, as in the prose. The cells come in through
+   * set:html, which never carries this page's scope class, hence :global. */
+  td :global(code) {
     padding: 0.1em 0.35em;
     font: 400 0.875em var(--font-mono);
     color: var(--c-text);

@@ -14,6 +14,8 @@ const today = [
 // Pages about what isn't built yet. They have to say so where you can see it.
 const headed = ['/editors', '/product/admin'];
 const all = [...today.map((p) => p.path), ...headed, '/why', '/security'];
+// Pages that are only their header: the signup steps and the 404 (any path that isn't a page).
+const short = ['/confirmed', '/check-your-inbox', '/link-expired', '/signup-problem', '/no-such-page'];
 // Every other inner page: the project pages, the blog, the comparisons, the signup
 // steps and the 404 (any path that isn't a page).
 const rest = [
@@ -30,11 +32,7 @@ const rest = [
   '/brand',
   '/privacy',
   '/trademark',
-  '/confirmed',
-  '/check-your-inbox',
-  '/link-expired',
-  '/signup-problem',
-  '/no-such-page',
+  ...short,
 ];
 const inner = [...all, ...rest];
 // Pages that show working code, beyond the feature pages checked below.
@@ -131,28 +129,35 @@ for (const width of [320, 390]) {
 for (const width of [320, 390]) {
   test(`the short pages fit a ${width} px phone`, async ({ page }) => {
     await page.setViewportSize({ width, height: 844 });
-    for (const path of rest.slice(-5)) {
+    for (const path of short) {
       await page.goto(path);
       expect(await overflowing(page), path).toEqual([]);
     }
   });
 }
 
-// Only the preloaded faces: mono is Geist Mono 400, and headings are Inter 400 or 600.
+// Only the preloaded faces, and only our two families: Geist Mono 400, and Inter 400
+// or 600 for everything else, headings, bold and table headers included. Text that
+// falls back to the browser's own monospace, or synthesises a bold, fails here.
 test('inner pages set type in the preloaded weights', async ({ page }) => {
+  const found: string[] = [];
   for (const path of rest) {
     await page.goto(path);
     const off = await page.locator('main').evaluate((main) =>
       [...main.querySelectorAll('*')]
-        .filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim()) || /^H[1-6]$/.test(el.tagName))
+        .filter((el) => [...el.childNodes].some((n) => n.nodeType === 3 && n.textContent!.trim()))
         .map((el) => ({ el, css: getComputedStyle(el) }))
-        .filter(({ el, css }) =>
-          css.fontFamily.includes('Geist Mono') ? css.fontWeight !== '400' : /^H[1-6]$/.test(el.tagName) && !['400', '600'].includes(css.fontWeight),
-        )
+        .filter(({ css }) => {
+          const family = css.fontFamily.split(',')[0];
+          if (family.includes('Geist Mono')) return css.fontWeight !== '400';
+          if (family.includes('Inter')) return !['400', '600'].includes(css.fontWeight);
+          return true;
+        })
         .map(({ el, css }) => `${el.tagName.toLowerCase()}.${el.className} ${css.fontFamily.split(',')[0]} ${css.fontWeight}`),
     );
-    expect(off, path).toEqual([]);
+    found.push(...[...new Set(off)].map((o) => `${path}: ${o}`));
   }
+  expect(found).toEqual([]);
 });
 
 const compare = ['wordpress', 'strapi', 'contentful', 'sanity', 'directus'];
