@@ -165,3 +165,8 @@ test('every page is dark', async ({ page }) => {
   }
 });
 
+test('on a phone the product tabs show the current page', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/security');
+  await expect(page.locator('nav.product-nav a[aria-current="page"]')).toBeInViewport({ ratio: 1 });
+});

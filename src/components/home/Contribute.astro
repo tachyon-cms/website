@@ -3,7 +3,7 @@ import Icon from '../Icon.astro';
 import SectionHead from './SectionHead.astro';
 ---
 
-<section id="contribute" class="contribute" aria-labelledby="contribute-title">
+<section id="contribute" class="band contribute" aria-labelledby="contribute-title">
   <SectionHead id="contribute-title" eyebrow="Get involved" title="Want in? Start with something small.">
     <p>
       TachyonCMS is young enough that one pull request changes it. The good first issues are real and sized for an
@@ -26,18 +26,26 @@ import SectionHead from './SectionHead.astro';
 
 <style>
   .contribute {
-    margin-top: clamp(1rem, 4vw, 2rem);
-    padding: clamp(1.75rem, 5vw, 3rem);
-    background: var(--c-panel);
-    border: 1px solid var(--c-line);
-    border-radius: 20px;
+    display: grid;
+    gap: 8px;
+  }
+  .contribute :global(.section-head) {
+    margin-bottom: 24px;
   }
   .actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 12px;
   }
-  .contribute .btn.ghost {
-    background: var(--c-bg);
+  /* Wide, the buttons sit on the right, level with the end of the text. */
+  @media (min-width: 64rem) {
+    .contribute {
+      grid-template-columns: minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 64px;
+    }
+    .contribute :global(.section-head) {
+      margin-bottom: 0;
+    }
   }
 </style>

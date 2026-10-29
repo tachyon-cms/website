@@ -26,43 +26,31 @@ const { id, loop, caption } = Astro.props;
     margin: 0;
   }
   .diagram figcaption {
-    margin-top: 0.9rem;
+    margin-top: 14px;
     font-size: 0.875rem;
     color: var(--c-muted);
   }
   .diagram .pane {
     min-width: 0;
-    background: var(--c-panel);
-    border: 1px solid var(--c-line);
+    background: linear-gradient(var(--c-panel), var(--c-bg));
+    border: 1px solid var(--c-line-2);
     border-radius: 14px;
-    box-shadow: 0 24px 60px -36px color-mix(in srgb, var(--c-blue) 70%, transparent);
+    box-shadow: 0 30px 80px -30px #000;
   }
   .diagram .pane-head {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
     margin: 0;
-    padding: 0.6rem 1rem;
-    font: 600 0.75rem/1.4 var(--font-mono);
-    letter-spacing: 0.06em;
-    text-transform: uppercase;
+    padding: 10px 14px;
+    font: 400 11.5px/1.4 var(--font-mono);
     color: var(--c-muted);
     border-bottom: 1px solid var(--c-line);
-  }
-  .diagram .pane-head::before {
-    content: '';
-    width: 0.5rem;
-    height: 0.5rem;
-    border-radius: 50%;
-    background: var(--c-blue);
   }
   /* Wrapped rather than scrolled, so no line hides off the edge of a phone. */
   .diagram pre {
     margin: 0;
-    --pad: 0.75rem;
-    padding: 0.9rem var(--pad) 1rem;
-    font: 400 0.75rem/1.65 var(--font-mono);
-    color: var(--c-text);
+    --pad: 14px;
+    padding: 14px var(--pad) 16px;
+    font: 400 12px/1.7 var(--font-mono);
+    color: #c9cbcf;
     white-space: pre-wrap;
     overflow-wrap: anywhere;
   }
@@ -71,11 +59,12 @@ const { id, loop, caption } = Astro.props;
   }
   @media (min-width: 30rem) {
     .diagram pre {
-      --pad: 1rem;
-      font-size: 0.8125rem;
+      --pad: 16px;
+      font-size: 12.5px;
     }
   }
-  /* Code colours: keys, quiet punctuation, a good outcome, a warning. */
+  /* Code colours: keys, strings, quiet punctuation and prompts, a good outcome
+   * in blue, a warning in amber. */
   .diagram .k {
     color: var(--c-blue-soft);
   }
@@ -87,15 +76,18 @@ const { id, loop, caption } = Astro.props;
     color: var(--c-muted);
   }
   .diagram .ok {
-    color: var(--c-blue-soft);
+    color: var(--c-blue);
   }
   .diagram .warn {
-    color: var(--c-blue);
+    color: var(--c-warn);
+  }
+  .diagram .warn :is(.k, .s, .p) {
+    color: inherit;
   }
   .diagram .mark {
     margin-inline: calc(-1 * var(--pad));
-    padding-inline: var(--pad);
-    box-shadow: inset 2px 0 0 var(--c-blue);
+    padding-inline: calc(var(--pad) - 2px) var(--pad);
+    border-left: 2px solid var(--c-blue);
     background: color-mix(in srgb, var(--c-blue) 10%, transparent);
   }
   .diagram .arrow {
@@ -103,10 +95,11 @@ const { id, loop, caption } = Astro.props;
     place-items: center;
     align-self: center;
     justify-self: center;
-    width: 2.25rem;
-    height: 2.25rem;
-    color: var(--c-on-blue);
-    background: var(--c-blue);
+    width: 32px;
+    height: 32px;
+    color: var(--c-blue);
+    background: var(--c-bg);
+    border: 1px solid var(--c-line-2);
     border-radius: 50%;
   }
 
@@ -131,7 +124,7 @@ const { id, loop, caption } = Astro.props;
   }
   @keyframes diagram-pulse {
     from {
-      box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-blue) 60%, transparent);
+      box-shadow: 0 0 0 0 color-mix(in srgb, var(--c-blue) 45%, transparent);
     }
     to {
       box-shadow: 0 0 0 14px transparent;

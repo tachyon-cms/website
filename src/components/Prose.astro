@@ -28,8 +28,12 @@
     color: var(--c-text);
   }
   .prose :global(code) {
-    font: 0.9em var(--font-mono);
-    color: var(--c-blue);
+    padding: 0.1em 0.35em;
+    font: 400 0.875em var(--font-mono);
+    color: var(--c-text);
+    background: var(--c-panel);
+    border: 1px solid var(--c-line);
+    border-radius: 5px;
   }
   .prose :global(pre) {
     padding: 1rem 1.25rem;
@@ -39,7 +43,10 @@
     border-radius: 10px;
   }
   .prose :global(pre code) {
+    padding: 0;
     color: var(--c-text);
+    background: none;
+    border: 0;
   }
   .prose :global(table) {
     width: 100%;
@@ -62,6 +69,6 @@
   }
   .prose :global(blockquote) {
     padding-left: 1rem;
-    border-left: 3px solid var(--c-blue);
+    border-left: 2px solid var(--c-blue);
   }
 </style>

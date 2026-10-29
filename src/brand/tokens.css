@@ -19,6 +19,9 @@
   --c-blue-deep: #0b2236;
   /* String values in code samples. */
   --c-code-string: #9fd5ff;
+  /* Warnings in code samples: a 404, a data loss, a refused key. Amber, so it
+   * never reads as one more blue. */
+  --c-warn: #f0b95e;
   /* Text on --c-blue buttons. */
   --c-on-blue: #04121f;
 }

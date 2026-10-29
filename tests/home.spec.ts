@@ -266,3 +266,10 @@ test.describe('the hero', () => {
     expect(await idle(page)).toBe(0);
   });
 });
+
+test('a warning in a diagram reads differently from a good outcome', async ({ page }) => {
+  await page.goto('/');
+  const d = page.locator('[data-diagram="schema-diff"]');
+  const colour = (sel: string) => d.locator(sel).first().evaluate((el) => getComputedStyle(el).color);
+  expect(await colour('.warn')).not.toBe(await colour('.ok'));
+});

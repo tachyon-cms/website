@@ -342,6 +342,16 @@ const still = [
     display: none;
   }
 
+  /* Small laptops: copy and panels side by side, the panels still stacked with
+   * their short wires, since the fixed wire geometry below needs 1200 px. */
+  @media (min-width: 1024px) and (max-width: 1199.98px) {
+    .hero {
+      grid-template-columns: minmax(0, 1fr) 30rem;
+      align-items: center;
+      gap: 40px;
+      padding: 80px 0;
+    }
+  }
   @media (min-width: 1200px) {
     .hero {
       grid-template-columns: 1.05fr 1fr;

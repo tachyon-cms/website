@@ -43,6 +43,8 @@ const pairs = [
   ["--c-on-blue", "--c-blue", 4.5],
   ["--c-blue", "--c-bg", 4.5], ["--c-blue", "--c-panel", 4.5],
   ["--c-code-string", "--c-bg", 4.5], ["--c-code-string", "--c-panel", 4.5],
+  // Warnings in the diagrams: a 404, a data loss, a refused key.
+  ["--c-warn", "--c-bg", 4.5], ["--c-warn", "--c-panel", 4.5],
   // Dim is for decorative and meta text only, never body copy.
   ["--c-dim", "--c-bg", 3], ["--c-dim", "--c-panel", 3],
 ];
@@ -55,6 +57,21 @@ for (const [fg, bg, min] of pairs) {
 
 // The docs map the tokens onto Starlight (docs/src/styles/brand.css). Links use
 // accent-high; the current sidebar item puts text-invert (accent-low) on it.
+// A warning has to read as something other than the blues around it, not only
+// by brightness: a clearly different hue.
+test("--c-warn is a different hue from the blues", () => {
+  const hue = (hex) => {
+    const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
+    const max = Math.max(r, g, b), d = max - Math.min(r, g, b);
+    const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+    return (h * 60 + 360) % 360;
+  };
+  for (const blue of ["--c-blue", "--c-blue-soft", "--c-code-string"]) {
+    const gap = Math.abs(hue(t["--c-warn"]) - hue(t[blue]));
+    assert.ok(Math.min(gap, 360 - gap) >= 90, `${blue} and --c-warn are only ${gap.toFixed(0)} degrees apart`);
+  }
+});
+
 const docs = read("../docs/src/styles/brand.css");
 const sl = block(":root", docs);
 const colour = (v) => (sl[v].startsWith("var(") ? t[sl[v].slice(4, -1)] : sl[v]);

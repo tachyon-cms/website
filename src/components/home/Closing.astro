@@ -3,8 +3,9 @@ import Icon from '../Icon.astro';
 ---
 
 <section id="start" class="band closing" aria-labelledby="start-title">
+  <div class="backdrop" aria-hidden="true"></div>
   <h2 id="start-title">Pull it. Point it at Postgres. Define something.</h2>
-  <pre><code><span class="q">$</span> docker pull ghcr.io/tachyon-cms/tachyoncms:v0.1.0</code></pre>
+  <pre><code><span class="q">$</span> docker pull <span class="img">ghcr.io/tachyon-cms/tachyoncms:v0.1.0</span></code></pre>
   <p>Or grab a binary for Linux or macOS. The docs take you from there to your first API key.</p>
   <div class="actions">
     <a class="btn" href="https://docs.tachyoncms.com/install">Get started <Icon name="FiArrowRight" /></a>
@@ -16,31 +17,59 @@ import Icon from '../Icon.astro';
 
 <style>
   .closing {
+    position: relative;
     text-align: center;
+  }
+  .closing > :not(.backdrop) {
+    position: relative;
+  }
+  /* The hero's grid and glow, rising from the bottom edge: the page ends where
+   * it started. Still. */
+  .backdrop {
+    position: absolute;
+    inset: 0 calc(50% - 50vw);
+    overflow: hidden;
+    pointer-events: none;
+    background:
+      radial-gradient(48rem 20rem at 50% 100%, color-mix(in srgb, var(--c-blue) 14%, transparent), transparent 70%),
+      linear-gradient(var(--c-line) 1px, transparent 1px) center bottom / 64px 64px,
+      linear-gradient(90deg, var(--c-line) 1px, transparent 1px) center bottom / 64px 64px;
+    -webkit-mask-image: radial-gradient(60% 90% at 50% 100%, #000 20%, transparent 75%);
+    mask-image: radial-gradient(60% 90% at 50% 100%, #000 20%, transparent 75%);
+    opacity: 0.7;
   }
   h2 {
     max-width: 18ch;
-    margin: 0 auto 1.5rem;
-    font-size: clamp(2rem, 6vw, 3.4rem);
-    line-height: 1.05;
+    margin: 0 auto 28px;
+    font-size: clamp(2.25rem, 4vw + 1rem, 3.75rem);
+    font-weight: 600;
+    line-height: 1.02;
     letter-spacing: -0.04em;
     text-wrap: balance;
   }
   pre {
     display: inline-block;
     max-width: 100%;
-    margin: 0 0 1.25rem;
-    padding: 0.8rem 1.2rem;
-    font: 0.875rem/1.5 var(--font-mono);
+    margin: 0 0 20px;
+    padding: 11px 14px;
+    font: 400 13px/1.5 var(--font-mono);
     text-align: left;
     white-space: pre-wrap;
-    overflow-wrap: anywhere;
+    color: var(--c-muted);
     background: var(--c-panel);
     border: 1px solid var(--c-line);
-    border-radius: 12px;
+    border-radius: 9px;
+  }
+  code {
+    font: inherit;
   }
   .q {
-    color: var(--c-muted);
+    margin-right: 4px;
+    color: var(--c-blue);
+  }
+  /* On a phone the line breaks after "pull", never inside the image name. */
+  .img {
+    white-space: nowrap;
   }
   p {
     color: var(--c-muted);
@@ -49,6 +78,7 @@ import Icon from '../Icon.astro';
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 0.75rem;
+    gap: 12px;
+    margin-top: 32px;
   }
 </style>

@@ -72,15 +72,22 @@ const latestPosts: PostLink[] = (await publishedPosts()).slice(0, 3).map((p) => 
 </Base>
 
 <style>
-  /* Every home section after the hero is a band with room around it. */
+  /* Every home section after the hero is a band, set off by a line the full width
+   * of the screen. */
   :global(main > .band) {
-    padding: clamp(3rem, 8vw, 5.5rem) 0;
+    position: relative;
+    padding: clamp(4.5rem, 9vw, 7.5rem) 0;
   }
-  :global(main > .band + .band) {
+  :global(main > .band + .band::before) {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: calc(50% - 50vw);
+    width: 100vw;
     border-top: 1px solid var(--c-line);
   }
   code {
-    font: 0.9em var(--font-mono);
+    font: 400 0.875em var(--font-mono);
     color: var(--c-text);
   }
 </style>

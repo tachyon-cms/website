@@ -55,47 +55,68 @@ import SectionHead from './SectionHead.astro';
 </section>
 
 <style>
+  /* Three columns under one line, split by thin rules: no boxes. */
   .cards {
     display: grid;
-    gap: 1rem;
+    border-top: 1px solid var(--c-line);
   }
   article {
-    padding: 1.5rem;
-    background: var(--c-panel);
-    border: 1px solid var(--c-line);
-    border-radius: 16px;
+    padding: 32px 0;
+  }
+  article + article {
+    border-top: 1px solid var(--c-line);
   }
   article :global(.icon) {
     color: var(--c-blue);
   }
   h3 {
-    margin: 0.9rem 0 0.75rem;
-    font-size: 1.25rem;
+    margin: 18px 0 12px;
+    font-size: 1.0625rem;
+    font-weight: 600;
     letter-spacing: -0.01em;
   }
   article p {
-    font-size: 1rem;
+    font-size: 0.9375rem;
+    line-height: 1.65;
     color: var(--c-muted);
   }
   article p:last-child {
     margin-bottom: 0;
   }
   code {
-    font: 0.9em var(--font-mono);
+    font: 400 0.875em var(--font-mono);
     color: var(--c-text);
   }
   .more {
-    margin: 1.5rem 0 0;
+    margin: 8px 0 0;
   }
   .more a {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    font-weight: 600;
+    gap: 6px;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    text-decoration: none;
+  }
+  .more a:hover {
+    text-decoration: underline;
   }
   @media (min-width: 56rem) {
     .cards {
       grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    article {
+      padding: 36px 32px 40px;
+    }
+    article:first-child {
+      padding-left: 0;
+    }
+    article:last-child {
+      padding-right: 0;
+    }
+    article + article {
+      border-top: 0;
+      border-left: 1px solid var(--c-line);
     }
   }
 </style>

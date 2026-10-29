@@ -38,46 +38,55 @@ if (!siteKey) throw new Error('PUBLIC_TURNSTILE_SITE_KEY must be set for a Cloud
 <style>
   .signup {
     max-width: 36rem;
-    padding: 1.5rem;
-    background: var(--c-panel);
-    border: 1px solid var(--c-line);
+    padding: 24px;
+    background: linear-gradient(var(--c-panel), var(--c-bg));
+    border: 1px solid var(--c-line-2);
     border-radius: 14px;
   }
   label {
     display: block;
-    margin-bottom: 0.75rem;
+    margin-bottom: 14px;
+    font-size: 1rem;
     font-weight: 600;
+    letter-spacing: -0.01em;
   }
   .row {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
+    gap: 10px;
   }
   input[type='email'] {
     flex: 1 1 14rem;
     min-width: 0;
-    padding: 0.8rem 1rem;
+    height: 44px;
+    padding: 0 14px;
     font: inherit;
+    font-size: 15px;
     color: var(--c-text);
     background: var(--c-bg);
-    border: 1px solid var(--c-line);
-    border-radius: 999px;
+    border: 1px solid var(--c-line-2);
+    border-radius: 9px;
   }
   input[type='email']::placeholder {
     color: var(--c-muted);
   }
+  input[type='email']:focus-visible {
+    border-color: var(--c-blue);
+    outline-offset: 1px;
+  }
+  /* The site's primary button, as a real button. */
   button {
-    padding: 0.8rem 1.4rem;
-    font: inherit;
-    font-weight: 600;
+    height: 44px;
+    padding: 0 20px;
+    font: 600 15px/1 var(--font-sans);
     color: var(--c-on-blue);
     background: var(--c-blue);
     border: 0;
-    border-radius: 999px;
+    border-radius: 9px;
     cursor: pointer;
   }
   button:hover {
-    filter: brightness(1.1);
+    background: var(--c-blue-soft);
   }
   .fine {
     margin: 0.9rem 0 0;
