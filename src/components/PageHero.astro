@@ -26,9 +26,9 @@ const streaks = [
     <svg class="streaks" aria-hidden="true" width="900" height="320" viewBox="0 0 900 320">
       <defs>
         <linearGradient id="page-hero-tail">
-          <stop offset="0" stop-color="#3da9ff" stop-opacity="0"></stop>
-          <stop offset="0.85" stop-color="#3da9ff" stop-opacity="0.8"></stop>
-          <stop offset="1" stop-color="#dff0ff"></stop>
+          <stop class="blue" offset="0" stop-opacity="0"></stop>
+          <stop class="blue" offset="0.85" stop-opacity="0.8"></stop>
+          <stop class="soft" offset="1"></stop>
         </linearGradient>
         <filter id="page-hero-glow" x="-4" y="-4" width="9" height="9">
           <feGaussianBlur stdDeviation="2.4" result="g"></feGaussianBlur>
@@ -39,7 +39,7 @@ const streaks = [
         streaks.map(([row, x1, x2, o]) => (
           <g opacity={o}>
             <rect x={x1} y={row * 64 - 0.15} width={x2 - x1} height="1.3" fill="url(#page-hero-tail)" />
-            <circle cx={x2} cy={row * 64 + 0.5} r="2.2" fill="#dff0ff" filter="url(#page-hero-glow)" />
+            <circle cx={x2} cy={row * 64 + 0.5} r="2.2" filter="url(#page-hero-glow)" />
           </g>
         ))
       }
@@ -88,6 +88,16 @@ const streaks = [
     right: 0;
     -webkit-mask-image: linear-gradient(90deg, transparent, #000 35%);
     mask-image: linear-gradient(90deg, transparent, #000 35%);
+  }
+  /* Colours from the tokens: presentation attributes can't read a custom property. */
+  .blue {
+    stop-color: var(--c-blue);
+  }
+  .soft {
+    stop-color: var(--c-blue-soft);
+  }
+  .streaks circle {
+    fill: var(--c-blue-soft);
   }
   .copy {
     position: relative;

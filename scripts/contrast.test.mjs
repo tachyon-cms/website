@@ -4,7 +4,7 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
+import { readdirSync, readFileSync } from "node:fs";
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), "utf8");
 const css = read("../src/brand/tokens.css");
@@ -43,6 +43,8 @@ const pairs = [
   ["--c-on-blue", "--c-blue", 4.5],
   ["--c-blue", "--c-bg", 4.5], ["--c-blue", "--c-panel", 4.5],
   ["--c-code-string", "--c-bg", 4.5], ["--c-code-string", "--c-panel", 4.5],
+  // Plain text in code samples.
+  ["--c-code", "--c-bg", 4.5], ["--c-code", "--c-panel", 4.5],
   // Warnings in the diagrams: a 404, a data loss, a refused key.
   ["--c-warn", "--c-bg", 4.5], ["--c-warn", "--c-panel", 4.5],
   // Dim is for decorative and meta text only, never body copy.
@@ -55,14 +57,13 @@ for (const [fg, bg, min] of pairs) {
   });
 }
 
-// The docs map the tokens onto Starlight (docs/src/styles/brand.css). Links use
-// accent-high; the current sidebar item puts text-invert (accent-low) on it.
 // A warning has to read as something other than the blues around it, not only
 // by brightness: a clearly different hue.
 test("--c-warn is a different hue from the blues", () => {
   const hue = (hex) => {
     const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255);
     const max = Math.max(r, g, b), d = max - Math.min(r, g, b);
+    assert.ok(d > 0, `${hex} is a grey, so it has no hue`);
     const h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
     return (h * 60 + 360) % 360;
   };
@@ -72,6 +73,24 @@ test("--c-warn is a different hue from the blues", () => {
   }
 });
 
+// Colours live in tokens.css, so moving a token moves everything drawn with it.
+// The one exception is black, the solid half of a mask or a shadow.
+test("components and layouts take their colours from the tokens", () => {
+  const dirs = ["../src/components/", "../src/layouts/"];
+  const files = dirs.flatMap((d) =>
+    readdirSync(new URL(d, import.meta.url), { recursive: true }).filter((f) => f.endsWith(".astro")).map((f) => d + f),
+  );
+  assert.ok(files.length > 10, "no components found");
+  for (const file of files) {
+    // The theme-color meta is read by the browser chrome, which can't see a custom property.
+    const source = read(file).replace(/<meta name="theme-color" content="#[0-9a-f]{6}"/i, "");
+    const literals = [...source.matchAll(/#[0-9a-f]{6}\b|#[0-9a-f]{3}\b/gi)].map((m) => m[0]).filter((c) => c !== "#000");
+    assert.deepEqual(literals, [], `${file} hard-codes colours`);
+  }
+});
+
+// The docs map the tokens onto Starlight (docs/src/styles/brand.css). Links use
+// accent-high; the current sidebar item puts text-invert (accent-low) on it.
 const docs = read("../docs/src/styles/brand.css");
 const sl = block(":root", docs);
 const colour = (v) => (sl[v].startsWith("var(") ? t[sl[v].slice(4, -1)] : sl[v]);
