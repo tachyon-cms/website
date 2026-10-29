@@ -16,6 +16,18 @@ test('each topic tab links to its topic root', async ({ page }) => {
   }
 });
 
+test('the header links back to the website and to GitHub', async ({ page }) => {
+  await page.goto('/reference');
+  await expect(page.locator('header').getByRole('link', { name: 'tachyoncms.com', exact: true })).toHaveAttribute(
+    'href',
+    'https://tachyoncms.com',
+  );
+  await expect(page.locator('header').getByRole('link', { name: 'TachyonCMS on GitHub' })).toHaveAttribute(
+    'href',
+    'https://github.com/tachyon-cms/tachyoncms',
+  );
+});
+
 for (const { label, link } of topics) {
   test(`the ${label} tab is the current one on ${link}`, async ({ page }) => {
     await page.goto(link);

@@ -8,22 +8,25 @@ const here = `/${Astro.locals.starlightRoute.id}`;
 
 <div class="topic-header">
   <div class="bar"><Default /></div>
-  <nav class="tabs print:hidden" aria-label="Topics">
-    <ul>
-      {
-        topics.map((topic) => (
-          <li>
-            <a
-              href={topic.link}
-              aria-current={topic.isCurrent ? (topic.link === here ? 'page' : 'true') : undefined}
-            >
-              {topic.label}
-            </a>
-          </li>
-        ))
-      }
-    </ul>
-  </nav>
+  <div class="tabs print:hidden">
+    <nav aria-label="Topics">
+      <ul>
+        {
+          topics.map((topic) => (
+            <li>
+              <a
+                href={topic.link}
+                aria-current={topic.isCurrent ? (topic.link === here ? 'page' : 'true') : undefined}
+              >
+                {topic.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+    <a class="site" href="https://tachyoncms.com">tachyoncms.com</a>
+  </div>
 </div>
 
 <style>
@@ -66,8 +69,14 @@ const here = `/${Astro.locals.starlightRoute.id}`;
     margin-inline: calc(-1 * var(--sl-nav-pad-x));
     padding-inline: var(--sl-nav-pad-x);
     border-top: 1px solid var(--sl-color-hairline-shade);
+    display: flex;
+    gap: 1rem;
+    justify-content: space-between;
     overflow-x: auto;
     scrollbar-width: none;
+  }
+  nav {
+    height: 100%;
   }
   @media (max-width: 49.99em) {
     /* On phones the header keeps room on the right for the menu button. */
@@ -100,6 +109,16 @@ const here = `/${Astro.locals.starlightRoute.id}`;
   }
   a:hover {
     color: var(--sl-color-white);
+  }
+  .site {
+    flex: none;
+    font-weight: 400;
+  }
+  /* No room beside the tabs on a phone; the Overview page links the site instead. */
+  @media (max-width: 29.99em) {
+    .site {
+      display: none;
+    }
   }
   /* Inset, because .tabs scrolls sideways and would clip a ring drawn outside. */
   a:focus-visible {

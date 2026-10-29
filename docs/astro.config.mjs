@@ -63,6 +63,7 @@ export default defineConfig({
         light: '../public/brand/logo-light.svg',
         replacesTitle: true,
       },
+      social: [{ icon: 'github', label: 'TachyonCMS on GitHub', href: 'https://github.com/tachyon-cms/tachyoncms' }],
       customCss: ['./src/styles/brand.css'],
       components: {
         // Adds the <Font> tags; Starlight has no other hook into the head for them.

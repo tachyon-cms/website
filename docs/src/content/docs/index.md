@@ -5,7 +5,7 @@ description: Install, run and configure TachyonCMS, a headless CMS in one Rust b
 
 TachyonCMS is a headless CMS written in Rust. You run one binary next to one Postgres database, define your content types, and get a JSON API for them: documents you can create, read, update, delete, filter and link together, with sign-in, roles, API keys and access rules down to a single field.
 
-These pages describe **v0.1.0**, the first release.
+These pages describe **v0.1.0**, the first release. For why it exists, what's on the roadmap and how it compares, see [tachyoncms.com](https://tachyoncms.com).
 
 :::caution[Pre-alpha]
 v0.1.0 has the content API, sign-in and access rules. It has no admin screen, media library, drafts or GraphQL yet. Keep it off public networks for now.
