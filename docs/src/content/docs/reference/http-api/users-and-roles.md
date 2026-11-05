@@ -63,7 +63,7 @@ Creates a user. The body mixes account keys with the profile's fields.
 | `email` | string | none | Required. |
 | `password` | string | none | Required. 12 to 256 characters, not known from a data breach. |
 | `role` | string | `viewer` | A role slug that exists. |
-| Profile fields | | | The fields of the `users` collection. `name` is required. |
+| Profile fields | | | The fields of the `users` collection. `name` is required. A `richText` field may be sent as [Markdown](/markdown-input), `{"format": "markdown", "value": "…"}`. |
 
 ```sh
 curl -X POST localhost:3000/api/users \
@@ -91,8 +91,9 @@ Reads one user, with email and role.
 | | |
 |---|---|
 | Who | Signed in as that user, or `users` ability |
+| Query | `format` only, as for a [document](/reference/http-api/documents#get-apicollection). Any other parameter, `depth` and `select` included, is a `400`. |
 | Returns | `200` and the user |
-| Errors | `401`; `403 You can only see and change your own account.`; `404` |
+| Errors | `400`; `401`; `403 You can only see and change your own account.`; `404` |
 
 ```sh
 curl localhost:3000/api/users/01a18491-0224-77b7-b789-10e9e8eb6fd8 -H "authorization: Bearer $TOKEN"
@@ -116,7 +117,7 @@ Changes a user's profile fields and account. Profile fields merge like a documen
 | `currentPassword` | string | none | Your password, to confirm an email change. |
 | `role` | string | unchanged | A role slug. Needs the `users` ability. |
 | `password` | string | unchanged | A new password. Needs the `users` ability, and ends the user's other sessions. Change your own with [`POST /api/auth/password`](/reference/http-api/auth#post-apiauthpassword). |
-| Profile fields | | unchanged | Fields of the `users` collection. `null` clears one. |
+| Profile fields | | unchanged | Fields of the `users` collection. `null` clears one. A `richText` field may be sent as [Markdown](/markdown-input), `{"format": "markdown", "value": "…"}`. |
 
 ```sh
 curl -X PATCH localhost:3000/api/users/01a18491-0224-77b7-b789-10e9e8eb6fd8 \

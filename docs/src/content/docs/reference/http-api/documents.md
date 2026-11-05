@@ -1,6 +1,6 @@
 ---
 title: Documents API
-description: The access, global and document endpoints in TachyonCMS v0.1.0.
+description: The access, global and document endpoints in TachyonCMS.
 sidebar:
   label: Documents
 ---
@@ -71,7 +71,7 @@ Reads a global. Until it's first saved, it shows only its fields' defaults, with
 | | |
 |---|---|
 | Who | Content: anyone, unless a read rule says otherwise. A key needs `slug:read`, `slug:write`, `*:read`, `*:write` or `admin`. |
-| Query | `depth`, `select`, `populate`, as for [`GET /api/{collection}/{id}`](#get-apicollectionid) |
+| Query | `depth`, `select`, `populate` and `format`, as for [`GET /api/{collection}/{id}`](#get-apicollectionid) |
 | Returns | `200` and the global |
 | Errors | `400`; `401`, `403` a read rule or key scope refuses; `404` no such global |
 
@@ -90,6 +90,24 @@ curl localhost:3000/api/globals/site
 }
 ```
 
+With `format`, rich text comes back as a string. Here `site` also has a `footer` rich text field (new in v0.2.0):
+
+```sh
+curl 'localhost:3000/api/globals/site?format=html'
+```
+
+```json
+{
+  "createdAt": "2026-11-05T08:03:18.571817Z",
+  "footer": "<p>Made with <em>care</em>.</p>",
+  "id": "01a1aabb-d346-7758-8c0a-9067df82acb5",
+  "status": "published",
+  "tagline": "Notes from the build",
+  "title": "My site",
+  "updatedAt": "2026-11-05T08:03:18.571817Z"
+}
+```
+
 ### `PATCH /api/globals/{slug}`
 
 Changes a global, saving it the first time. Fields merge as for a [document `PATCH`](#patch-apicollectionid). If the global's read or update rule is a filter, a global that has never been saved can't be saved this way, since there's no document for the rule to match.
@@ -97,7 +115,7 @@ Changes a global, saving it the first time. Fields merge as for a [document `PAT
 | | |
 |---|---|
 | Who | Content: a role whose `content` is `all` (Editor and Admin), or the global's update rule. A key needs `slug:write`, `*:write` or `admin`. |
-| Body | The fields to change |
+| Body | The fields to change. A `richText` field may be sent as [Markdown](/markdown-input), `{"format": "markdown", "value": "…"}`. |
 | Returns | `200` and the global |
 | Errors | `401`; `403` the role, a rule, a field rule or a key scope refuses; `404`; `422` |
 
@@ -136,6 +154,7 @@ Lists the documents you may read, a page at a time.
 | `depth` | integer, 0 to 5 | `1` | How many levels of links to fill in. See [Relationships](/relationships#populate-with-depth). |
 | `populate` | object | none | `populate[collection][field]=true`: the fields of populated documents from that collection. |
 | `joins` | `false` or object | on | `joins=false`, or `joins[field][option]=value` with `limit`, `page`, `sort`, `where` or `count`. See [Join options per request](/joins-and-virtual-fields#join-options-per-request). |
+| `format` | `json`, `html`, `markdown` or `text` | `json` | New in v0.2.0. How every [rich text](/rich-text#read-it-as-html-markdown-or-text) field comes back, populated and joined documents included. Anything but `json` gives a string. |
 
 Any other parameter is a `400`.
 
@@ -176,7 +195,7 @@ Creates a document.
 | | |
 |---|---|
 | Who | Content: a signed-in role whose `content` is `all` or `own`, subject to the create rule. A key needs `collection:write`, `*:write` or `admin`. |
-| Body | The document's fields. Fields left out take their `default`. |
+| Body | The document's fields. Fields left out take their `default`. A `richText` field may be sent as [Markdown](/markdown-input), `{"format": "markdown", "value": "…"}`. |
 | Returns | `201` and the document, with links filled in to depth 1. If a read rule hides it from you, only `{"id"}`. |
 | Errors | `401`; `403` the role, a rule, a field rule or a key scope refuses; `404` no such collection; `422` a value that doesn't validate, an unknown field, a link to a document that doesn't exist, or a `unique` value that's taken |
 
@@ -215,7 +234,7 @@ Reads one document.
 | | |
 |---|---|
 | Who | Content, as for [`GET /api/{collection}`](#get-apicollection) |
-| Query | `depth`, `select`, `populate` and `joins`, as for a list. Any other parameter is a `400`. |
+| Query | `depth`, `select`, `populate`, `joins` and `format`, as for a list. Any other parameter is a `400`. |
 | Returns | `200` and the document |
 | Errors | `400`; `401`, `403` a read rule or key scope refuses; `404` no such document, or one a read rule hides |
 
@@ -245,7 +264,7 @@ Changes a document. What you send is merged into what's stored: a field inside a
 | | |
 |---|---|
 | Who | Content: a role whose `content` is `all`, or `own` for documents you created, subject to the update rule. A key needs `collection:write`, `*:write` or `admin`. |
-| Body | The fields to change |
+| Body | The fields to change. A `richText` field may be sent as [Markdown](/markdown-input), `{"format": "markdown", "value": "…"}`. |
 | Returns | `200` and the document, with links filled in to depth 1. If a read rule now hides it from you, only `{"id"}`. |
 | Errors | `401`; `403 You can only change documents you created.`, `403 An access rule doesn't let you change this document.`, or a field rule or key scope refuses; `404`; `409` the collection's fields changed during the request; `422` |
 

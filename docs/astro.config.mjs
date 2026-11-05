@@ -119,6 +119,9 @@ export default defineConfig({
                 items: [
                   'content-types',
                   'fields',
+                  'blocks',
+                  'rich-text',
+                  'markdown-input',
                   'querying',
                   'relationships',
                   'joins-and-virtual-fields',

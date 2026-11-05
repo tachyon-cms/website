@@ -1,6 +1,6 @@
 ---
 title: Errors
-description: The problem+json error format TachyonCMS v0.1.0 uses, every status it returns, and the messages behind them.
+description: The problem+json error format TachyonCMS uses, every status it returns, and the messages behind them.
 ---
 
 Every error from the API is a JSON object with the content type `application/problem+json`, in the format of [RFC 9457](https://www.rfc-editor.org/rfc/rfc9457). The status and `title` say what kind of problem it is, and `detail` says what went wrong.
@@ -38,7 +38,7 @@ A request can send its own `x-request-id` of up to 128 letters, digits, `-` and 
 | `403` | Forbidden | The caller is known but may not do this: their role, an access rule or a key's scopes refuse it. |
 | `404` | Not found | No such route, collection, global or document, or one the caller can't read. A malformed ID is a `404` too. |
 | `405` | Method not allowed | The route exists, but not with this method. |
-| `409` | Conflict | The request clashes with stored data: setup already done, a slug or role that exists, a document other documents link to. |
+| `409` | Conflict | The request clashes with stored data: setup already done, a slug or role that exists, a document other documents link to, a shared block a schema still names. |
 | `409` | Confirmation required | A schema change would remove or retype fields, or leave documents that won't validate. Send it again with `"confirm": true`. |
 | `413` | Content too large | The body is over 10 MB. |
 | `422` | Validation failed | A document, schema, account or key doesn't pass its checks. |
@@ -68,7 +68,7 @@ A `422` lists every problem at once. `path` is a dotted path to the field, with 
 }
 ```
 
-The messages for each field type are in [Field types](/reference/field-types#validation-messages).
+The messages for each field type are in [Field types](/reference/field-types#validation-messages). In rich text, `path` names the node, such as `body.content.1.content.0.marks.0.attrs.href`. Rich text sent as Markdown adds the line to the message, `line 3: …`. See [When Markdown is refused](/markdown-input#when-markdown-is-refused).
 
 ## Common messages
 
@@ -85,7 +85,8 @@ These are the `detail` texts you're most likely to meet, by status.
 | `limit must be at least 1`, `page must be at least 1`, `depth must be between 0 and 5`, `count must be true or false` | A list parameter out of range. |
 | `use either page or after, not both`, `after isn't a valid cursor`, `after doesn't match this sort; start again without it` | A cursor problem. See [Page through results](/querying#page-through-results). |
 | `where[…]: …`, `sort: …` | A filter or sort that doesn't fit the collection. See [Filters and sorting](/reference/filters#errors). |
-| ``field `title`: unknown variant `string`, expected one of `text`, … `` | A schema with an unknown field type. |
+| ``field `title`: unknown variant `string`, expected one of `text`, … `` | A schema with an unknown field type, or an unknown rich text feature. |
+| `format must be json, html, markdown or text` | A `format` other than those four. New in v0.2.0. |
 
 ### `401`
 
@@ -125,6 +126,8 @@ A session cookie that has expired counts as signed out rather than a `401`, sinc
 | ``access rules in posts name the role `reviewer`; change them first`` | Deleting a role an access rule names. |
 | `` `editor` is a built-in role and can't be changed or removed. `` | Changing or deleting a built-in role. |
 | `This collection's fields just changed. Reload and try again.` | A write that raced a schema change. |
+| ``pages uses the shared block `cta`; remove it there first`` | Deleting a [shared block](/blocks#delete-a-shared-block) a schema names. New in v0.2.0. |
+| `` `pages` isn't a shared block; collections and globals can't be deleted yet `` | `DELETE /api/admin/collections/{slug}` on a collection or global. |
 | `a document with this value already exists` | A unique value that's taken, where no single field can be named. Usually this comes as a `422` on the field instead. |
 
 ## Examples
