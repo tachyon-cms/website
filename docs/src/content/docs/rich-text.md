@@ -284,7 +284,7 @@ Add `format` to any read of a collection or a global, single or list, and every 
 | `markdown` | Markdown, in the form [Markdown input](/markdown-input) reads back. |
 | `text` | The words alone. |
 
-`GET /api/users/{id}` takes `format` too, but not `depth` or `select`. Any other `format` is a `400`: `format must be json, html, markdown or text`.
+`GET /api/users` takes it as any list does, and `GET /api/users/{id}` takes `format` too, but not `depth` or `select`. Any other `format` is a `400`: `format must be json, html, markdown or text`.
 
 ```sh
 curl -g 'localhost:3000/api/articles/01a1aaa5-188a-76b6-a9cb-8cce711355ed?format=html&select[body]=true'

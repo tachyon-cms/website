@@ -91,8 +91,9 @@ Reads one user, with email and role.
 | | |
 |---|---|
 | Who | Signed in as that user, or `users` ability |
+| Query | `format` only, as for a [document](/reference/http-api/documents#get-apicollection). Any other parameter, `depth` and `select` included, is a `400`. |
 | Returns | `200` and the user |
-| Errors | `401`; `403 You can only see and change your own account.`; `404` |
+| Errors | `400`; `401`; `403 You can only see and change your own account.`; `404` |
 
 ```sh
 curl localhost:3000/api/users/01a18491-0224-77b7-b789-10e9e8eb6fd8 -H "authorization: Bearer $TOKEN"

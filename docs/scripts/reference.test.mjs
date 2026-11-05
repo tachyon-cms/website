@@ -1,8 +1,8 @@
-// The reference pages must cover the whole v0.1.0 surface, and nothing else.
+// The reference pages must cover the whole v0.2.0 surface, and nothing else.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { configKeys, errors, fieldOptions, fieldTypes, operators, routes } from './v0.1.0-surface.mjs';
+import { configKeys, errors, fieldOptions, fieldTypes, operators, routes } from './v0.2.0-surface.mjs';
 
 const page = (name) =>
   readFileSync(new URL(`../src/content/docs/reference/${name}.md`, import.meta.url), 'utf8');
@@ -44,7 +44,7 @@ test('the http-api overview lists every endpoint once, linking to its section', 
 
 test('field-types has a section per type, listing every option', () => {
   const text = page('field-types');
-  const headings = [...text.matchAll(/^### `([a-z]+)`$/gm)].map((m) => m[1]);
+  const headings = [...text.matchAll(/^### `([a-zA-Z]+)`$/gm)].map((m) => m[1]);
   assert.deepEqual(sorted(headings), sorted(Object.keys(fieldTypes)));
   for (const [type, options] of Object.entries(fieldTypes)) {
     assert.deepEqual(sorted(tableNames(section(text, `### \`${type}\``))), sorted(options), type);

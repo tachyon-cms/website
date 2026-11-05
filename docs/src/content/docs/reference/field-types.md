@@ -1,6 +1,6 @@
 ---
 title: Field types
-description: Every field type in TachyonCMS v0.1.0, every option it takes, the values it accepts and the validation messages.
+description: Every field type in TachyonCMS, every option it takes, the values it accepts and the validation messages. Blocks and rich text are new in v0.2.0.
 ---
 
 Every field type, with its options, defaults and the values it accepts. For a guided introduction, see [Fields](/fields).
@@ -11,7 +11,7 @@ A field is a JSON object in a schema's `fields` list, such as `{"name": "title",
 
 | Option | Type | Default | Description |
 |---|---|---|---|
-| `name` | string | none | Required on every field except `row`, `collapsible` and `tabs`. 1 to 64 letters, digits and underscores, starting with a letter. `id`, `createdAt`, `updatedAt` and `status` are reserved at the top level, and in `users` so are `email`, `role`, `password` and `currentPassword`. |
+| `name` | string | none | Required on every field except `row`, `collapsible` and `tabs`. 1 to 64 letters, digits and underscores, starting with a letter. `id`, `createdAt`, `updatedAt` and `status` are reserved at the top level, and in `users` so are `email`, `role`, `password` and `currentPassword`. Inside a block type, `id` and `blockType` are. |
 | `type` | string | none | Required. One of the types on this page. |
 | `label` | string | none | A human name. Titles a `collapsible`. |
 | `required` | boolean | `false` | The field must have a value. |
@@ -167,6 +167,61 @@ A list of rows, each an object of other fields. Stored as an array of objects.
 | `minRows` | integer | none | Fewest rows. |
 | `maxRows` | integer | none | Most rows. |
 
+## Blocks and rich text
+
+New in v0.2.0.
+
+### `blocks`
+
+A list of rows, each one of several block types with its own fields. Stored as an array of objects, each `{"id": "<uuid>", "blockType": "<slug>", ...that type's fields}`. A row sent without an `id` gets one; a row sent with one keeps it. With `required`, an empty list counts as missing. See [Blocks](/blocks).
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `blocks` | array | none | Required, at least one. Each is a block type, `{"slug", "fields", "labels"}`, or a [shared block](/blocks#shared-blocks), `{"blockRef": "<slug>"}`. |
+| `minRows` | integer | none | Fewest rows. |
+| `maxRows` | integer | none | Most rows. |
+
+### Block types
+
+Each entry in a `blocks` list, on a `blocks` field or a `richText` field, is a block type written in place or a shared block. One written in place takes:
+
+| Key | Type | Default | Description |
+|---|---|---|---|
+| `slug` | string | none | Required. A lowercase letter, then lowercase letters, digits and underscores, 64 at most. Unique within the field. Rows name it as `blockType`. |
+| `fields` | array | none | Required. The type's fields. None may be `unique`, `filterable` or a `slug`, or a `join`. |
+| `labels` | object | none | `{"singular": "…", "plural": "…"}`, what an editor calls its rows. |
+
+A `blockRef` must name a shared block, a schema saved with `"kind": "block"`. Shared blocks can name other shared blocks, up to 8 deep, and never in a loop.
+
+### `richText`
+
+Formatted text, stored as a tree of nodes: `{"type": "doc", "content": […]}`. Can also be sent as Markdown, `{"format": "markdown", "value": "…"}`. With `required`, a value with no nodes, or only blank paragraphs, counts as missing. Can't be `unique` or `filterable`. See [Rich text](/rich-text) for the nodes and marks, and [Markdown input](/markdown-input).
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `features` | array | everything | What the field allows, from `bold`, `italic`, `underline`, `strike`, `subscript`, `superscript`, `code`, `link`, `heading`, `bulletList`, `orderedList`, `taskList`, `blockquote`, `horizontalRule`, `hardBreak`, `table`, `codeBlock`, `relationship` and `block`. Each at most once. Paragraphs and plain text are always allowed. |
+| `relationTo` | array | `[]` | Collections that links and relationship nodes may point at. Each must exist. With `features`, needs `link` or `relationship` in it. |
+| `blocks` | array | `[]` | Block types the text may hold as block nodes, as for a [`blocks`](#blocks) field. With `features`, needs `block` in it. |
+
+One value nests at most 32 levels deep and holds at most 50,000 nodes, counting the rich text inside its block nodes.
+
+### Refused when you save
+
+| Message | Cause |
+|---|---|
+| ``field `layout`: blocks needs at least one block type`` | An empty `blocks` list on a `blocks` field. |
+| ``field `layout`: block slug `Hero` must start with a lowercase letter and use only lowercase letters, digits and underscores (64 at most)`` | A bad block slug. |
+| ``field `layout`: block `hero` is defined more than once`` | Two block types with one slug. |
+| ``field `layout`: minRows is greater than maxRows`` | |
+| ``field name `blockType` is reserved`` | A block type with a field called `id` or `blockType`. |
+| ``field `layout`: blockRef `nope` doesn't match a shared block`` | A `blockRef` to a slug that isn't a shared block. |
+| ``field `body`: features lists `bold` twice`` | |
+| ``field `body`: blocks needs `block` in features, or no features list`` | |
+| ``field `body`: relationTo needs `link` or `relationship` in features, or no features list`` | |
+| ``field `body`: richText fields can't be unique or filterable`` | |
+
+An unknown feature is a `400`: ``field `body`: unknown variant `sparkle`, expected one of `bold`, …``.
+
 ## Layout
 
 Layout fields arrange other fields on an editing screen. Their fields are stored as if they sat directly in the parent, so layout changes no data. They take no `name`, can't be `required`, `unique` or `filterable`, have no `default`, and can't carry `access` rules. A `collapsible` needs a `label`; `row` and `tabs` take none.
@@ -238,16 +293,30 @@ A document that doesn't fit gets a `422` with one entry per problem (see [Errors
 | `expected a date-time like 2026-10-12T09:30:00Z` | `date` |
 | `expected an email address` | `email` |
 | `expected an http or https URL` | `url` |
-| `expected one of: a, b` | `select`, `radio` |
+| `expected one of: a, b` | `select`, `radio`; a `blocks` row's `blockType` |
 | `expected a list of: a, b` | `select` with `multiple` |
 | `expected lowercase letters, digits and single hyphens, like my-first-post` | `slug` |
 | `expected [longitude, latitude], like [-0.1276, 51.5072]` | `point` |
 | `expected a document ID`, `expected a list of document IDs` | `relationship` |
 | `expected a link like {"relationTo": "<collection>", "value": "<document ID>"} to one of: …` | `relationship` with several collections |
 | `doesn't match any document in the related collection` | `relationship`: no such document, or one you can't read |
-| `expected a list` | `hasMany`, `multiple`, `array` |
-| `must have at least N rows`, `must have at most N rows` | `hasMany` with `minRows`/`maxRows`, `array` |
-| `expected an object` | `group`, an `array` row |
+| `expected a list` | `hasMany`, `multiple`, `array`, `blocks` |
+| `must have at least N rows`, `must have at most N rows` | `hasMany` with `minRows`/`maxRows`, `array`, `blocks` |
+| `expected an object` | `group`, an `array` or `blocks` row |
+| `this row ID is used twice`, `expected a row ID` | a `blocks` row's `id` |
+| `expected a rich text document like {"type": "doc", "content": []}` | `richText` |
+| ``the `heading` feature isn't turned on for this field`` | `richText`, at the node |
+| `links must start with http://, https://, mailto:, tel:, / or #` | `richText`, at the link's `href` |
+| ``no `pages` document you can read has the slug `home` `` | `richText` sent as Markdown with a `doc:` link or `::ref` |
+| `nests more than 32 levels deep`, `holds more than 50000 nodes` | `richText` |
+| ``unknown node type `x` ``, ``unknown mark `x` ``, ``unknown attribute `x` ``, ``unknown key `x` `` | `richText` |
+| `` `listItem` can't go inside `doc` ``, `needs at least one node inside`, `expected text that isn't empty` | `richText`: a node in the wrong place, an empty container or text node |
+| `` `bold` is applied twice ``, `code blocks hold plain text without marks` | `richText` marks |
+| `a link takes href or doc, not both`, `a link needs href or doc`, `this field can't link to documents`, ``can't link to `x`; expected one of: …`` | `richText` links |
+| `this field has no block types`, `this block ID is used twice` | `richText` block nodes |
+| `expected a whole number from 1 to 6`, `expected a whole number from 0 to 1000000`, `expected a whole number from 1 to 1000` | `richText`: a heading's `level`, a list's `start`, a cell's `colspan` or `rowspan` |
+| `every row of a table must span the same number of columns: …`, `reaches past the last row` | `richText` tables |
+| `line N: …` | `richText` sent as Markdown. See [When Markdown is refused](/markdown-input#when-markdown-is-refused). |
 | `must not contain the NUL character` | any text |
 | `is filled from posts.category; it can't be set` | `join` |
 | `is read from author.name; set that instead` | a `virtual` field |

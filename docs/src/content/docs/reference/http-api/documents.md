@@ -1,6 +1,6 @@
 ---
 title: Documents API
-description: The access, global and document endpoints in TachyonCMS v0.1.0.
+description: The access, global and document endpoints in TachyonCMS.
 sidebar:
   label: Documents
 ---
@@ -71,7 +71,7 @@ Reads a global. Until it's first saved, it shows only its fields' defaults, with
 | | |
 |---|---|
 | Who | Content: anyone, unless a read rule says otherwise. A key needs `slug:read`, `slug:write`, `*:read`, `*:write` or `admin`. |
-| Query | `depth`, `select`, `populate`, as for [`GET /api/{collection}/{id}`](#get-apicollectionid) |
+| Query | `depth`, `select`, `populate` and `format`, as for [`GET /api/{collection}/{id}`](#get-apicollectionid) |
 | Returns | `200` and the global |
 | Errors | `400`; `401`, `403` a read rule or key scope refuses; `404` no such global |
 
@@ -110,6 +110,22 @@ curl -X PATCH localhost:3000/api/globals/site \
 
 The response is the global, as for `GET`.
 
+With `format`, rich text comes back as a string. Here `site` has a `footer` rich text field:
+
+```sh
+curl 'localhost:3000/api/globals/site?format=html'
+```
+
+```json
+{
+  "createdAt": "2026-11-05T07:46:13.194018Z",
+  "footer": "<p>Made with <em>care</em>.</p>",
+  "id": "01a1aaac-2ddf-7141-8f40-d5f0c3b2c392",
+  "status": "published",
+  "updatedAt": "2026-11-05T07:46:13.194018Z"
+}
+```
+
 ## Documents
 
 `{collection}` is a collection's slug. `users` isn't served here: use [`/api/users`](/reference/http-api/users-and-roles#get-apiusers). A `{id}` that isn't a document ID is a `404`.
@@ -136,6 +152,7 @@ Lists the documents you may read, a page at a time.
 | `depth` | integer, 0 to 5 | `1` | How many levels of links to fill in. See [Relationships](/relationships#populate-with-depth). |
 | `populate` | object | none | `populate[collection][field]=true`: the fields of populated documents from that collection. |
 | `joins` | `false` or object | on | `joins=false`, or `joins[field][option]=value` with `limit`, `page`, `sort`, `where` or `count`. See [Join options per request](/joins-and-virtual-fields#join-options-per-request). |
+| `format` | `json`, `html`, `markdown` or `text` | `json` | New in v0.2.0. How every [rich text](/rich-text#read-it-as-html-markdown-or-text) field comes back, populated and joined documents included. Anything but `json` gives a string. |
 
 Any other parameter is a `400`.
 
@@ -176,7 +193,7 @@ Creates a document.
 | | |
 |---|---|
 | Who | Content: a signed-in role whose `content` is `all` or `own`, subject to the create rule. A key needs `collection:write`, `*:write` or `admin`. |
-| Body | The document's fields. Fields left out take their `default`. |
+| Body | The document's fields. Fields left out take their `default`. A `richText` field may be sent as [Markdown](/markdown-input), `{"format": "markdown", "value": "…"}`. |
 | Returns | `201` and the document, with links filled in to depth 1. If a read rule hides it from you, only `{"id"}`. |
 | Errors | `401`; `403` the role, a rule, a field rule or a key scope refuses; `404` no such collection; `422` a value that doesn't validate, an unknown field, a link to a document that doesn't exist, or a `unique` value that's taken |
 
@@ -215,7 +232,7 @@ Reads one document.
 | | |
 |---|---|
 | Who | Content, as for [`GET /api/{collection}`](#get-apicollection) |
-| Query | `depth`, `select`, `populate` and `joins`, as for a list. Any other parameter is a `400`. |
+| Query | `depth`, `select`, `populate`, `joins` and `format`, as for a list. Any other parameter is a `400`. |
 | Returns | `200` and the document |
 | Errors | `400`; `401`, `403` a read rule or key scope refuses; `404` no such document, or one a read rule hides |
 

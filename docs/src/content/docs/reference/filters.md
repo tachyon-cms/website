@@ -49,8 +49,9 @@ Each field compares as one of these kinds, and each kind takes only some operato
 | List | `text` or `number` with `hasMany`, `select` with `multiple`, `relationship` with `hasMany` | `contains`, `exists` |
 | ID | `id` | `equals`, `not_equals`, `in`, `not_in` |
 | Timestamp | `createdAt`, `updatedAt` | `equals`, `not_equals`, `in`, `not_in`, `gt`, `gte`, `lt`, `lte` |
+| Has a value | `richText` | `exists` |
 
-`json` and `join` fields can't be filtered. A `group` or `array` can't be filtered as a whole, only through a path to a field inside it.
+`json` and `join` fields can't be filtered. A `group`, `array` or `blocks` field can't be filtered as a whole, only through a path to a field inside it. Nothing inside rich text can be named in a filter.
 
 ## Values
 
@@ -77,11 +78,14 @@ A value that doesn't fit is a `400` naming the parameter, such as ``where[price]
 | `id`, `createdAt`, `updatedAt` | The document's own ID and timestamps. |
 | `seo.title` | A field inside a group. |
 | `links.url` | A field in any row of an array. |
+| `layout.blockType`, `layout.heading` | The block type of any row of a `blocks` field, compared as text, or a field in any row whose type has it. The path leaves the block type out. New in v0.2.0. |
 | `category.name` | A field of the linked document, through a relationship. See [Filter through a link](/relationships#filter-through-a-link). |
 | `owner.relationTo`, `owner.value` | The collection or the ID of a link to several collections. `owner` alone means `owner.value`. |
 | A virtual field | The value it reads, at its source. See [Joins and virtual fields](/joins-and-virtual-fields). |
 
 A path can go through at most 3 relationships and into at most 3 nested arrays. `near` works on top-level `point` fields only, not through a relationship, into an array or in a join's `where`. To match one link in a `relationship` with `hasMany`, use `contains` with its document ID, not a path into it.
+
+A path through `blocks` must mean one thing: a name that's text in one block type and a number in another is a `400`, ``where[layout.x][equals]: `layout.x` means different things in block types a and b``. A `blockType` that isn't one of the field's types is a `400` listing them.
 
 Filters only see what you can read. A document a [read rule](/access-rules) hides from you never matches, even through a relationship. A path to a field you can't read is a `403`: ``where[phone][equals]: you can't filter or sort by a field you can't read``.
 
@@ -106,7 +110,7 @@ Without a `sort`, results come back nearest first when `near` is at the top leve
 |---|---|
 | Any field that compares as text, number, date or boolean; `id`, `createdAt`, `updatedAt`; a field inside a group (`seo.title`) | More than one field; a list; a `point`; a field inside an array; a path through a relationship; a virtual field |
 
-A sort that can't work is a `400`, such as ``sort: `tags` holds a list and can't be sorted``.
+A field inside a `blocks` row counts as inside a list, and rich text can't be sorted. A sort that can't work is a `400`, such as ``sort: `tags` holds a list and can't be sorted``.
 
 ## Limits
 
