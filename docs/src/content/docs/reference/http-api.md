@@ -73,6 +73,7 @@ Any endpoint can also return `400` for a body that isn't JSON, `401` for credent
 | [`GET /api/admin/collections/{slug}`](/reference/http-api/collections#get-apiadmincollectionsslug) | Reads a content type. | Signed in |
 | [`PUT /api/admin/collections/{slug}`](/reference/http-api/collections#put-apiadmincollectionsslug) | Changes a content type. | `schemas` ability |
 | [`POST /api/admin/collections/{slug}/preview`](/reference/http-api/collections#post-apiadmincollectionsslugpreview) | Previews a change. | `schemas` ability |
+| [`DELETE /api/admin/collections/{slug}`](/reference/http-api/collections#delete-apiadmincollectionsslug) | Deletes a shared block. | `schemas` ability |
 | [`GET /api/access`](/reference/http-api/documents#get-apiaccess) | Says what you may do. | Anyone |
 | [`GET /api/globals/{slug}`](/reference/http-api/documents#get-apiglobalsslug) | Reads a global. | Content |
 | [`PATCH /api/globals/{slug}`](/reference/http-api/documents#patch-apiglobalsslug) | Changes a global. | Content |

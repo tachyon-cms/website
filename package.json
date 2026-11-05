@@ -54,6 +54,9 @@
     "@lhci/utils": {
       "lighthouse": "13.6.0"
     },
+    "@sentry/bundler-plugins": {
+      "glob": "14.0.2"
+    },
     "basic-ftp": "6.2.3",
     "tmp": "0.2.7"
   }
