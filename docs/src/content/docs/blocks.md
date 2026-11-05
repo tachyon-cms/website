@@ -212,6 +212,31 @@ What gets a `400`:
 
 A [join field](/joins-and-virtual-fields#join-fields) can read links that sit in block rows: `"on": "layout.who"` lists the pages with a row whose `who` links here. The path is accepted if any block type of `layout` has a `who` relationship to this collection.
 
+Links inside the block nodes of [rich text](/rich-text#block-nodes) work the same way. Here `articles` has a `body` whose `byline` block type links to `authors`:
+
+```json
+{"slug": "articles", "fields": [
+  {"name": "title", "type": "text"},
+  {"name": "body", "type": "richText", "blocks": [
+    {"slug": "byline", "fields": [{"name": "who", "type": "relationship", "relationTo": "authors"}]}
+  ]}
+]}
+```
+
+A join on `authors` with `"on": "body.who"` lists every article with a `byline` node naming that author. Asked for with `populate[articles][title]=true`, Ann's `articles` join reads:
+
+```json
+{
+  "docs": [
+    {
+      "id": "01a1aac3-3eb2-76a4-8431-48b5b9cf226f",
+      "title": "Back up first"
+    }
+  ],
+  "hasNextPage": false
+}
+```
+
 ## Field rules inside blocks
 
 [Field rules](/access-rules#field-rules) work inside block types as they do in groups and lists. Each row answers to its own block type's rules. If `hero` has a `secret` field only Editors may read, and `quote` has a `secret` with no rule, a Viewer reading the page gets no `secret` in hero rows and sees it in quote rows.
@@ -327,7 +352,16 @@ A shared block has no documents of its own:
 - It has no routes: `/api/cta` is a `404`, and it doesn't appear in `/api/access`.
 - It takes no `access`, `defaultPopulate` or `url`. Put [field rules](/access-rules#field-rules) on its fields instead.
 - Nothing can link to it with a `relationship`.
-- A shared block can name other shared blocks, up to 8 deep, but not in a loop. `cta` naming `section` when `section` names `cta` is a `422` naming the blocks field that closes it: ``field `inner`: shared blocks can't name each other in a loop: cta → section → cta``. Going deeper than 8 is ``field `inner`: shared blocks can nest at most 8 deep: …``.
+- A shared block can name other shared blocks, up to 8 deep, but not in a loop. Say `section` is a shared block whose `items` field holds `cta` rows:
+
+  ```json
+  {"slug": "section", "kind": "block", "fields": [
+    {"name": "heading", "type": "text"},
+    {"name": "items", "type": "blocks", "blocks": [{"blockRef": "cta"}]}
+  ]}
+  ```
+
+  Giving `cta` a `blocks` field that names `section` would close a loop, so that save is a `422` naming the field where the chain comes back round: ``field `items`: shared blocks can't name each other in a loop: cta → section → cta``. A chain of more than 8 is refused the same way: ``field `items`: shared blocks can nest at most 8 deep: …``.
 - An admin `condition` in a shared block names fields from the block's own top, such as `{"field": "style", "equals": "link"}`, wherever the block is placed.
 
 ### Change a shared block

@@ -215,8 +215,8 @@ One value nests at most 32 levels deep and holds at most 50,000 nodes, counting 
 | ``field `layout`: minRows is greater than maxRows`` | |
 | ``field name `blockType` is reserved`` | A block type with a field called `id` or `blockType`. |
 | ``field `layout`: blockRef `nope` doesn't match a shared block`` | A `blockRef` to a slug that isn't a shared block. |
-| ``field `inner`: shared blocks can't name each other in a loop: cta → section → cta`` | Shared blocks naming each other in a circle. |
-| ``field `inner`: shared blocks can nest at most 8 deep: …`` | A chain of shared blocks more than 8 deep. |
+| ``field `items`: shared blocks can't name each other in a loop: cta → section → cta`` | Shared blocks naming each other in a circle. The message names the field where the chain comes back round: here `section`'s `items` names `cta`, and `cta` was given a field naming `section`. |
+| ``field `items`: shared blocks can nest at most 8 deep: …`` | A chain of shared blocks more than 8 deep, named at its innermost field. |
 | ``field `body`: features lists `bold` twice`` | |
 | ``field `body`: blocks needs `block` in features, or no features list`` | |
 | ``field `body`: relationTo needs `link` or `relationship` in features, or no features list`` | |

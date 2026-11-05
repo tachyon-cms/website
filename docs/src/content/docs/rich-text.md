@@ -235,6 +235,8 @@ It's populated on read like a link.
 
 A `block` node holds one row of any block type the field's `blocks` lists. `fields` holds that type's fields, checked as a [blocks](/blocks) row's are, and field rules apply to them per node type in the same way. Each node gets an `id` if it has none. An `id` can appear only once in a whole value, rich text inside block nodes included.
 
+A relationship field in a block node can feed a [join](/blocks#joins-through-blocks): `"on": "body.who"` lists the documents whose `body` has a block node with `who` linking here.
+
 ## Limits
 
 - One value nests at most 32 levels deep and holds at most 50,000 nodes. Both count the rich text inside its block nodes.
