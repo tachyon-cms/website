@@ -6,10 +6,18 @@ description: Every TachyonCMS v0.1.0 setting, in tachyon.toml or as TACHYON_ env
 TachyonCMS reads its settings from three places, each overriding the one before:
 
 1. Built-in defaults.
-2. `tachyon.toml` in the working directory, if it exists. Point at another file with `--config path/to/file.toml`.
+2. `tachyon.toml` in the working directory, if it exists. Point at another file with `--config path/to/file.toml`; a file named that way has to exist, or `tachyon` stops with its path.
 3. Environment variables starting with `TACHYON_`.
 
 The only setting without a default is `database_url`.
+
+A top-level key TachyonCMS doesn't know, such as a misspelt `publc_url`, stops `tachyon` at startup instead of being ignored. That goes for every command, since `serve`, `migrate` and `schema` read the same config:
+
+```text
+unknown key `publc_url` in tachyon.toml; the top-level keys are database_url, listen, public_url, auth
+```
+
+Environment variables aren't checked this way, so a `TACHYON_` variable that isn't a setting is left alone.
 
 ## A complete file
 
@@ -151,7 +159,7 @@ Commands:
   help     Print this message or the help of the given subcommand(s)
 
 Options:
-      --config <CONFIG>  Config file. Every setting can also come from a TACHYON_* environment variable [default: tachyon.toml]
+      --config <CONFIG>  Config file. Without it, tachyon.toml is read if it exists. Every setting can also come from a TACHYON_* environment variable
   -h, --help             Print help
   -V, --version          Print version
 ```
