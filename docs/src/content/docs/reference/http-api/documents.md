@@ -90,6 +90,24 @@ curl localhost:3000/api/globals/site
 }
 ```
 
+With `format`, rich text comes back as a string. Here `site` also has a `footer` rich text field (new in v0.2.0):
+
+```sh
+curl 'localhost:3000/api/globals/site?format=html'
+```
+
+```json
+{
+  "createdAt": "2026-11-05T08:03:18.571817Z",
+  "footer": "<p>Made with <em>care</em>.</p>",
+  "id": "01a1aabb-d346-7758-8c0a-9067df82acb5",
+  "status": "published",
+  "tagline": "Notes from the build",
+  "title": "My site",
+  "updatedAt": "2026-11-05T08:03:18.571817Z"
+}
+```
+
 ### `PATCH /api/globals/{slug}`
 
 Changes a global, saving it the first time. Fields merge as for a [document `PATCH`](#patch-apicollectionid). If the global's read or update rule is a filter, a global that has never been saved can't be saved this way, since there's no document for the rule to match.
@@ -97,7 +115,7 @@ Changes a global, saving it the first time. Fields merge as for a [document `PAT
 | | |
 |---|---|
 | Who | Content: a role whose `content` is `all` (Editor and Admin), or the global's update rule. A key needs `slug:write`, `*:write` or `admin`. |
-| Body | The fields to change |
+| Body | The fields to change. A `richText` field may be sent as [Markdown](/markdown-input), `{"format": "markdown", "value": "…"}`. |
 | Returns | `200` and the global |
 | Errors | `401`; `403` the role, a rule, a field rule or a key scope refuses; `404`; `422` |
 
@@ -109,22 +127,6 @@ curl -X PATCH localhost:3000/api/globals/site \
 ```
 
 The response is the global, as for `GET`.
-
-With `format`, rich text comes back as a string. Here `site` has a `footer` rich text field:
-
-```sh
-curl 'localhost:3000/api/globals/site?format=html'
-```
-
-```json
-{
-  "createdAt": "2026-11-05T07:46:13.194018Z",
-  "footer": "<p>Made with <em>care</em>.</p>",
-  "id": "01a1aaac-2ddf-7141-8f40-d5f0c3b2c392",
-  "status": "published",
-  "updatedAt": "2026-11-05T07:46:13.194018Z"
-}
-```
 
 ## Documents
 
@@ -262,7 +264,7 @@ Changes a document. What you send is merged into what's stored: a field inside a
 | | |
 |---|---|
 | Who | Content: a role whose `content` is `all`, or `own` for documents you created, subject to the update rule. A key needs `collection:write`, `*:write` or `admin`. |
-| Body | The fields to change |
+| Body | The fields to change. A `richText` field may be sent as [Markdown](/markdown-input), `{"format": "markdown", "value": "…"}`. |
 | Returns | `200` and the document, with links filled in to depth 1. If a read rule now hides it from you, only `{"id"}`. |
 | Errors | `401`; `403 You can only change documents you created.`, `403 An access rule doesn't let you change this document.`, or a field rule or key scope refuses; `404`; `409` the collection's fields changed during the request; `422` |
 

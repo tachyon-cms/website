@@ -215,10 +215,22 @@ One value nests at most 32 levels deep and holds at most 50,000 nodes, counting 
 | ``field `layout`: minRows is greater than maxRows`` | |
 | ``field name `blockType` is reserved`` | A block type with a field called `id` or `blockType`. |
 | ``field `layout`: blockRef `nope` doesn't match a shared block`` | A `blockRef` to a slug that isn't a shared block. |
+| ``field `inner`: shared blocks can't name each other in a loop: cta → section → cta`` | Shared blocks naming each other in a circle. |
+| ``field `inner`: shared blocks can nest at most 8 deep: …`` | A chain of shared blocks more than 8 deep. |
 | ``field `body`: features lists `bold` twice`` | |
 | ``field `body`: blocks needs `block` in features, or no features list`` | |
 | ``field `body`: relationTo needs `link` or `relationship` in features, or no features list`` | |
 | ``field `body`: richText fields can't be unique or filterable`` | |
+| ``field `body`: relationTo lists `notes` twice`` | |
+| ``field `body`: relationTo `Bad` isn't a valid collection slug`` | |
+| ``relationTo `nope` doesn't match an existing collection`` | A `relationTo` collection that doesn't exist. |
+| `labels: only shared blocks take labels` | `labels` on a collection or global. |
+| `access: a shared block has no documents, so it takes no access rules; put rules on its fields` | `access` on a shared block. |
+| `defaultPopulate: a shared block is never populated, so it can't have one` | `defaultPopulate` on a shared block. |
+| `url: only collections have pages of their own` | `url` on a global or shared block. |
+| ``url: `{nope}` must name a top-level text or slug field`` | A placeholder for a field that isn't a stored top-level `text` or `slug`. A virtual one gets ``url: `{name}` is virtual; a url needs a stored text or slug field``. |
+| ``url: a `{` is never closed`` | |
+| `url: must start with http://, https://, / or #` | |
 
 An unknown feature is a `400`: ``field `body`: unknown variant `sparkle`, expected one of `bold`, …``.
 
@@ -313,7 +325,7 @@ A document that doesn't fit gets a `422` with one entry per problem (see [Errors
 | `` `listItem` can't go inside `doc` ``, `needs at least one node inside`, `expected text that isn't empty` | `richText`: a node in the wrong place, an empty container or text node |
 | `` `bold` is applied twice ``, `code blocks hold plain text without marks` | `richText` marks |
 | `a link takes href or doc, not both`, `a link needs href or doc`, `this field can't link to documents`, ``can't link to `x`; expected one of: …`` | `richText` links |
-| `this field has no block types`, `this block ID is used twice` | `richText` block nodes |
+| `this field has no block types`, `this block ID is used twice`, `expected a block ID` | `richText` block nodes |
 | `expected a whole number from 1 to 6`, `expected a whole number from 0 to 1000000`, `expected a whole number from 1 to 1000` | `richText`: a heading's `level`, a list's `start`, a cell's `colspan` or `rowspan` |
 | `every row of a table must span the same number of columns: …`, `reaches past the last row` | `richText` tables |
 | `line N: …` | `richText` sent as Markdown. See [When Markdown is refused](/markdown-input#when-markdown-is-refused). |

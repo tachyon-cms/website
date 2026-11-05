@@ -13,7 +13,7 @@ Collections, globals and shared blocks share these routes. A schema is a JSON ob
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `slug` | string | none | Required. Lowercase letters, digits and underscores, starting with a letter, up to 64 characters. Not `access`, `admin`, `auth`, `globals`, `media`, `search`, `graphql`, `plugins` or `setup`. |
+| `slug` | string | none | Required. Lowercase letters, digits and underscores, starting with a letter, up to 64 characters. Not `access`, `admin`, `auth`, `blocks`, `globals`, `media`, `search`, `graphql`, `plugins` or `setup`. |
 | `kind` | string | `collection` | `collection`, `global`, or `block` for a [shared block](/blocks#shared-blocks) (new in v0.2.0). A shared block has no documents or routes of its own, and takes no `access`, `defaultPopulate` or `url`. |
 | `fields` | array | none | Required. See [Field types](/reference/field-types). |
 | `access` | object | none | Collection rules: `read`, `create`, `update`, `delete`. See [Access rules](/access-rules). |
@@ -353,4 +353,4 @@ While `pages` still names `cta`:
 }
 ```
 
-When another shared block names it, that block is the one named. For a collection or global, the detail is `` `pages` isn't a shared block; collections and globals can't be deleted yet ``.
+If several schemas name it, the detail names the first in slug order that names it directly, whether a collection, a global or another shared block. For a collection or global, the detail is `` `pages` isn't a shared block; collections and globals can't be deleted yet ``.

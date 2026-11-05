@@ -3,7 +3,7 @@ title: Reference
 description: Every endpoint, field type, filter operator, setting and error in TachyonCMS v0.1.0, plus the blocks and rich text arriving in v0.2.0.
 ---
 
-The reference lists everything TachyonCMS v0.1.0 offers, plus blocks and rich text, which arrive in v0.2.0 and are marked as new, one subject per page, in tables you can scan. It describes; the [Docs](/) topic explains, and the [Tutorials](/tutorials) build something.
+The reference lists everything TachyonCMS v0.1.0 offers, one subject per page, in tables you can scan. It also covers blocks and rich text, which arrive in v0.2.0 and are marked as new. It describes; the [Docs](/) topic explains, and the [Tutorials](/tutorials) build something.
 
 | Page | Covers |
 |---|---|

@@ -47,7 +47,7 @@ curl -X POST localhost:3000/api/admin/collections \
 
 The collection's routes exist straight away: `/api/posts` and `/api/posts/{id}`.
 
-A slug starts with a lowercase letter and uses only lowercase letters, digits and underscores, up to 64 characters. These slugs are reserved for the server's own routes: `access`, `admin`, `auth`, `globals`, `media`, `search`, `graphql`, `plugins` and `setup`.
+A slug starts with a lowercase letter and uses only lowercase letters, digits and underscores, up to 64 characters. These slugs are reserved for the server's own routes: `access`, `admin`, `auth`, `blocks`, `globals`, `media`, `search`, `graphql`, `plugins` and `setup`.
 
 From v0.2.0 a collection can also take a `url`, such as `"/blog/{slug}"`, saying where its documents live on your site. Links to them in [rich text](/rich-text#add-a-rich-text-field) point there when read as HTML.
 

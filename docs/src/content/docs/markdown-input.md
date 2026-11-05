@@ -54,7 +54,7 @@ GitHub-flavoured Markdown, with tables, `~~strikethrough~~` and task lists:
 | `- [ ]` and `- [x]` items | `taskList` |
 | `>` | `blockquote` |
 | `---` | `horizontalRule` |
-| A fenced or indented code block | `codeBlock`, with the fence's info as its `language` |
+| A fenced or indented code block | `codeBlock`. A fence's whole info string becomes its `language`, so ```` ```js ```` works and ```` ```js title=x ```` is refused by the language rule. |
 | A table | `table`, its first row the header |
 | A backslash or two spaces at the end of a line | `hardBreak` |
 
@@ -75,11 +75,21 @@ These cover what plain Markdown has no syntax for:
 
 That's all the HTML there is. Any other tag is refused.
 
-**Documents by slug.** `doc:` links and `::ref` name a document by its slug, which TachyonCMS swaps for the ID before saving. You can only name documents you can read. Anything else gets the same `422` as a slug that doesn't exist: ``no `articles` document you can read has the slug `nope` ``. One write names at most 1,000 documents this way.
+#### Documents by slug
 
-**Attributes.** Values are double-quoted, with `\\`, `\"`, `\n` and `\r` as escapes, and a key appears once. A value for a field that stores text is kept as written. For any other field it's read as JSON, so `start="30"` is the number 30 and `autoplay="true"` is a checkbox that's on. A `json` field's value must itself be JSON, so a string is `meta="\"text\""`.
+`doc:` links and `::ref` name a document by its slug, which TachyonCMS swaps for the ID before saving. You can only name documents you can read. Anything else gets the same `422` as a slug that doesn't exist: ``no `articles` document you can read has the slug `nope` ``. One write names at most 1,000 documents this way.
 
-**Block bodies.** The `:::name` form works when the block type has exactly one rich text field. That field holds the body, so it can't also be an attribute. To nest one body inside another, give the outer one more colons, and close each with as many colons as it opened with:
+#### Attributes
+
+Values are double-quoted, with `\\`, `\"`, `\n` and `\r` as escapes, and a key appears once. A value for a field that stores text is kept as written. For any other field it's read as JSON where it can be, and kept as text where it can't, which validation then refuses for a field that doesn't store text.
+
+Say `body` also offered a `video` block type, `{"slug": "video", "fields": [{"name": "url", "type": "text", "required": true}, {"name": "start", "type": "number"}, {"name": "autoplay", "type": "checkbox"}]}`. Then `::video{url="/v.mp4" start="30" autoplay="true"}` stores `start` as the number 30 and `autoplay` as `true`, and `start="soon"` is a `422`: `line 1: expected a number` at `body.content.0.attrs.fields.start`.
+
+A `json` field's value must itself be JSON, or the line is refused, so a string is `meta="\"text\""`.
+
+#### Block bodies
+
+The `:::name` form works when the block type has exactly one rich text field. That field holds the body, so it can't also be an attribute. To nest one body inside another, give the outer one more colons, and close each with as many colons as it opened with:
 
 ```md
 ::::callout{kind="note"}
@@ -93,7 +103,9 @@ Check the backups.
 
 This needs `callout`'s rich text field to offer an `aside` block. Inside a body, the Markdown follows the rules of the block's own rich text field: its `features`, its `relationTo` and its block types.
 
-**Directives** start their own line, indented less than four spaces. They can sit in a quote or a list item, after its marker.
+#### Where directives go
+
+Directives start their own line, indented less than four spaces. They can sit in a quote or a list item, after its marker.
 
 ## When Markdown is refused
 
@@ -143,9 +155,9 @@ What's refused:
 | A table with aligned columns, `\|:--\|` | `tables can't align columns; leave the colons out of the line under the header` |
 | Task items and plain items in one list | `a list can't mix task items with plain ones` |
 | A numbered task list, `1. [ ] a` | ``a task list can't be numbered; start its items with `- [ ]` `` |
-| A directive whose name isn't a block type of the field | ``unknown directive `::embed` `` |
-| A directive with bad attributes, `::video{url=nope}` | ``expected a directive like `::name{key="value"}`, not `::video{url=nope}` `` |
-| A body for a block type without exactly one rich text field | ``…has no single rich text field to hold text; write it as `::video{…}` `` |
+| A directive whose name isn't a block type of the field | ``unknown directive `::banner` `` |
+| A directive with bad attributes, `::cta{label=nope}` | ``expected a directive like `::name{key="value"}`, not `::cta{label=nope}` `` |
+| A body for a block type without exactly one rich text field, such as `:::cta` | `` `cta` has no single rich text field to hold text; write it as `::cta{…}` `` |
 | A body left open, or closed with the wrong number of colons | ``…is never closed``, ``…doesn't close `:::aside` from line 2`` |
 | `::ref` without both `collection` and `slug` | `` `::ref` takes a collection and a slug `` |
 | A `doc:` link without a slug, `doc:posts` | `expected doc:<collection>/<slug>, not` … |

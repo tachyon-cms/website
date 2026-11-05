@@ -32,7 +32,7 @@ curl -X POST localhost:3000/api/admin/collections \
       ]}'
 ```
 
-Create `cta` first, as [Shared blocks](#shared-blocks) shows, or the save is refused with ``blockRef `cta` doesn't match a shared block``.
+Create `cta` first, as [Shared blocks](#shared-blocks) shows, or the save is refused with ``field `layout`: blockRef `cta` doesn't match a shared block``.
 
 | Option | Does |
 |---|---|
@@ -164,7 +164,16 @@ The two rows you sent back keep their IDs, and the new one gets its own (respons
 
 ## Filter into blocks
 
-Filters name a field inside a row by its path, without the block type. `layout.blockType` finds pages by the rows they hold:
+Filters name a field inside a row by its path, without the block type. Say there's also an About page with a single quote row:
+
+```sh
+curl -X POST localhost:3000/api/pages \
+  -H "authorization: Bearer $TOKEN" \
+  -H 'content-type: application/json' \
+  -d '{"title": "About", "layout": [{"blockType": "quote", "text": "Small team, big plans."}]}'
+```
+
+`layout.blockType` finds pages by the rows they hold:
 
 ```sh
 curl -g 'localhost:3000/api/pages?where[layout.blockType][equals]=quote&select[title]=true'
@@ -199,13 +208,17 @@ What gets a `400`:
 | `where[layout][exists]=true` | ``where[layout][exists]: `layout` can't be filtered`` |
 | `sort=layout.heading` | ``sort: `layout.heading` is inside a list and can't be sorted`` |
 
+## Joins through blocks
+
+A [join field](/joins-and-virtual-fields#join-fields) can read links that sit in block rows: `"on": "layout.who"` lists the pages with a row whose `who` links here. The path is accepted if any block type of `layout` has a `who` relationship to this collection.
+
 ## Field rules inside blocks
 
 [Field rules](/access-rules#field-rules) work inside block types as they do in groups and lists. Each row answers to its own block type's rules. If `hero` has a `secret` field only Editors may read, and `quote` has a `secret` with no rule, a Viewer reading the page gets no `secret` in hero rows and sees it in quote rows.
 
 Where there's no row to go by, the stricter answer wins:
 
-- Filtering or sorting on `layout.secret` is a `403` for anyone who can't read `secret` in some block type that has it.
+- Filtering on `layout.secret` is a `403` for anyone who can't read `secret` in some block type that has it.
 - [`/api/access`](/access-rules#what-am-i-allowed-to-do) names block fields the same way, `layout.secret`, and answers with what every block type that has the field allows.
 
 Writes go row by row. Since a `PATCH` replaces the whole list, it counts every row stored or sent. Someone who can't write hero's `secret` can't replace a list that holds a hero row, even if they leave `secret` out, and gets ``You don't have permission to write `layout.secret`.`` A list with only quote rows is theirs to replace.
@@ -216,7 +229,7 @@ Changing a block type works like changing any field, through [Change a content t
 
 A block type's own slug can't be renamed. Changing it is removing one type and adding another.
 
-Removing a block type that rows still use is a `409`, like dropping a `select` option. The preview counts the documents that won't validate and gives examples:
+Removing a block type that rows still use is a `409`, like dropping a `select` option. Here `quote` is removed while Home and About both have quote rows. The preview counts the documents that won't validate and gives examples:
 
 ```json
 {
@@ -314,7 +327,8 @@ A shared block has no documents of its own:
 - It has no routes: `/api/cta` is a `404`, and it doesn't appear in `/api/access`.
 - It takes no `access`, `defaultPopulate` or `url`. Put [field rules](/access-rules#field-rules) on its fields instead.
 - Nothing can link to it with a `relationship`.
-- A shared block can name other shared blocks, up to 8 deep, but not in a loop. `cta` naming `section` when `section` names `cta` is a `422`: ``shared blocks can't name each other in a loop: cta → section → cta``.
+- A shared block can name other shared blocks, up to 8 deep, but not in a loop. `cta` naming `section` when `section` names `cta` is a `422` naming the blocks field that closes it: ``field `inner`: shared blocks can't name each other in a loop: cta → section → cta``. Going deeper than 8 is ``field `inner`: shared blocks can nest at most 8 deep: …``.
+- An admin `condition` in a shared block names fields from the block's own top, such as `{"field": "style", "equals": "link"}`, wherever the block is placed.
 
 ### Change a shared block
 
@@ -386,7 +400,7 @@ A change that would break something elsewhere is refused outright with a `422`, 
 }
 ```
 
-When another shared block names it, that block is the one reported. Collections and globals can't be deleted this way.
+If several schemas name it, the detail names the first in slug order that names it directly, whether a collection, a global or another shared block. Collections and globals can't be deleted this way.
 
 ### In schema files
 

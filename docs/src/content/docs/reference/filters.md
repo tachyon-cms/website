@@ -83,7 +83,7 @@ A value that doesn't fit is a `400` naming the parameter, such as ``where[price]
 | `owner.relationTo`, `owner.value` | The collection or the ID of a link to several collections. `owner` alone means `owner.value`. |
 | A virtual field | The value it reads, at its source. See [Joins and virtual fields](/joins-and-virtual-fields). |
 
-A path can go through at most 3 relationships and into at most 3 nested arrays. `near` works on top-level `point` fields only, not through a relationship, into an array or in a join's `where`. To match one link in a `relationship` with `hasMany`, use `contains` with its document ID, not a path into it.
+A path can go through at most 3 relationships and into at most 3 nested lists, where `array` and `blocks` fields both count. `near` works on top-level `point` fields only, not through a relationship, into an array or in a join's `where`. To match one link in a `relationship` with `hasMany`, use `contains` with its document ID, not a path into it.
 
 A path through `blocks` must mean one thing: a name that's text in one block type and a number in another is a `400`, ``where[layout.x][equals]: `layout.x` means different things in block types a and b``. A `blockType` that isn't one of the field's types is a `400` listing them.
 
@@ -122,7 +122,7 @@ A field inside a `blocks` row counts as inside a list, and rich text can't be so
 | `and` / `or` nesting | 5 levels | ``where[…]: is nested too deeply`` |
 | Values in `in` or `not_in` | 100 | ``where[…]: expected up to 100 comma-separated values`` |
 | Relationships in one path | 3 | ``…reaches through too many relationships (3 at most)`` |
-| Nested arrays in one path | 3 | ``…reaches into too many nested lists (3 at most)`` |
+| Nested lists (`array` or `blocks`) in one path | 3 | ``…reaches into too many nested lists (3 at most)`` |
 
 ## Errors
 

@@ -219,7 +219,7 @@ A link's `attrs` hold either an `href` or a `doc`, not both:
 - A `doc` names a document in one of the field's `relationTo` collections by its ID. Linking to a document you can't read gets the same `422` as linking to one that doesn't exist.
 - `"newTab": true` opens the link in a new tab. Raw `target`, `rel` and `class` attributes are refused.
 
-Rich text links count as links everywhere else too: a document they point at can't be deleted while they do, and they show up in its [`/references`](/relationships#what-links-here).
+Rich text links count as links everywhere else too: a document they point at can't be deleted while they do, and they show up in its [`/references`](/relationships#what-links-here). There, rich text counts its links, relationship nodes and block nodes in document order: the third is `body.2`, and a link inside the fields of the block node at `body.1` is `body.1.who`.
 
 ### Relationship nodes
 
@@ -337,4 +337,4 @@ What you can't read stays hidden in every format:
 
 - A field you can't read isn't there, inside block nodes too.
 - A link to a document you can't read is its text alone. In JSON it stays a bare ID, whatever the `depth`.
-- A relationship node pointing at a document you can't read is left out entirely.
+- A relationship node pointing at a document you can't read is left out of HTML, Markdown and text. In JSON it stays, with a bare ID as its `value`, as a hidden link does.
