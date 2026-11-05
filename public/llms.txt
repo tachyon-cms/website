@@ -1,6 +1,6 @@
 # TachyonCMS
 
-> An open-source headless CMS written in Rust: one binary and one Postgres database, with a REST API that comes from the content types you define. MIT licensed. The current release, v0.1.0, is pre-alpha and has no admin screen yet.
+> An open-source headless CMS written in Rust: one binary and one Postgres database, with a REST API that comes from the content types you define. MIT licensed. The current release, v0.2.0, is pre-alpha and has no admin screen yet.
 
 ## The project
 
@@ -12,7 +12,7 @@
 
 ## Product
 
-- [Content modelling](https://tachyoncms.com/product/content-modelling): content types, fields, relationships.
+- [Content modelling](https://tachyoncms.com/product/content-modelling): content types, fields, relationships, blocks and rich text.
 - [Schema as code](https://tachyoncms.com/product/schema-as-code): content types kept in a JSON file you diff and apply.
 - [Querying](https://tachyoncms.com/product/querying): filters, sorting, joins, select and populate.
 - [Sign-in](https://tachyoncms.com/product/sign-in): sessions, bearer tokens and scoped API keys.

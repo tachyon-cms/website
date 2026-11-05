@@ -1,6 +1,6 @@
 ---
 name: WordPress
-summary: "WordPress hands an editor a finished site on day one. TachyonCMS v0.1.0 is an API with no admin screen yet. Here's where each one really stands."
+summary: "WordPress hands an editor a finished site on day one. TachyonCMS v0.2.0 is an API with no admin screen yet. Here's where each one really stands."
 checked: 2026-10-28
 rows:
   - topic: Built with
@@ -12,7 +12,7 @@ rows:
     them: MySQL 8.0 or newer, or MariaDB 10.11 or newer.
     source: https://wordpress.org/about/requirements/
   - topic: Editing
-    tachyon: No admin screen yet. You work over HTTP or with the `tachyon` command.
+    tachyon: No admin screen yet. You work over HTTP or with the `tachyon` command. Pages built from blocks, and rich text written as JSON or Markdown, are in the API.
     them: The block editor. Paragraphs, images, galleries and the rest are blocks you arrange, then view before you publish.
     source: https://wordpress.org/documentation/article/wordpress-block-editor/
   - topic: API
@@ -24,7 +24,7 @@ rows:
     them: Cookie sign-in from inside WordPress, and Application Passwords over HTTPS for everything else.
     source: https://developer.wordpress.org/rest-api/using-the-rest-api/authentication/
   - topic: Drafts and history
-    tachyon: Not yet. Drafts, versions and scheduled publishing are next on the roadmap, after rich text.
+    tachyon: Not yet. Drafts, versions and scheduled publishing are next on the roadmap, and under way.
     them: Every saved draft or update is a revision you can compare and restore, and autosave keeps a backup while you write.
     source: https://wordpress.org/documentation/article/revisions/
   - topic: Media

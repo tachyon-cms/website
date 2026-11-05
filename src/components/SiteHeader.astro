@@ -448,18 +448,31 @@ const repo = 'https://github.com/tachyon-cms/tachyoncms';
       display: block;
     }
   }
-  /* At the 320 px reflow width the logo, the button and the menu only just fit. */
+  /* At the 320 px reflow width the logo, the button and the menu only just fit in Inter.
+     In a wider fallback font (a slow first visit keeps it), the button's label wraps onto
+     two lines instead of pushing the menu off the screen; the logo and menu keep their size. */
   @media (max-width: 359.98px) {
     .bar,
     .end {
       gap: 8px;
     }
     .brand {
+      flex-shrink: 0;
       gap: 8px;
       font-size: 16px;
     }
+    .end {
+      min-width: 0;
+    }
     .cta {
+      min-width: 0;
       padding: 0 11px;
+      line-height: 1.1;
+      text-align: center;
+      white-space: normal;
+    }
+    .mobile {
+      flex-shrink: 0;
     }
   }
 </style>

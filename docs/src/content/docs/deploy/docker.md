@@ -1,12 +1,12 @@
 ---
 title: Deploy with Docker
-description: Run the signed TachyonCMS v0.1.0 container image with Postgres, keep its data, and verify the image.
+description: Run the signed TachyonCMS v0.2.0 container image with Postgres, keep its data, and verify the image.
 ---
 
 Each release publishes a container image at `ghcr.io/tachyon-cms/tachyoncms`, for `linux/amd64` and `linux/arm64`.
 
 :::caution[Pre-alpha]
-v0.1.0 isn't ready for a public network. These steps suit a private server, a staging setup or a local machine.
+v0.2.0 isn't ready for a public network. These steps suit a private server, a staging setup or a local machine.
 :::
 
 ## The image
@@ -17,20 +17,20 @@ v0.1.0 isn't ready for a public network. These steps suit a private server, a st
 - Runs `tachyon serve` by default. Pass another command, such as `migrate` or `schema export`, as the container's arguments.
 - Needs `TACHYON_DATABASE_URL`, and `TACHYON_PUBLIC_URL` because it listens beyond loopback. See [Configuration](/configuration).
 
-Pin the version tag, `v0.1.0`, rather than a moving tag.
+Pin the version tag, `v0.2.0`, rather than a moving tag.
 
 ## Verify the image
 
 The image is signed with [cosign](https://docs.sigstore.dev/cosign/) by the release workflow. Check it before you run it:
 
 ```sh
-cosign verify ghcr.io/tachyon-cms/tachyoncms:v0.1.0 \
+cosign verify ghcr.io/tachyon-cms/tachyoncms:v0.2.0 \
   --certificate-identity 'https://github.com/tachyon-cms/tachyoncms/.github/workflows/release.yml@refs/heads/main' \
   --certificate-oidc-issuer https://token.actions.githubusercontent.com
 ```
 
 ```text
-Verification for ghcr.io/tachyon-cms/tachyoncms:v0.1.0 --
+Verification for ghcr.io/tachyon-cms/tachyoncms:v0.2.0 --
 The following checks were performed on each of these signatures:
   - The cosign claims were validated
   - Existence of the claims in the transparency log was verified offline
@@ -56,7 +56,7 @@ services:
     restart: unless-stopped
 
   cms:
-    image: ghcr.io/tachyon-cms/tachyoncms:v0.1.0
+    image: ghcr.io/tachyon-cms/tachyoncms:v0.2.0
     environment:
       TACHYON_DATABASE_URL: postgres://tachyon:change-me@db:5432/tachyon
       TACHYON_PUBLIC_URL: https://cms.example.com

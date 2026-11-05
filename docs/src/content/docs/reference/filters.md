@@ -1,6 +1,6 @@
 ---
 title: Filters and sorting
-description: Every filter operator in TachyonCMS v0.1.0, which fields each one works on, how values are read, and the limits.
+description: Every filter operator in TachyonCMS v0.2.0, which fields each one works on, how values are read, and the limits.
 ---
 
 This page lists every operator, path and limit for `where` and `sort`. For a guided introduction with examples, see [Querying](/querying).

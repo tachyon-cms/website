@@ -1,9 +1,15 @@
 import { expect, test } from '@playwright/test';
 import { overflowing } from './fit';
 
-const posts = ['/blog/v0-1-0', '/blog/where-tachyoncms-is-headed'];
+// Each post with the day it was published.
+const dated: [string, string][] = [
+  ['/blog/v0-2-0', '2026-11-05'],
+  ['/blog/v0-1-0', '2026-10-28'],
+  ['/blog/where-tachyoncms-is-headed', '2026-10-28'],
+];
+const posts = dated.map(([path]) => path);
 
-test('/blog lists both launch posts and marks Blog in the nav', async ({ page }) => {
+test('/blog lists every post and marks Blog in the nav', async ({ page }) => {
   await page.goto('/blog');
   await expect(page.locator('h1')).toHaveCount(1);
   for (const path of posts) await expect(page.locator(`main a[href="${path}"]`)).toBeVisible();
@@ -18,14 +24,14 @@ test('the home page shows the latest posts', async ({ page }) => {
   for (const path of posts) await expect(page.locator(`#latest a[href="${path}"]`)).toBeVisible();
 });
 
-for (const path of posts) {
+for (const [path, day] of dated) {
   test(`${path} has its card for social previews, an infographic and share links`, async ({ page }) => {
     await page.goto(path);
     await expect(page.locator('h1')).toHaveCount(1);
     const slug = path.split('/').pop();
     await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', `https://tachyoncms.com/media/blog/${slug}/card.png`);
     await expect(page.locator('meta[property="og:type"]')).toHaveAttribute('content', 'article');
-    await expect(page.locator('meta[property="article:published_time"]')).toHaveAttribute('content', '2026-10-28T00:00:00.000Z');
+    await expect(page.locator('meta[property="article:published_time"]')).toHaveAttribute('content', `${day}T00:00:00.000Z`);
     await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image');
     const card = await page.request.get(`/media/blog/${slug}/card.png`);
     expect(card.ok()).toBe(true);
@@ -41,7 +47,7 @@ test('copy link puts the post URL on the clipboard', async ({ page, context }) =
   await page.goto(posts[0]);
   await page.getByRole('button', { name: 'Copy link' }).click();
   await expect(page.getByRole('status')).toHaveText('Link copied');
-  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('https://tachyoncms.com/blog/v0-1-0');
+  expect(await page.evaluate(() => navigator.clipboard.readText())).toBe('https://tachyoncms.com/blog/v0-2-0');
 });
 
 test.describe('without JavaScript', () => {

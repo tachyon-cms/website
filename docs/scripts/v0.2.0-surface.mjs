@@ -1,20 +1,106 @@
-// The public surface of TachyonCMS v0.2.0: v0.1.0's, plus what blocks and rich text add,
-// copied by hand from the source as for v0.1.0-surface.mjs. Cited from the v0.2.0 tag
-// (1cac741) by file, symbol and line; re-check with `git show v0.2.0:<file>`. Operators
-// (`enum Op` in crates/tachyon-core/src/query.rs), config keys (`Config` and
-// `AuthSettings` in crates/tachyon/src/config.rs) and error statuses didn't change.
-import * as v010 from './v0.1.0-surface.mjs';
+// The public surface of TachyonCMS v0.2.0, copied by hand from the tagged source (1cac741) so
+// the reference pages can be checked against it without network or git. Update it with each
+// release, from the files named beside each list; `git show v0.2.0:<file>` shows each one.
 
-// crates/tachyon-api/src/lib.rs:83-88, `.route("/api/admin/collections/{slug}"` with
-// `.delete(collections::delete)`: deleting a shared block
-export const routes = [...v010.routes, 'DELETE /api/admin/collections/{slug}'];
+// crates/tachyon-api/src/lib.rs:78-112 and crates/tachyon-api/src/auth/routes.rs:33-63
+export const routes = [
+  'GET /api/setup',
+  'POST /api/setup',
+  'POST /api/auth/login',
+  'POST /api/auth/logout',
+  'GET /api/auth/me',
+  'GET /api/auth/sessions',
+  'DELETE /api/auth/sessions/{id}',
+  'POST /api/auth/password',
+  'GET /api/auth/keys',
+  'POST /api/auth/keys',
+  'DELETE /api/auth/keys/{id}',
+  'POST /api/auth/keys/{id}/rotate',
+  'GET /api/users',
+  'POST /api/users',
+  'GET /api/users/{id}',
+  'PATCH /api/users/{id}',
+  'DELETE /api/users/{id}',
+  'GET /api/admin/roles',
+  'POST /api/admin/roles',
+  'PUT /api/admin/roles/{slug}',
+  'DELETE /api/admin/roles/{slug}',
+  'GET /api/admin/collections',
+  'POST /api/admin/collections',
+  'GET /api/admin/collections/{slug}',
+  'DELETE /api/admin/collections/{slug}',
+  'PUT /api/admin/collections/{slug}',
+  'POST /api/admin/collections/{slug}/preview',
+  'GET /api/access',
+  'GET /api/globals/{slug}',
+  'PATCH /api/globals/{slug}',
+  'GET /api/{collection}',
+  'POST /api/{collection}',
+  'GET /api/{collection}/{id}',
+  'PATCH /api/{collection}/{id}',
+  'DELETE /api/{collection}/{id}',
+  'GET /api/{collection}/{id}/references',
+];
 
-// `enum FieldKind` variants `Blocks` (schema.rs:282-288) and `RichText` (schema.rs:291-301)
-// in crates/tachyon-core/src/schema.rs; options are their serde names
+// `enum FieldKind` in crates/tachyon-core/src/schema.rs:186-317 (`checkbox` is an alias of `boolean`)
 export const fieldTypes = {
-  ...v010.fieldTypes,
+  text: ['minLength', 'maxLength', 'hasMany', 'minRows', 'maxRows'],
+  textarea: ['minLength', 'maxLength'],
+  number: ['min', 'max', 'integer', 'hasMany', 'minRows', 'maxRows'],
+  boolean: [],
+  date: ['dateOnly'],
+  email: [],
+  url: [],
+  select: ['options', 'multiple'],
+  radio: ['options'],
+  code: ['language'],
+  point: [],
+  slug: ['from'],
+  relationship: ['relationTo', 'hasMany', 'maxDepth'],
+  json: [],
+  join: ['collection', 'on', 'where', 'defaultLimit', 'defaultSort'],
+  group: ['fields'],
+  array: ['fields', 'minRows', 'maxRows'],
   blocks: ['blocks', 'minRows', 'maxRows'],
   richText: ['features', 'relationTo', 'blocks'],
+  row: ['fields'],
+  collapsible: ['initiallyCollapsed', 'fields'],
+  tabs: ['tabs'],
 };
 
-export const { fieldOptions, operators, configKeys, errors } = v010;
+// `struct Field` in crates/tachyon-core/src/schema.rs:86-111
+export const fieldOptions = ['name', 'type', 'label', 'required', 'default', 'unique', 'filterable', 'admin', 'virtual', 'access'];
+
+// `enum Op` in crates/tachyon-core/src/query.rs:226-239
+export const operators = ['equals', 'not_equals', 'in', 'not_in', 'gt', 'gte', 'lt', 'lte', 'like', 'contains', 'exists', 'near'];
+
+// `Config` and `AuthSettings` in crates/tachyon/src/config.rs:10-33
+export const configKeys = [
+  'database_url',
+  'listen',
+  'public_url',
+  'auth.session_idle',
+  'auth.session_absolute',
+  'auth.lockout_attempts',
+  'auth.lockout_window',
+  'auth.lockout_duration',
+  'auth.argon2_memory_kib',
+  'auth.breach_check',
+  'auth.breach_check_url',
+  'auth.allowed_origins',
+];
+
+// `ApiError::into_response` in crates/tachyon-api/src/error.rs:60-138: status and title
+export const errors = [
+  [400, 'Bad request'],
+  [401, 'Unauthorized'],
+  [403, 'Forbidden'],
+  [404, 'Not found'],
+  [405, 'Method not allowed'],
+  [409, 'Conflict'],
+  [409, 'Confirmation required'],
+  [413, 'Content too large'],
+  [422, 'Validation failed'],
+  [500, 'Internal server error'],
+  [503, 'Service unavailable'],
+];

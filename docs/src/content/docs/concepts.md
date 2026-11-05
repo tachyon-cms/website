@@ -15,7 +15,7 @@ A **document** is one entry in a collection, stored as JSON in Postgres. Every d
 |---|---|
 | `id` | A UUIDv7, so IDs sort by creation time. |
 | `createdAt`, `updatedAt` | UTC timestamps to the microsecond. |
-| `status` | Always `"published"` in v0.1.0. Drafts aren't built yet. |
+| `status` | Always `"published"` in v0.2.0. Drafts aren't built yet. |
 
 Deleting a document is a soft delete: it disappears from the API, and a unique value it held is free for other documents again.
 

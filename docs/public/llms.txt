@@ -1,6 +1,6 @@
 # TachyonCMS docs
 
-> Documentation for TachyonCMS v0.1.0 (pre-alpha), an open-source headless CMS written in Rust that runs as one binary beside a Postgres database. There is no admin screen yet; you work over the HTTP API or with the `tachyon` command.
+> Documentation for TachyonCMS v0.2.0 (pre-alpha), an open-source headless CMS written in Rust that runs as one binary beside a Postgres database. There is no admin screen yet; you work over the HTTP API or with the `tachyon` command.
 
 ## Start here
 
@@ -12,6 +12,9 @@
 
 - [Content types](https://docs.tachyoncms.com/content-types)
 - [Fields](https://docs.tachyoncms.com/fields)
+- [Blocks](https://docs.tachyoncms.com/blocks): pages built from rows of block types, and shared blocks.
+- [Rich text](https://docs.tachyoncms.com/rich-text): formatted text as JSON, read back as HTML, Markdown or plain text.
+- [Markdown input](https://docs.tachyoncms.com/markdown-input): writing rich text as Markdown, and what changes on the way through.
 - [Querying](https://docs.tachyoncms.com/querying)
 - [Relationships](https://docs.tachyoncms.com/relationships)
 - [Joins and virtual fields](https://docs.tachyoncms.com/joins-and-virtual-fields)

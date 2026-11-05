@@ -136,8 +136,8 @@ test.describe('the hero', () => {
     const hero = page.locator('.hero');
     await expect(hero.locator('h1')).toHaveText('Content at the speed of your code.');
     await expect(hero.locator('canvas')).toHaveAttribute('aria-hidden', 'true');
-    await expect(hero).toContainText('v0.1.0 is pre-alpha.');
-    await expect(hero).toContainText('docker pull ghcr.io/tachyon-cms/tachyoncms:v0.1.0');
+    await expect(hero).toContainText('v0.2.0 is pre-alpha.');
+    await expect(hero).toContainText('docker pull ghcr.io/tachyon-cms/tachyoncms:v0.2.0');
   });
 
   test.describe('with reduced motion', () => {

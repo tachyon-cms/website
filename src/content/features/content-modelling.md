@@ -1,10 +1,12 @@
 ---
 title: "Describe your content once. The API follows."
-summary: "Twenty field types, from plain text to map points, groups and repeatable lists. Send a content type to the server and its endpoints exist from that moment."
+summary: "Twenty-two field types, from plain text to map points, pages built from blocks and real rich text. Send a content type to the server and its endpoints exist from that moment."
 status: today
 sources:
   - README.md#what-works-today
   - README.md#first-run
+  - README.md#pages-and-rich-text
+  - crates/tachyon-core/src/richtext/mod.rs
   - crates/tachyon-core/src/schema.rs
   - crates/tachyon-core/src/validate.rs
   - crates/tachyon-api/src/error.rs
@@ -18,6 +20,12 @@ Text, as one value or a list. Longer text in a textarea. Numbers, again one or a
 Then come the fields that give content its shape. A relationship links to a document in one collection, or in any of several. A group gathers fields under one name, so you get `seo.title` and `seo.description`. An array is a list of rows with fields of their own, which is how a page carries as many links as it needs.
 
 Rows, collapsible sections and tabs are different again. They arrange the editing screen and change nothing about your data. The admin that uses them [isn't built yet](/product/admin), but the layout you give it is saved with your schema today.
+
+## Pages and posts with a body
+
+A landing page is a hero, a quote and a call to action, in whatever order the editor wants this week. A `blocks` field holds exactly that: a list of rows, each one of the block types you define, each with its own fields. Define a block once as a shared block and every collection that names it gets the same fields, rules and labels.
+
+Long-form writing goes in a `richText` field: headings, lists, tables, code, links to other documents, and blocks placed in the flow of the text. Write it as JSON or as Markdown. Read it back as JSON, or ask for HTML, Markdown or plain text with `?format=` and it comes back as a string, escaped and with every link checked on the way out.
 
 ## Rules that sit on the field
 

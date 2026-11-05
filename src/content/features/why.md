@@ -35,7 +35,7 @@ The admin isn't built yet. The bar it has to clear is that someone who has only 
 
 ## What you can run today
 
-- An API that appears the moment you define a content type, with [twenty field types](/product/content-modelling).
+- An API that appears the moment you define a content type, with [twenty-two field types](/product/content-modelling).
 - [Filters, sorting, cursors and populated links](/product/querying), trimmed to what the page needs.
 - [Access rules](/product/access-control) down to a single field, compiled into the query.
 - [Sessions, scoped API keys](/product/sign-in) and passwords checked against known breaches.

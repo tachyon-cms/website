@@ -25,7 +25,7 @@ for (const width of [320, 390]) {
 test('the roadmap links the discussion it mirrors and both polls', async ({ page }) => {
   await page.goto('/roadmap');
   for (const n of [35, 38, 39]) await expect(page.locator(`main a[href="${discussions}/${n}"]`).first()).toBeVisible();
-  await expect(page.locator('main ol li').first()).toContainText('Rich text and blocks');
+  await expect(page.locator('main ol li').first()).toContainText('Drafts, versions and scheduled publishing');
 });
 
 test('releases shows the v0.1.0 notes, rendered from Markdown', async ({ page }) => {

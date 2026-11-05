@@ -5,7 +5,7 @@ description: Write rich text as Markdown, with extensions for blocks, document l
 
 Writing a JSON tree by hand gets old by the second paragraph. Any [rich text](/rich-text) field also takes Markdown, which TachyonCMS converts and stores as the same tree. It's the format `?format=markdown` writes, too, so you can read a value as Markdown, edit it, and send it back.
 
-Markdown input arrives in v0.2.0.
+Markdown input arrived in v0.2.0.
 
 ## Send Markdown
 

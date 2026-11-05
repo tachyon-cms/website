@@ -1,6 +1,6 @@
 ---
 title: Sign-in and keys API
-description: The setup, sign-in, session, password and API key endpoints in TachyonCMS v0.1.0.
+description: The setup, sign-in, session, password and API key endpoints in TachyonCMS v0.2.0.
 sidebar:
   label: Sign-in and keys
 ---

@@ -14,7 +14,9 @@ const { entry } = Astro.props as { entry: CollectionEntry<'compare'> };
 const { name, summary, checked, rows, notYet } = entry.data;
 const { Content } = await render(entry);
 const path = `/compare/${entry.id}`;
-const readme = 'https://github.com/tachyon-cms/tachyoncms/blob/v0.1.0/README.md';
+// The release the TachyonCMS column describes. tests/pages.spec.ts holds it to docs/cli-version.txt.
+const version = 'v0.2.0';
+const readme = `https://github.com/tachyon-cms/tachyoncms/blob/${version}/README.md`;
 const day = checked.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
 // Cells are plain strings; `backticks` mark code, as in Markdown.
 const escape = (text: string) => text.replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
@@ -30,15 +32,16 @@ const withCode = (text: string) =>
 
   <div class="compare">
     <p class="checked">
-      Checked on <time datetime={checked.toISOString().slice(0, 10)}>{day}</time> against TachyonCMS v0.1.0 and {name}'s
-      own docs. Each {name} row links to the page it came from.
+      The TachyonCMS side is {version}. The {name} side was checked on
+      <time datetime={checked.toISOString().slice(0, 10)}>{day}</time> against {name}'s own docs, and each {name} row
+      links to the page it came from.
     </p>
 
     <table>
       <thead>
         <tr>
           <th scope="col"><span class="sr-only">Topic</span></th>
-          <th scope="col">TachyonCMS v0.1.0</th>
+          <th scope="col">TachyonCMS {version}</th>
           <th scope="col">{name}</th>
         </tr>
       </thead>
@@ -47,7 +50,7 @@ const withCode = (text: string) =>
           rows.map((row) => (
             <tr>
               <th scope="row">{row.topic}</th>
-              <td data-label="TachyonCMS v0.1.0">
+              <td data-label={`TachyonCMS ${version}`}>
                 <Fragment set:html={withCode(row.tachyon)} />
               </td>
               <td data-label={name}>
@@ -73,7 +76,7 @@ const withCode = (text: string) =>
     <section class="sources" aria-labelledby="sources-title">
       <h2 id="sources-title">Where this comes from</h2>
       <p>
-        The TachyonCMS side comes from the <a href={readme}>v0.1.0 README</a> and its code. If a row's out of date,{' '}
+        The TachyonCMS side comes from the <a href={readme}>{version} README</a> and its code. If a row's out of date,{' '}
         <a href="https://github.com/tachyon-cms/tachyoncms/issues">tell me in an issue</a> and I'll fix it.
       </p>
       <p><a href="/compare">All comparisons</a></p>

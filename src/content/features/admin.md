@@ -11,7 +11,7 @@ sources:
 
 ## What's true today
 
-There's no admin screen in v0.1.0. You manage content types, users and documents over HTTP or with the `tachyon` command, and that's the whole interface. I'd rather say so here than show you a mockup and let you guess.
+There's no admin screen in v0.2.0. You manage content types, users and documents over HTTP or with the `tachyon` command, and that's the whole interface. I'd rather say so here than show you a mockup and let you guess.
 
 ## The test it has to pass
 
@@ -27,6 +27,6 @@ Some of the admin's groundwork ships today, because it lives in the schema:
 
 ## What comes with it
 
-Sign-in, API keys and access rules shipped in v0.1.0, so the admin will have something to sign in to. Before the admin itself come rich text and blocks, then drafts, versions and scheduled publishing, then media, live preview and authoring tools such as Markdown import. The admin follows those.
+Sign-in, API keys and access rules shipped in v0.1.0, so the admin will have something to sign in to. Blocks and rich text shipped in v0.2.0, so it will have pages and posts to edit. Before the admin itself come drafts, versions and scheduled publishing, then media, live preview and authoring tools: pushing and pulling content as Markdown files, and bulk import. The admin follows those.
 
 There are no dates yet. The [roadmap](/roadmap) shows the order.

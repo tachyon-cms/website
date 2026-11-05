@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>v0.2.0: infographic</title>
+<link rel="stylesheet" href="../shared.css">
+<style>
+  body { width: 1600px; }
+  .frame { padding: 80px 88px; display: grid; gap: 56px; }
+  .top { display: flex; justify-content: space-between; align-items: center; }
+  .top img { height: 44px; }
+  .eyebrow span { text-transform: none; }
+  h1 { font-size: 76px; line-height: 1.04; letter-spacing: -0.03em; }
+  .lede { margin-top: 20px; max-width: 1100px; font-size: 30px; line-height: 1.4; color: var(--muted); }
+  h2 { margin-bottom: 24px; }
+  .get { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .get .box { padding: 32px 36px; }
+  .get h3 { font-size: 30px; margin-bottom: 14px; }
+  .get p { font-size: 24px; line-height: 1.45; color: var(--muted); }
+  .get code { color: var(--blue-soft); font-size: 21px; }
+  .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .grid .box { padding: 30px 32px; }
+  .grid h3 { font-size: 28px; line-height: 1.2; margin-bottom: 12px; }
+  .grid p { font-size: 22px; line-height: 1.45; color: var(--muted); }
+  .grid code { color: var(--blue-soft); font-size: 19px; }
+  .chain { display: flex; flex-wrap: wrap; gap: 14px; padding: 0; list-style: none; }
+  .chain li { padding: 14px 22px; border: 2px solid var(--line-2); border-radius: 999px; font: 400 22px/1 var(--mono); color: var(--text); }
+  .note { padding: 28px 36px; border-left: 6px solid var(--blue); background: var(--panel); border-radius: 0 18px 18px 0; font-size: 26px; line-height: 1.45; }
+  .note b { color: var(--blue); }
+</style>
+</head>
+<body>
+<div class="frame">
+  <div class="top"><img src="../../../public/brand/logo.svg" alt=""><span class="eyebrow">Release · <span>v0.2.0</span></span></div>
+  <header>
+    <h1>v0.2.0 <span class="accent">at a glance</span></h1>
+    <p class="lede">Pages built from blocks you define, and rich text you write as JSON or Markdown and read back however your site wants it.</p>
+  </header>
+
+  <section>
+    <h2 class="eyebrow">Get it</h2>
+    <div class="get">
+      <div class="box"><h3>A binary</h3><p>Linux x86_64 and arm64, both static. macOS on Intel and Apple silicon.</p></div>
+      <div class="box"><h3>A Docker image</h3><p><code>ghcr.io/tachyon-cms/tachyoncms:v0.2.0</code><br>Upgrading from v0.1.0? Swap the binary or the image. The one migration runs by itself.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="eyebrow">What's in it</h2>
+    <div class="grid">
+      <div class="box"><h3>Pages built from blocks</h3><p>A <code>blocks</code> field holds rows of the types you define. Filter into them with <code>layout.blockType</code>.</p></div>
+      <div class="box"><h3>Blocks you write once</h3><p>A shared block (<code>"kind": "block"</code>) works in every collection that names it.</p></div>
+      <div class="box"><h3>Rich text, field by field</h3><p>Headings, lists, tables, code, links and blocks in the text. Turn features on per field.</p></div>
+      <div class="box"><h3>Write it in Markdown</h3><p><code>{"format": "markdown", …}</code> in. What can't convert is a 422 with its line.</p></div>
+      <div class="box"><h3>Read it your way</h3><p><code>?format=html</code>, <code>markdown</code> or <code>text</code>, escaped, every link checked again.</p></div>
+      <div class="box"><h3>Config mistakes stop at startup</h3><p>A missing <code>--config</code>, a misspelt key or an origin that can't match. From @foothillsdigital.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2 class="eyebrow">Supply chain</h2>
+    <ul class="chain">
+      <li>SPDX SBOM per archive</li>
+      <li>cosign-signed checksums</li>
+      <li>build provenance</li>
+      <li>signed image</li>
+      <li>weekly Scorecard</li>
+      <li>DCO sign-off</li>
+    </ul>
+  </section>
+
+  <p class="note"><b>Pre-alpha.</b> Drafts, media and the admin screen come next, so keep it off public networks for now.</p>
+</div>
+</body>
+</html>

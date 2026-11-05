@@ -1,12 +1,12 @@
 ---
 title: Security model
-description: What TachyonCMS v0.1.0 protects, how it does it, and what it leaves to you.
+description: What TachyonCMS v0.2.0 protects, how it does it, and what it leaves to you.
 ---
 
-This page describes how v0.1.0 handles credentials, access and untrusted input, and what it leaves to the way you deploy it. To report a vulnerability, see [Reporting a security issue](/get-involved#report-a-security-issue).
+This page describes how v0.2.0 handles credentials, access and untrusted input, and what it leaves to the way you deploy it. To report a vulnerability, see [Reporting a security issue](/get-involved#report-a-security-issue).
 
 :::caution[Pre-alpha]
-v0.1.0 hasn't had an outside security review. Keep it off public networks for now.
+v0.2.0 hasn't had an outside security review. Keep it off public networks for now.
 :::
 
 ## Passwords
@@ -58,6 +58,13 @@ The one known leak is [unique fields](/access-rules#known-limits): a duplicate v
 - Queries are limited too: 100 query parameters, 50 filter conditions, nesting 5 deep, paths through 3 relationships, 100 documents per page and a population depth of 5.
 - Schemas reject unknown options, and query strings reject unknown parameters, rather than ignoring them.
 - When something fails inside the server, the response is a `500` with a request ID. The cause goes to the log, not to the caller.
+
+## Rich text
+
+- A link in rich text can only start with `http://`, `https://`, `mailto:`, `tel:`, `/` or `#`, in any case. One holding whitespace, a control character or a backslash is refused, so `javascript:` in any disguise never gets stored. Every link is checked again when HTML or Markdown is written, in case it was stored before a rule changed.
+- HTML output is built by TachyonCMS from the stored tree, never passed through. Text and attribute values are escaped, and a link opening in a new tab gets `rel="noopener noreferrer"`. Raw `target`, `rel` and `class` attributes are refused when you save.
+- Markdown input takes no raw HTML beyond `<u>` and `<br>`. One value can be 1 MiB, 32 levels deep and 50,000 nodes at most, and one write can name 1,000 documents by slug.
+- Saving a link, or a slug, that names a document you can't read gets the same `422` as one that doesn't exist. On read, a link to a document you can't read stays a bare ID in JSON and is its text alone in HTML, Markdown and text.
 
 ## What you're responsible for
 

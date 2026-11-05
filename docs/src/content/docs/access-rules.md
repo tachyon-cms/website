@@ -66,7 +66,7 @@ curl -X POST localhost:3000/api/posts \
   -d '{"title": "Ann'\''s draft", "author": "01a18460-fbba-75ad-be56-f085bab18202"}'
 ```
 
-Signed out, only the published post shows. (`status` still says `"published"` on every document in v0.1.0; the rule reads your own `published` field.)
+Signed out, only the published post shows. (`status` still says `"published"` on every document in v0.2.0; the rule reads your own `published` field.)
 
 ```sh
 curl -g 'localhost:3000/api/posts?select[title]=true&select[published]=true'

@@ -1,6 +1,6 @@
 ---
 name: Strapi
-summary: "Strapi's Community edition and TachyonCMS are both open-source headless CMSs under MIT. Strapi has an admin panel, media, drafts and translations today. TachyonCMS has a REST API and access rules, and not much else yet."
+summary: "Strapi's Community edition and TachyonCMS are both open-source headless CMSs under MIT. Strapi has an admin panel, media, drafts and translations today. TachyonCMS has a REST API, access rules, blocks and rich text, and no admin, media or drafts yet."
 checked: 2026-10-28
 rows:
   - topic: Built with
@@ -20,7 +20,7 @@ rows:
     them: REST by default, and GraphQL through Strapi's built-in GraphQL plugin.
     source: https://docs.strapi.io/cms/api/content-api
   - topic: Drafts
-    tachyon: Not yet. Drafts, versions and scheduled publishing are next on the roadmap, after rich text.
+    tachyon: Not yet. Drafts, versions and scheduled publishing are next on the roadmap, and under way.
     them: Draft & Publish, free, switched on per content type.
     source: https://docs.strapi.io/cms/features/draft-and-publish
   - topic: Content history

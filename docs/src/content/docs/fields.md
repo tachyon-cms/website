@@ -225,7 +225,7 @@ A tab with a `name` is the exception: it nests its fields under that name, like 
 
 ## Admin hints
 
-`admin` on any field holds hints for an editing screen. The API stores them and returns them with the schema, but doesn't enforce them. v0.1.0 has no admin screen yet.
+`admin` on any field holds hints for an editing screen. The API stores them and returns them with the schema, but doesn't enforce them. v0.2.0 has no admin screen yet.
 
 | Hint | Value |
 |---|---|
