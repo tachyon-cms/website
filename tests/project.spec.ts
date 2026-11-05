@@ -30,11 +30,13 @@ test('the roadmap links the discussion it mirrors and both polls', async ({ page
 
 test('releases shows the v0.1.0 notes, rendered from Markdown', async ({ page }) => {
   await page.goto('/releases');
-  await expect(page.locator('main h2', { hasText: 'v0.1.0' })).toBeVisible();
-  await expect(page.locator('main h3', { hasText: 'Verify a download' })).toBeVisible();
-  await expect(page.locator('main pre code')).toContainText('cosign verify-blob');
+  // Each release is its own article, named by its heading; later releases sit beside it.
+  const release = page.getByRole('article', { name: 'v0.1.0', exact: true });
+  await expect(release.locator('h2')).toHaveText('v0.1.0');
+  await expect(release.locator('h3', { hasText: 'Verify a download' })).toBeVisible();
+  await expect(release.locator('pre code').filter({ hasText: 'cosign verify-blob' }).first()).toBeVisible();
   // Once beside the date, and again after the notes, where a reader who got to the end looks.
-  await expect(page.locator('main a[href="https://github.com/tachyon-cms/tachyoncms/releases/tag/v0.1.0"]')).toHaveCount(2);
+  await expect(release.locator('a[href="https://github.com/tachyon-cms/tachyoncms/releases/tag/v0.1.0"]')).toHaveCount(2);
 });
 
 test('community lists contributors and the no-CLA promise', async ({ page }) => {
