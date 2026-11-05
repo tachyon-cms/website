@@ -59,7 +59,7 @@ The subcommands are listed in the [CLI reference](/cli).
 
 ## Startup errors
 
-A config mistake stops `tachyon` before it does anything. The first five stop every command; the rest stop `tachyon serve` before it listens:
+The first five stop every command before it touches the database. The rest stop `tachyon serve` after it connects and runs migrations, before it listens:
 
 | Cause | Message |
 |---|---|
