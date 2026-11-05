@@ -3,7 +3,7 @@ title: Content types
 description: Create collections and globals over the API, and change them later without losing documents.
 ---
 
-A content type is a schema: a `slug` and a list of fields. TachyonCMS has two kinds, **collections** with any number of documents, and **globals** with exactly one. Changing content types needs the Admin role, or another role with the `schemas` ability.
+A content type is a schema: a `slug` and a list of fields. TachyonCMS has two kinds, **collections** with any number of documents, and **globals** with exactly one. From v0.2.0 a schema can also be a [shared block](/blocks#shared-blocks), with `"kind": "block"`: a block type that `blocks` and `richText` fields name, with no documents of its own. Changing content types needs the Admin role, or another role with the `schemas` ability.
 
 The examples send `$TOKEN`, an Admin's bearer token from [Install](/install#sign-in-and-keep-a-token).
 
@@ -48,6 +48,8 @@ curl -X POST localhost:3000/api/admin/collections \
 The collection's routes exist straight away: `/api/posts` and `/api/posts/{id}`.
 
 A slug starts with a lowercase letter and uses only lowercase letters, digits and underscores, up to 64 characters. These slugs are reserved for the server's own routes: `access`, `admin`, `auth`, `globals`, `media`, `search`, `graphql`, `plugins` and `setup`.
+
+From v0.2.0 a collection can also take a `url`, such as `"/blog/{slug}"`, saying where its documents live on your site. Links to them in [rich text](/rich-text#add-a-rich-text-field) point there when read as HTML.
 
 The schema is checked before it's saved. A misspelt option such as `maxLenght` is refused by name rather than ignored, and so is a field called `id`, `createdAt`, `updatedAt` or `status`, which the server adds to every document.
 
@@ -274,7 +276,7 @@ curl -g 'localhost:3000/api/posts?select[headline]=true'
 
 ### Changes that are refused
 
-Some changes are refused whatever you confirm, with a `422` that says why. For example, a change that would break another collection's [join or virtual field](/joins-and-virtual-fields), or remove a profile field an [access rule](/access-rules) reads. Collections can't be deleted in v0.1.0.
+Some changes are refused whatever you confirm, with a `422` that says why. For example, a change that would break another collection's [join or virtual field](/joins-and-virtual-fields), or remove a profile field an [access rule](/access-rules) reads. Collections and globals can't be deleted yet. A [shared block](/blocks#delete-a-shared-block) can be, once no schema names it.
 
 ## Keep content types in files
 

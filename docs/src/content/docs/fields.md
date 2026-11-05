@@ -1,6 +1,6 @@
 ---
 title: Fields
-description: The field types TachyonCMS v0.1.0 supports, their options, and how documents are validated and updated.
+description: The field types TachyonCMS supports, their options, and how documents are validated and updated.
 ---
 
 Every field has a `name` and a `type`. The type decides what values it accepts; the options on this page narrow that further.
@@ -26,8 +26,10 @@ Every field has a `name` and a `type`. The type decides what values it accepts; 
 | `join` | Nothing: lists the documents that link here, on every read | `collection`, `on`, `where`, `defaultLimit`, `defaultSort` |
 | `group` | An object of other fields | `fields` |
 | `array` | A list of rows, each an object of other fields | `fields`, `minRows`, `maxRows` |
+| `blocks` | A list of rows, each one of several block types with its own fields. New in v0.2.0. | `blocks`, `minRows`, `maxRows` |
+| `richText` | Formatted text, stored as a JSON tree of nodes. New in v0.2.0. | `features`, `relationTo`, `blocks` |
 
-`relationship` is covered in [Relationships](/relationships), and `join` in [Joins and virtual fields](/joins-and-virtual-fields).
+`relationship` is covered in [Relationships](/relationships), `join` in [Joins and virtual fields](/joins-and-virtual-fields), `blocks` in [Blocks](/blocks), and `richText` in [Rich text](/rich-text), which can also be written as [Markdown](/markdown-input).
 
 A few details:
 
@@ -175,7 +177,7 @@ A `unique` value that's already taken is a `422` on that field too:
 `PATCH` merges what you send into the stored document:
 
 - A field inside a group changes on its own. Sending `seo.title` leaves `seo.description` as it was.
-- A list (`hasMany`, `array`, a `multiple` select) is replaced whole.
+- A list (`hasMany`, `array`, `blocks`, a `multiple` select) is replaced whole, and so is a `richText` value.
 - `null` clears a field, wherever it sits.
 
 ```sh
