@@ -125,6 +125,31 @@ for (const width of [320, 390]) {
   });
 }
 
+// font-display: optional keeps the fallback when the web font is slow on a first visit, and
+// the metric-matched fallback names Arial, which Linux and Android may lack. So every page
+// has to fit at 320 px in whatever sans-serif the phone has, not only in Inter. With the web
+// fonts blocked, this renders in DejaVu Sans (Linux) or Verdana (macOS), wider than a phone's
+// default sans-serif, so passing here means passing there.
+test.describe('in a wide fallback font', () => {
+  // The site's CSP refuses the injected style; the page under test is otherwise unchanged.
+  test.use({ bypassCSP: true });
+
+  test('nothing runs off the side of a 320 px phone', async ({ page }) => {
+    await page.route(/\.woff2$/, (route) => route.abort());
+    await page.setViewportSize({ width: 320, height: 844 });
+    for (const path of ['/', ...all]) {
+      await page.goto(path);
+      await page.addStyleTag({ content: 'html:root { --font-sans: "DejaVu Sans", Verdana, sans-serif; }' });
+      expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily), path).toMatch(/^"DejaVu Sans"/);
+      const webFonts = await page.evaluate(() =>
+        [...document.fonts].filter((f) => f.status === 'loaded' && !f.family.includes('fallback')).map((f) => f.family),
+      );
+      expect(webFonts, path).toEqual([]);
+      expect(await overflowing(page), path).toEqual([]);
+    }
+  });
+});
+
 // The signup steps and the 404; the other pages are checked in their own specs.
 for (const width of [320, 390]) {
   test(`the short pages fit a ${width} px phone`, async ({ page }) => {
