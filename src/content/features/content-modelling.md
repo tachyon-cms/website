@@ -21,7 +21,7 @@ Then come the fields that give content its shape. A relationship links to a docu
 
 Rows, collapsible sections and tabs are different again. They arrange the editing screen and change nothing about your data. The admin that uses them [isn't built yet](/product/admin), but the layout you give it is saved with your schema today.
 
-## Pages and posts, not just records
+## Pages and posts with a body
 
 A landing page is a hero, a quote and a call to action, in whatever order the editor wants this week. A `blocks` field holds exactly that: a list of rows, each one of the block types you define, each with its own fields. Define a block once as a shared block and every collection that names it gets the same fields, rules and labels.
 

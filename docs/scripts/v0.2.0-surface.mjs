@@ -2,7 +2,7 @@
 // the reference pages can be checked against it without network or git. Update it with each
 // release, from the files named beside each list; `git show v0.2.0:<file>` shows each one.
 
-// crates/tachyon-api/src/lib.rs:79-112 and crates/tachyon-api/src/auth/routes.rs:33-63
+// crates/tachyon-api/src/lib.rs:78-112 and crates/tachyon-api/src/auth/routes.rs:33-63
 export const routes = [
   'GET /api/setup',
   'POST /api/setup',

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
 import { overflowing } from './fit';
 
@@ -129,8 +130,8 @@ for (const width of [320, 390]) {
 // font-display: optional keeps the fallback when the web font is slow on a first visit, and
 // the metric-matched fallback names Arial, which Linux and Android may lack. So every page
 // has to fit at 320 px in whatever sans-serif the phone has, not only in Inter. With the web
-// fonts blocked, this renders in DejaVu Sans (Linux) or Verdana (macOS), wider than a phone's
-// default sans-serif, so passing here means passing there.
+// fonts blocked, this renders every page in DejaVu Sans (Linux) or Verdana (macOS), wider than a
+// phone's default sans-serif, so passing here means passing there.
 test.describe('in a wide fallback font', () => {
   // The site's CSP refuses the injected style; the page under test is otherwise unchanged.
   test.use({ bypassCSP: true });
@@ -138,7 +139,7 @@ test.describe('in a wide fallback font', () => {
   test('nothing runs off the side of a 320 px phone', async ({ page }) => {
     await page.route(/\.woff2$/, (route) => route.abort());
     await page.setViewportSize({ width: 320, height: 844 });
-    for (const path of ['/', ...all]) {
+    for (const path of ['/', ...inner]) {
       await page.goto(path);
       await page.addStyleTag({ content: 'html:root { --font-sans: "DejaVu Sans", Verdana, sans-serif; }' });
       expect(await page.evaluate(() => getComputedStyle(document.body).fontFamily), path).toMatch(/^"DejaVu Sans"/);
@@ -199,6 +200,22 @@ test('every page sets type in the preloaded weights', async ({ page }) => {
 });
 
 const compare = ['wordpress', 'strapi', 'contentful', 'sanity', 'directus'];
+// The release the TachyonCMS column describes is the one the docs pin, so a new release can't
+// leave a stale version in a heading, a stacked label or the sources line.
+const release = `v${readFileSync(new URL('../docs/cli-version.txt', import.meta.url), 'utf8').trim()}`;
+
+test('compare pages name the current release wherever they name TachyonCMS', async ({ page }) => {
+  for (const slug of compare) {
+    await page.goto(`/compare/${slug}`);
+    await expect(page.locator('main thead th').nth(1)).toHaveText(`TachyonCMS ${release}`);
+    const labels = await page.locator('main td[data-label^="TachyonCMS"]').evaluateAll((cells) => cells.map((c) => c.getAttribute('data-label')));
+    expect(labels.length).toBeGreaterThan(0);
+    expect(new Set(labels)).toEqual(new Set([`TachyonCMS ${release}`]));
+    // Any version written as vX.Y.Z on the page is the current one.
+    const versions = (await page.locator('main').innerText()).match(/\bv\d+\.\d+\.\d+\b/g) ?? [];
+    expect(versions.filter((v) => v !== release), slug).toEqual([]);
+  }
+});
 
 test('/compare links to every comparison', async ({ page }) => {
   await page.goto('/compare');

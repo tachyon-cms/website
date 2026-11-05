@@ -20,7 +20,7 @@ rows:
     them: A Content Preview API for unpublished content, and an Images API that resizes, crops and converts.
     source: https://www.contentful.com/developers/docs/references/api-basics/
   - topic: Editing
-    tachyon: No admin screen yet. You work over HTTP or with the `tachyon` command.
+    tachyon: No admin screen yet. You work over HTTP or with the `tachyon` command. Pages built from blocks, and rich text written as JSON or Markdown, are in the API.
     them: A web app with a rich text editor, scheduled publishing, content versioning, comments and live preview, depending on your plan.
     source: https://www.contentful.com/pricing/
   - topic: Roles

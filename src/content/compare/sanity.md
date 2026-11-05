@@ -8,7 +8,7 @@ rows:
     them: In Sanity's Content Lake, which stores it as structured JSON documents.
     source: https://www.sanity.io/docs/content-lake
   - topic: Editing
-    tachyon: No admin screen yet. You work over HTTP or with the `tachyon` command.
+    tachyon: No admin screen yet. You work over HTTP or with the `tachyon` command. Pages built from blocks, and rich text written as JSON or Markdown, are in the API.
     them: Sanity Studio, an open-source, real-time collaborative editor you configure in JavaScript or TypeScript and extend with React. You can deploy it yourself or on Sanity's hosting.
     source: https://www.sanity.io/docs/studio
   - topic: Querying

@@ -27,6 +27,6 @@ Some of the admin's groundwork ships today, because it lives in the schema:
 
 ## What comes with it
 
-Sign-in, API keys and access rules shipped in v0.1.0, so the admin will have something to sign in to. Blocks and rich text shipped in v0.2.0, so it will have pages and posts to edit. Before the admin itself come drafts, versions and scheduled publishing, then media, live preview and authoring tools such as bulk import. The admin follows those.
+Sign-in, API keys and access rules shipped in v0.1.0, so the admin will have something to sign in to. Blocks and rich text shipped in v0.2.0, so it will have pages and posts to edit. Before the admin itself come drafts, versions and scheduled publishing, then media, live preview and authoring tools: pushing and pulling content as Markdown files, and bulk import. The admin follows those.
 
 There are no dates yet. The [roadmap](/roadmap) shows the order.

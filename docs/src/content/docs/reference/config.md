@@ -10,7 +10,7 @@ Every setting, in one table per section. For how settings are loaded and what ea
 Each source overrides the one before:
 
 1. Built-in defaults.
-2. The config file: `tachyon.toml` in the working directory, or the file named by `--config`. A missing file is skipped.
+2. The config file: the one named by `--config`, which has to exist, or else `tachyon.toml` in the working directory, if it exists.
 3. Environment variables: `TACHYON_` plus the key in capitals. A key under `[auth]` takes a double underscore: `TACHYON_AUTH__SESSION_IDLE`.
 
 Lists in environment variables use TOML syntax: `TACHYON_AUTH__ALLOWED_ORIGINS='["https://www.example.com"]'`.
@@ -23,7 +23,7 @@ Lists in environment variables use TOML syntax: `TACHYON_AUTH__ALLOWED_ORIGINS='
 | `listen` | `TACHYON_LISTEN` | `address:port` | `127.0.0.1:3000` | Address and port to serve on. The Docker image sets `0.0.0.0:3000`. |
 | `public_url` | `TACHYON_PUBLIC_URL` | `http` or `https` URL | `http://localhost:` plus the `listen` port | The address browsers use. Cookie-signed changes are accepted only from this origin and `allowed_origins`. Required when `listen` isn't a loopback address. |
 
-Unknown top-level keys and `TACHYON_` variables are ignored.
+An unknown top-level key in the file stops every command, `serve`, `migrate` and `schema` alike, and lists the keys that exist. `TACHYON_` variables that aren't settings are ignored.
 
 ## `[auth]`
 
@@ -41,7 +41,7 @@ Unknown top-level keys and `TACHYON_` variables are ignored.
 
 A duration is a whole number above zero followed by `s`, `m`, `h` or `d`: `90s`, `15m`, `12h`, `7d`.
 
-An unknown key under `[auth]`, in the file or the environment, stops the server and lists the keys that exist.
+An unknown key under `[auth]`, in the file or the environment, stops every command and lists the keys that exist.
 
 ## Other environment variables
 
@@ -53,23 +53,29 @@ An unknown key under `[auth]`, in the file or the environment, stops the server 
 
 | Option | Default | Description |
 |---|---|---|
-| `--config <path>` | `tachyon.toml` | The config file to read. Works before or after the subcommand. |
+| `--config <path>` | none | The config file to read, which has to exist. Without it, `tachyon.toml` is read if it exists. Works before or after the subcommand. |
 
 The subcommands are listed in the [CLI reference](/cli).
 
 ## Startup errors
 
-The server stops before listening when a setting is wrong:
+A config mistake stops `tachyon` before it does anything. The first five stop every command; the rest stop `tachyon serve` before it listens:
 
 | Cause | Message |
 |---|---|
+| A `--config` file that doesn't exist | `Error: the config file prod.toml doesn't exist` |
+| An unknown top-level key in the file | ``Error: unknown key `publc_url` in tachyon.toml; the top-level keys are database_url, listen, public_url, auth`` |
 | No `database_url` | `` Error: missing field `database_url` `` |
 | An empty `database_url` | `Error: database_url is empty` |
+| An unknown `[auth]` key | `` Error: unknown field: found `nope`, expected `one of …` `` |
 | No `public_url` while listening beyond loopback | `Error: set public_url (such as https://cms.example.com) when listening beyond this machine` |
 | A `public_url` that isn't a full `http` or `https` address | `Error: public_url must be a full web address, like https://cms.example.com` |
 | A bad duration | ``Error: auth.session_idle: `soon` isn't a duration; use a number and s, m, h or d, like 15m or 7d`` |
 | `argon2_memory_kib` below 8 | `Error: memory cost is too small` |
-| An unknown `[auth]` key | `` Error: unknown field: found `nope`, expected `one of …` `` |
+| An `allowed_origins` entry that isn't an origin: no scheme, not `http` or `https`, or with a user, password, path, query or fragment | ``Error: auth.allowed_origins: `https://www.example.com/admin` isn't an origin; use a scheme and host, like https://www.example.com`` |
+| An `allowed_origins` entry with a wildcard | ``Error: auth.allowed_origins: `https://*.example.com` uses a wildcard, which isn't supported; list each origin, like https://www.example.com`` |
+| `lockout_attempts` below 1 | `Error: auth.lockout_attempts is 0; it has to be at least 1` |
+| `session_absolute` shorter than `session_idle` | `Error: auth.session_absolute (1d) is shorter than auth.session_idle (7d), so the idle limit would never apply` |
 
 ## Example file
 

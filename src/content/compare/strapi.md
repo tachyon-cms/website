@@ -1,6 +1,6 @@
 ---
 name: Strapi
-summary: "Strapi's Community edition and TachyonCMS are both open-source headless CMSs under MIT. Strapi has an admin panel, media, drafts and translations today. TachyonCMS has a REST API and access rules, and not much else yet."
+summary: "Strapi's Community edition and TachyonCMS are both open-source headless CMSs under MIT. Strapi has an admin panel, media, drafts and translations today. TachyonCMS has a REST API, access rules, blocks and rich text, and no admin, media or drafts yet."
 checked: 2026-10-28
 rows:
   - topic: Built with
