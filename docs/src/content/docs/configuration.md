@@ -117,7 +117,7 @@ Turn `breach_check` off on a server with no internet access. Otherwise, if the s
 
 `tachyon serve` also stops at startup, naming the setting, on three mistakes that would otherwise only show up later:
 
-- An `allowed_origins` entry that isn't an origin. Each one is an `http` or `https` address with a host and, if needed, a port, and nothing else: no user or password, path, query or fragment. `www.example.com` and `https://www.example.com/admin` are refused, `https://www.example.com` is fine. One that isn't an origin could never match a browser's `Origin` header.
+- An `allowed_origins` entry that isn't an origin. Each one is an `http` or `https` address with a host and, if needed, a port, and nothing else: no user or password, path, query or fragment. `www.example.com` and `https://www.example.com/admin` are refused, `https://www.example.com` is fine. One that isn't an origin could never match a browser's `Origin` header. Wildcards aren't supported, so a `*` in an origin, as in `https://*.example.com`, is refused too: list each origin.
 - `lockout_attempts` below 1, which would lock an account on its first wrong password.
 - `session_absolute` shorter than `session_idle`, which would make the idle limit meaningless.
 
