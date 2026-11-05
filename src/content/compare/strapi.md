@@ -20,7 +20,7 @@ rows:
     them: REST by default, and GraphQL through Strapi's built-in GraphQL plugin.
     source: https://docs.strapi.io/cms/api/content-api
   - topic: Drafts
-    tachyon: Not yet. Drafts, versions and scheduled publishing are next on the roadmap, after rich text.
+    tachyon: Not yet. Drafts, versions and scheduled publishing are next on the roadmap, and under way.
     them: Draft & Publish, free, switched on per content type.
     source: https://docs.strapi.io/cms/features/draft-and-publish
   - topic: Content history

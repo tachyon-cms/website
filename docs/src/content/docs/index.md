@@ -5,10 +5,10 @@ description: Install, run and configure TachyonCMS, a headless CMS in one Rust b
 
 TachyonCMS is a headless CMS written in Rust. You run one binary next to one Postgres database, define your content types, and get a JSON API for them: documents you can create, read, update, delete, filter and link together, with sign-in, roles, API keys and access rules down to a single field.
 
-These pages describe **v0.1.0**, the first release. For why it exists, what's on the roadmap and how it compares, see [tachyoncms.com](https://tachyoncms.com).
+These pages describe **v0.2.0**, the current release. For why it exists, what's on the roadmap and how it compares, see [tachyoncms.com](https://tachyoncms.com).
 
 :::caution[Pre-alpha]
-v0.1.0 has the content API, sign-in and access rules. It has no admin screen, media library, drafts or GraphQL yet. Keep it off public networks for now.
+v0.2.0 has the content API, sign-in, access rules, blocks and rich text. It has no admin screen, media library, drafts or GraphQL yet. Keep it off public networks for now.
 :::
 
 ## Start here
@@ -21,6 +21,7 @@ v0.1.0 has the content API, sign-in and access rules. It has no admin screen, me
 
 - [Content types](/content-types): collections, globals, and changing them without losing data.
 - [Fields](/fields): every field type, its options and how values are validated.
+- [Blocks](/blocks) and [Rich text](/rich-text): pages built from blocks, and formatted text you can also write as [Markdown](/markdown-input).
 - [Querying](/querying): filters, sorting, paging and choosing which fields come back.
 - [Relationships](/relationships): links between documents, and getting them back populated.
 - [Joins and virtual fields](/joins-and-virtual-fields): showing related documents without storing them twice.
@@ -42,6 +43,6 @@ v0.1.0 has the content API, sign-in and access rules. It has no admin screen, me
 
 ## About the examples
 
-Every request on these pages was run against the v0.1.0 Docker image, and every response shown is the one it returned. Responses are pretty-printed, and long ones are trimmed where the page says so. IDs and timestamps will differ on your machine, and session tokens and API keys are cut short to `tcs_…` and `tcy_…`.
+Every request on these pages was run against a real TachyonCMS server, the v0.1.0 image or, for what v0.2.0 added, the v0.2.0 code, and every response shown is the one it returned. Responses are pretty-printed, and long ones are trimmed where the page says so. IDs and timestamps will differ on your machine, and session tokens and API keys are cut short to `tcs_…` and `tcy_…`.
 
 The examples use `curl -g`, which stops curl reading the square brackets in query strings such as `where[title][equals]` as a pattern.

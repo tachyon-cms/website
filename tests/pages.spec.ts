@@ -3,7 +3,7 @@ import { overflowing } from './fit';
 
 const docs = 'https://docs.tachyoncms.com';
 
-// Features that ship in v0.1.0, each with the docs page it hands over to.
+// Features that ship in v0.2.0, each with the docs page it hands over to.
 const today = [
   { path: '/product/content-modelling', docs: 'content-types' },
   { path: '/product/querying', docs: 'querying' },
@@ -22,6 +22,7 @@ const rest = [
   '/compare',
   ...['wordpress', 'strapi', 'contentful', 'sanity', 'directus'].map((s) => `/compare/${s}`),
   '/blog',
+  '/blog/v0-2-0',
   '/blog/v0-1-0',
   '/blog/where-tachyoncms-is-headed',
   '/roadmap',
@@ -39,11 +40,11 @@ const inner = [...all, ...rest];
 const withCode = ['/why', '/security'];
 
 for (const path of all) {
-  test(`${path} has one h1, a title and lists its v0.1.0 sources`, async ({ page }) => {
+  test(`${path} has one h1, a title and lists its v0.2.0 sources`, async ({ page }) => {
     await page.goto(path);
     await expect(page.locator('h1')).toHaveCount(1);
     expect(await page.title()).not.toBe('');
-    const sources = page.locator('.sources a[href^="https://github.com/tachyon-cms/tachyoncms/blob/v0.1.0/"]');
+    const sources = page.locator('.sources a[href^="https://github.com/tachyon-cms/tachyoncms/blob/v0.2.0/"]');
     expect(await sources.count()).toBeGreaterThan(0);
   });
 }

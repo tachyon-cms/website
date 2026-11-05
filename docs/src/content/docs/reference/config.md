@@ -1,6 +1,6 @@
 ---
 title: Configuration keys
-description: Every TachyonCMS v0.1.0 setting and environment variable, with its type and default.
+description: Every TachyonCMS v0.2.0 setting and environment variable, with its type and default.
 ---
 
 Every setting, in one table per section. For how settings are loaded and what each one is for, see [Configuration](/configuration).

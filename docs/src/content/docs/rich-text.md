@@ -5,7 +5,7 @@ description: Store formatted text as a JSON tree, choose what each field allows,
 
 A `richText` field holds formatted writing: headings, lists, links, tables, quotes, and [blocks](/blocks) placed in the flow of the text. It's stored as a tree of JSON nodes, so nothing has to parse HTML to know what's in it, and you can read it back as HTML, Markdown or plain text when that's what your front end wants. You can also write it as [Markdown](/markdown-input).
 
-Rich text arrives in v0.2.0.
+Rich text arrived in v0.2.0.
 
 ## Add a rich text field
 

@@ -1,6 +1,6 @@
 ---
 title: Install
-description: Run TachyonCMS v0.1.0 with Docker or a release binary, create the first Admin and make your first request.
+description: Run TachyonCMS v0.2.0 with Docker or a release binary, create the first Admin and make your first request.
 ---
 
 You need a Postgres database and the `tachyon` binary. The quickest way to get both is Docker. If you'd rather run the binary yourself, see [Deploy as a binary](/deploy/binary).
@@ -17,7 +17,7 @@ docker run -d --name tachyon-db --network tachyon \
 docker run --rm --network tachyon -p 127.0.0.1:3000:3000 \
   -e TACHYON_DATABASE_URL=postgres://tachyon:tachyon@tachyon-db:5432/tachyon \
   -e TACHYON_PUBLIC_URL=http://localhost:3000 \
-  ghcr.io/tachyon-cms/tachyoncms:v0.1.0
+  ghcr.io/tachyon-cms/tachyoncms:v0.2.0
 ```
 
 The last command stays in the foreground, so run the rest of this page in a second terminal. (Or add `-d` to run it in the background and read its output with `docker logs`.)
@@ -65,7 +65,7 @@ curl -X POST localhost:3000/api/setup \
 }
 ```
 
-Every document in v0.1.0, users included, comes back with `"status": "published"`. Drafts don't exist yet, so it never says anything else.
+Every document in v0.2.0, users included, comes back with `"status": "published"`. Drafts don't exist yet, so it never says anything else.
 
 Running setup a second time gets a `409`:
 

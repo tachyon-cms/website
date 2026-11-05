@@ -3,7 +3,7 @@ title: Tutorials
 description: Step-by-step walkthroughs that build something with TachyonCMS, with the real responses at every step.
 ---
 
-Each tutorial builds one thing with TachyonCMS v0.1.0, from an empty database to a working result. You run every command yourself, and each step shows the response you should get back.
+Each tutorial builds one thing with TachyonCMS v0.2.0, from an empty database to a working result. You run every command yourself, and each step shows the response you should get back.
 
 ## Build a blog
 

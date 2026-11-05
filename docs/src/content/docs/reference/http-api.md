@@ -1,9 +1,9 @@
 ---
 title: HTTP API
-description: How requests to the TachyonCMS v0.1.0 HTTP API work, and a table of every endpoint.
+description: How requests to the TachyonCMS v0.2.0 HTTP API work, and a table of every endpoint.
 ---
 
-Every endpoint TachyonCMS v0.1.0 serves. This page covers what they share and lists them all. Each area has its own page with a section per endpoint: [Sign-in and keys](/reference/http-api/auth), [Users and roles](/reference/http-api/users-and-roles), [Content types](/reference/http-api/collections) and [Documents](/reference/http-api/documents).
+Every endpoint TachyonCMS v0.2.0 serves. This page covers what they share and lists them all. Each area has its own page with a section per endpoint: [Sign-in and keys](/reference/http-api/auth), [Users and roles](/reference/http-api/users-and-roles), [Content types](/reference/http-api/collections) and [Documents](/reference/http-api/documents).
 
 The guides explain the ideas behind them: [Sign-in](/sign-in), [API keys](/api-keys), [Roles](/roles), [Content types](/content-types), [Querying](/querying) and [Access rules](/access-rules).
 
@@ -14,7 +14,7 @@ The guides explain the ideas behind them: [Sign-in](/sign-in), [API keys](/api-k
 - Responses are JSON. Errors are `application/problem+json`; see [Errors](/reference/errors).
 - Every response carries an `x-request-id` header.
 - A request that runs for more than 30 seconds is stopped with a `503`.
-- Documents come back with `id`, `createdAt`, `updatedAt` and `status` (always `"published"` in v0.1.0) besides their fields. Keys are in alphabetical order.
+- Documents come back with `id`, `createdAt`, `updatedAt` and `status` (always `"published"` in v0.2.0) besides their fields. Keys are in alphabetical order.
 
 ### Credentials
 

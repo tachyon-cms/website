@@ -14,7 +14,7 @@ Write every collection's schema as JSON
 Usage: tachyon schema export [OPTIONS]
 
 Options:
-      --config <CONFIG>  Config file. Every setting can also come from a TACHYON_* environment variable [default: tachyon.toml]
+      --config <CONFIG>  Config file. Without it, tachyon.toml is read if it exists. Every setting can also come from a TACHYON_* environment variable
   -o, --out <OUT>        File to write. Prints to stdout when omitted
   -h, --help             Print help
 ```

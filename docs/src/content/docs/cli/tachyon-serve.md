@@ -14,6 +14,6 @@ Run pending migrations, then serve the API
 Usage: tachyon serve [OPTIONS]
 
 Options:
-      --config <CONFIG>  Config file. Every setting can also come from a TACHYON_* environment variable [default: tachyon.toml]
+      --config <CONFIG>  Config file. Without it, tachyon.toml is read if it exists. Every setting can also come from a TACHYON_* environment variable
   -h, --help             Print help
 ```

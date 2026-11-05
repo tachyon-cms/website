@@ -20,7 +20,7 @@ rows:
     them: A read-only GraphQL API generated from your schema and deployed with the Sanity CLI. Writes go through the Mutation API.
     source: https://www.sanity.io/docs/graphql
   - topic: History
-    tachyon: Not yet. Drafts and versions are next on the roadmap, after rich text.
+    tachyon: Not yet. Drafts and versions are next on the roadmap, and under way.
     them: Every edit is kept as revision history. Free keeps 3 days, Growth 90 and Enterprise 365.
     source: https://www.sanity.io/docs/content-lake/history-experience
   - topic: Roles

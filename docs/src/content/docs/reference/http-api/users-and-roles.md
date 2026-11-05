@@ -1,6 +1,6 @@
 ---
 title: Users and roles API
-description: The user and role endpoints in TachyonCMS v0.1.0.
+description: The user and role endpoints in TachyonCMS v0.2.0.
 sidebar:
   label: Users and roles
 ---

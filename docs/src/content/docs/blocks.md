@@ -5,7 +5,7 @@ description: Build pages from rows of block types you define, share block types 
 
 A landing page isn't one long text field. It's a hero, then a quote, then a call to action, in whatever order the editor wants this week. A `blocks` field holds exactly that: a list of rows, where each row is one of the block types you define, with its own fields.
 
-Blocks arrive in v0.2.0. For long-form writing, see [Rich text](/rich-text), which can hold blocks too.
+Blocks arrived in v0.2.0. For long-form writing, see [Rich text](/rich-text), which can hold blocks too.
 
 ## Add a blocks field
 

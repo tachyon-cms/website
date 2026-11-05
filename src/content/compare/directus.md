@@ -16,7 +16,7 @@ rows:
     them: The Data Studio, a web app for your team's content, files, users and dashboards.
     source: https://directus.com/docs/getting-started/overview
   - topic: Drafts and versions
-    tachyon: Not yet. They're next on the roadmap, after rich text.
+    tachyon: Not yet. They're next on the roadmap, and under way.
     them: Content versioning. Draft changes in a version, publish it when it's ready, and revert through revisions.
     source: https://directus.com/docs/guides/content/content-versioning
   - topic: Translations

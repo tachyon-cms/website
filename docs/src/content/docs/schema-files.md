@@ -37,7 +37,7 @@ The release image has no shell, so run each command as its own container on the 
 ```sh
 docker run --rm --network tachyon -v "$PWD:/work" -w /work \
   -e TACHYON_DATABASE_URL=postgres://tachyon:tachyon@tachyon-db:5432/tachyon \
-  ghcr.io/tachyon-cms/tachyoncms:v0.1.0 schema export -o schema.json
+  ghcr.io/tachyon-cms/tachyoncms:v0.2.0 schema export -o schema.json
 ```
 
 The container runs as user 65532, not root. On Linux, make sure that user can write to the mounted folder, or `export -o` fails.

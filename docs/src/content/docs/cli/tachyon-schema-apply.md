@@ -17,7 +17,7 @@ Arguments:
   <FILE>
 
 Options:
-      --config <CONFIG>   Config file. Every setting can also come from a TACHYON_* environment variable [default: tachyon.toml]
+      --config <CONFIG>   Config file. Without it, tachyon.toml is read if it exists. Every setting can also come from a TACHYON_* environment variable
       --rename <RENAMES>  Rename a field instead of removing it and adding a new one: collection:field=new_name
       --yes               Go ahead with changes that delete or retype data
   -h, --help              Print help

@@ -38,7 +38,7 @@ Every pull request needs green CI: formatting, Clippy, tests on each supported P
 
 ## Improve these docs
 
-These pages live in the [tachyon-cms/website](https://github.com/tachyon-cms/website) repository, under `docs/`. Every page has an **Edit page** link at the bottom. Spotted something that's wrong for v0.1.0? A pull request or an issue there is welcome.
+These pages live in the [tachyon-cms/website](https://github.com/tachyon-cms/website) repository, under `docs/`. Every page has an **Edit page** link at the bottom. Spotted something that's wrong for v0.2.0? A pull request or an issue there is welcome.
 
 ## Report a security issue
 

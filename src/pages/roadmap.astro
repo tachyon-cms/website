@@ -9,7 +9,6 @@ const issues =
   'https://github.com/tachyon-cms/tachyoncms/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22%2C%22help+wanted%22';
 
 const next = [
-  ['Rich text and blocks', 'Long-form writing with code samples and tables, and pages built from reusable sections.'],
   ['Drafts, versions and scheduled publishing', "So nothing goes live before it's meant to."],
   ['Media', 'Upload once, reuse anywhere, with responsive images.'],
   ['Live preview', "Look at a draft before it's published."],
@@ -25,7 +24,7 @@ const next = [
   <PageHero
     eyebrow="Roadmap"
     title="What's next, and in what order"
-    lede="The developer half shipped in v0.1.0. Everything an editor touches comes next, and the order is set by one goal: running this site on TachyonCMS itself."
+    lede="The developer half shipped in v0.1.0, and blocks and rich text in v0.2.0. The rest of what an editor touches comes next, and the order is set by one goal: running this site on TachyonCMS itself."
   />
 
   <div class="roadmap">
@@ -35,11 +34,12 @@ const next = [
         Content types defined over the API or kept in a JSON file you diff and apply. Twenty-odd field types, including
         relationships, groups, arrays and map points. Filters that reach through relationships and into lists, joins,
         and <code>select</code> and <code>populate</code> so you fetch only what you need. Sign-in with sessions or
-        bearer tokens, scoped API keys, roles, and access rules down to a single field.
+        bearer tokens, scoped API keys, roles, and access rules down to a single field. Pages built from blocks, and
+        rich text written as JSON or Markdown and read back as JSON, HTML, Markdown or plain text.
       </p>
       <p>
-        That's <a href="/releases">v0.1.0</a>, and it's pre-alpha. The{' '}
-        <a href="https://github.com/tachyon-cms/tachyoncms/blob/v0.1.0/README.md#what-works-today">README</a> has the
+        That's <a href="/releases">v0.2.0</a>, and it's pre-alpha. The{' '}
+        <a href="https://github.com/tachyon-cms/tachyoncms/blob/v0.2.0/README.md#what-works-today">README</a> has the
         full list, with examples.
       </p>
 
@@ -61,7 +61,7 @@ const next = [
         After those comes the admin screen. The bar for it: anyone who has used WordPress can pick it up without
         training. <a href="/product/admin">Here's what it's being built on.</a>
       </p>
-      <p>None of this is in v0.1.0, and none of it has a date. What you're looking at is the order.</p>
+      <p>None of this is in v0.2.0, and none of it has a date. What you're looking at is the order.</p>
 
       <h2 id="say">Think the order's wrong?</h2>
       <p>

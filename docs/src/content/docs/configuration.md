@@ -1,6 +1,6 @@
 ---
 title: Configuration
-description: Every TachyonCMS v0.1.0 setting, in tachyon.toml or as TACHYON_ environment variables.
+description: Every TachyonCMS v0.2.0 setting, in tachyon.toml or as TACHYON_ environment variables.
 ---
 
 TachyonCMS reads its settings from three places, each overriding the one before:

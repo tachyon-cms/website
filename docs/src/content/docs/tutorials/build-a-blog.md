@@ -1,9 +1,9 @@
 ---
 title: Build a blog
-description: Build a blog API with TachyonCMS v0.1.0, from an empty Postgres to posts with authors, drafts only their author can see, and a front page query.
+description: Build a blog API with TachyonCMS v0.2.0, from an empty Postgres to posts with authors, drafts only their author can see, and a front page query.
 ---
 
-In this tutorial you build the back end of a small blog with TachyonCMS v0.1.0. By the end you'll have:
+In this tutorial you build the back end of a small blog with TachyonCMS v0.2.0. By the end you'll have:
 
 - two authors, Ann and Ben, who sign in and write posts;
 - a `posts` collection with a title, slug, body, date, author and a `published` flag;
@@ -36,7 +36,7 @@ docker run -d --name tachyon-db --network tachyon \
 docker run -d --name tachyon --network tachyon -p 127.0.0.1:3000:3000 \
   -e TACHYON_DATABASE_URL=postgres://tachyon:tachyon@tachyon-db:5432/tachyon \
   -e TACHYON_PUBLIC_URL=http://localhost:3000 \
-  ghcr.io/tachyon-cms/tachyoncms:v0.1.0
+  ghcr.io/tachyon-cms/tachyoncms:v0.2.0
 ```
 
 Check that it's up:
@@ -234,7 +234,7 @@ Each response is the new post, with its author filled in. Here's the draft:
 }
 ```
 
-`"published": false` is your draft flag. `"status": "published"` is something else: v0.1.0 has no drafts of its own yet, so every document says that.
+`"published": false` is your draft flag. `"status": "published"` is something else: v0.2.0 has no drafts of its own yet, so every document says that.
 
 Keep the IDs of Ann's two posts:
 
@@ -307,7 +307,7 @@ Here's what each part does:
 - **create**, **update** and **delete** have no rule, so the [role](/roles#built-in-roles) decides. Authors may create posts, and change or delete only the posts they created. TachyonCMS records who created each post itself, not from anything the client sends.
 - **The field rule on `author`** lets only Admins change the byline once a post exists.
 
-Why the field rule? `author` is whatever the client sends. A create rule in v0.1.0 can only check roles, `signedIn` and `true`/`false`, so it can't compare `author` with the caller: a post can name any user as its author, and that user can then read it while it's a draft. The field rule doesn't stop that at create time, but it stops anyone except an Admin reassigning a post's byline later.
+Why the field rule? `author` is whatever the client sends. A create rule in v0.2.0 can only check roles, `signedIn` and `true`/`false`, so it can't compare `author` with the caller: a post can name any user as its author, and that user can then read it while it's a draft. The field rule doesn't stop that at create time, but it stops anyone except an Admin reassigning a post's byline later.
 
 `$user.id` is single-quoted here on purpose: it goes to TachyonCMS as written, not through your shell.
 
