@@ -38,7 +38,7 @@ A request can send its own `x-request-id` of up to 128 letters, digits, `-` and 
 | `403` | Forbidden | The caller is known but may not do this: their role, an access rule or a key's scopes refuse it. |
 | `404` | Not found | No such route, collection, global or document, or one the caller can't read. A malformed ID is a `404` too. |
 | `405` | Method not allowed | The route exists, but not with this method. |
-| `409` | Conflict | The request clashes with stored data: setup already done, a slug or role that exists, a document other documents link to, a shared block a schema still names. |
+| `409` | Conflict | The request clashes with stored data: setup already done, a slug or role that exists, a document other documents link to, a shared block a schema still names. On `main` also: unpublishing what isn't published, turning drafts off with unpublished drafts, or a write that collided with another. |
 | `409` | Confirmation required | A schema change would remove or retype fields, or leave documents that won't validate. Send it again with `"confirm": true`. |
 | `413` | Content too large | The body is over 10 MB. |
 | `422` | Validation failed | A document, schema, account or key doesn't pass its checks. |
@@ -87,6 +87,12 @@ These are the `detail` texts you're most likely to meet, by status.
 | `where[…]: …`, `sort: …` | A filter or sort that doesn't fit the collection. See [Filters and sorting](/reference/filters#errors). |
 | ``field `title`: unknown variant `string`, expected one of `text`, … `` | A schema with an unknown field type, or an unknown rich text feature. |
 | `format must be json, html, markdown or text` | A `format` other than those four. New in v0.2.0. |
+| `` `draft`: `users` has no drafts ``, `` `posts` has no drafts `` | `draft=true`, or a publish or schedule, where drafts are off. On `main`. |
+| `` `categories` keeps no versions `` | A versions route where versions are off. On `main`. |
+| `` `draft` must be true or false ``, `` `autosave` must be true or false `` | Those parameters with any other value. On `main`. |
+| `` `autosave`: `series` doesn't autosave `` | `PATCH ?autosave=true` where autosave is off. On `main`. |
+| `` `to` is required: a version ID, `draft` or `published` `` | A diff without `from` or `to`. On `main`. |
+| ``unknown key `at`; use publishAt or unpublishAt`` | A schedule body with another key. On `main`. |
 
 ### `401`
 
@@ -106,6 +112,7 @@ A session cookie that has expired counts as signed out rather than a `401`, sinc
 |---|---|
 | `You don't have permission to do this.` | The role, an access rule or the key's scopes refuse the action. |
 | `You can only change documents you created.` | An Author changing or deleting someone else's document. |
+| `` `draft`: you don't have permission to read the drafts of `posts` `` | `draft=true` without `readDrafts`. On `main`. |
 | `An access rule doesn't let you change this document.` | An update or delete rule that the document doesn't match. |
 | ``You don't have permission to write `author`.`` | A field rule refuses a field in the body. |
 | `where[…]: you can't filter or sort by a field you can't read` | A filter or sort on a field a rule hides. |
@@ -128,6 +135,10 @@ A session cookie that has expired counts as signed out rather than a `401`, sinc
 | `This collection's fields just changed. Reload and try again.` | A write that raced a schema change. |
 | ``pages uses the shared block `cta`; remove it there first`` | Deleting a [shared block](/blocks#delete-a-shared-block) a schema names. New in v0.2.0. |
 | `` `pages` isn't a shared block; collections and globals can't be deleted yet `` | `DELETE /api/admin/collections/{slug}` on a collection or global. |
+| `` `01a1aeda-…` isn't published `` | Unpublishing a document or global that isn't published. On `main`. |
+| `3 documents have unpublished drafts; publish or delete them first` | Turning drafts off while drafts differ from what's published. No `confirm` overrides it. On `main`. |
+| `Another change to the same documents got in the way; try again.` | A write that met another in the database, a deadlock or serialization failure. Nothing was saved; retry. On `main`. |
+| `the schedule changed at the same time; try again` | Two schedule changes to one document at once. On `main`. |
 | `a document with this value already exists` | A unique value that's taken, where no single field can be named. Usually this comes as a `422` on the field instead. |
 
 ## Examples
