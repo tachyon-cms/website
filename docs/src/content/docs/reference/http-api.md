@@ -1,9 +1,9 @@
 ---
 title: HTTP API
-description: How requests to the TachyonCMS v0.2.0 HTTP API work, and a table of every endpoint.
+description: How requests to the TachyonCMS v0.2.0 HTTP API work, and a table of every endpoint, plus the drafts and history endpoints on main.
 ---
 
-Every endpoint TachyonCMS v0.2.0 serves. This page covers what they share and lists them all. Each area has its own page with a section per endpoint: [Sign-in and keys](/reference/http-api/auth), [Users and roles](/reference/http-api/users-and-roles), [Content types](/reference/http-api/collections) and [Documents](/reference/http-api/documents).
+Every endpoint TachyonCMS v0.2.0 serves, plus the drafts, versions, scheduling and trash endpoints on `main`, which arrive in the next release and are marked as such. This page covers what they share and lists them all. Each area has its own page with a section per endpoint: [Sign-in and keys](/reference/http-api/auth), [Users and roles](/reference/http-api/users-and-roles), [Content types](/reference/http-api/collections), [Documents](/reference/http-api/documents) and, on `main`, [Drafts and history](/reference/http-api/drafts-and-history).
 
 The guides explain the ideas behind them: [Sign-in](/sign-in), [API keys](/api-keys), [Roles](/roles), [Content types](/content-types), [Querying](/querying) and [Access rules](/access-rules).
 
@@ -14,7 +14,7 @@ The guides explain the ideas behind them: [Sign-in](/sign-in), [API keys](/api-k
 - Responses are JSON. Errors are `application/problem+json`; see [Errors](/reference/errors).
 - Every response carries an `x-request-id` header.
 - A request that runs for more than 30 seconds is stopped with a `503`.
-- Documents come back with `id`, `createdAt`, `updatedAt` and `status` (always `"published"` in v0.2.0) besides their fields. Keys are in alphabetical order.
+- Documents come back with `id`, `createdAt`, `updatedAt` and `status` (always `"published"` in v0.2.0) besides their fields. On `main`, a collection with [drafts](/drafts) can also say `"draft"`, and its published documents carry `publishedAt`. Keys are in alphabetical order.
 
 ### Credentials
 
@@ -37,7 +37,8 @@ The **Who** row of each endpoint uses these terms:
 | Session | A session only. API keys are refused. |
 | `users` ability | A role with `users: true` (Admin by default). Keys also need the `admin` scope. A role with this ability can do everything an Admin can. |
 | `schemas` ability | A role with `schemas: true` (Admin by default). Keys also need the `admin` scope. |
-| Content | The role's `content` ability, the collection's [access rules](/access-rules) and, for a key, its [scopes](/api-keys#scopes): `collection:read`, `collection:write`, `*:read`, `*:write` or `admin`. |
+| Content | The role's `content` ability, the collection's [access rules](/access-rules) and, for a key, its [scopes](/api-keys#scopes): `collection:read`, `collection:write`, `*:read`, `*:write` or `admin`, and on `main` also `collection:publish` and `*:publish`. |
+| `readDrafts`, `readVersions`, `publish` | On `main`. Rights that follow the role's `content` ability unless a rule says otherwise. See [Rights](/reference/http-api/drafts-and-history#rights). |
 
 Signed out, a refusal is a `401 Sign in first.`; signed in, it's a `403`.
 
@@ -83,3 +84,25 @@ Any endpoint can also return `400` for a body that isn't JSON, `401` for credent
 | [`PATCH /api/{collection}/{id}`](/reference/http-api/documents#patch-apicollectionid) | Changes a document. | Content |
 | [`DELETE /api/{collection}/{id}`](/reference/http-api/documents#delete-apicollectionid) | Deletes a document. | Content |
 | [`GET /api/{collection}/{id}/references`](/reference/http-api/documents#get-apicollectionidreferences) | Lists documents that link here. | Content |
+| [`POST /api/{collection}/{id}/publish`](/reference/http-api/drafts-and-history#post-apicollectionidpublish) | Publishes a draft. On `main`. | `publish` |
+| [`POST /api/{collection}/{id}/unpublish`](/reference/http-api/drafts-and-history#post-apicollectionidunpublish) | Takes a document down. On `main`. | `publish` |
+| [`POST /api/globals/{slug}/publish`](/reference/http-api/drafts-and-history#post-apiglobalsslugpublish) | Publishes a global's draft. On `main`. | `publish` |
+| [`POST /api/globals/{slug}/unpublish`](/reference/http-api/drafts-and-history#post-apiglobalsslugunpublish) | Takes a global down. On `main`. | `publish` |
+| [`PUT /api/{collection}/{id}/schedule`](/reference/http-api/drafts-and-history#put-apicollectionidschedule) | Schedules a publish or unpublish. On `main`. | `publish` |
+| [`GET /api/{collection}/{id}/schedule`](/reference/http-api/drafts-and-history#get-apicollectionidschedule) | Shows the schedule. On `main`. | `readDrafts` |
+| [`DELETE /api/{collection}/{id}/schedule`](/reference/http-api/drafts-and-history#delete-apicollectionidschedule) | Cancels the schedule. On `main`. | `publish` |
+| [`PUT /api/globals/{slug}/schedule`](/reference/http-api/drafts-and-history#put-apiglobalsslugschedule) | Schedules a global. On `main`. | `publish` |
+| [`GET /api/globals/{slug}/schedule`](/reference/http-api/drafts-and-history#get-apiglobalsslugschedule) | Shows a global's schedule. On `main`. | `readDrafts` |
+| [`DELETE /api/globals/{slug}/schedule`](/reference/http-api/drafts-and-history#delete-apiglobalsslugschedule) | Cancels a global's schedule. On `main`. | `publish` |
+| [`GET /api/{collection}/{id}/versions`](/reference/http-api/drafts-and-history#get-apicollectionidversions) | Lists a document's versions. On `main`. | `readVersions` |
+| [`GET /api/{collection}/{id}/versions/{vid}`](/reference/http-api/drafts-and-history#get-apicollectionidversionsvid) | Reads one version. On `main`. | `readVersions` |
+| [`POST /api/{collection}/{id}/versions/{vid}/restore`](/reference/http-api/drafts-and-history#post-apicollectionidversionsvidrestore) | Restores a version. On `main`. | Content, `readVersions` |
+| [`GET /api/{collection}/{id}/diff`](/reference/http-api/drafts-and-history#get-apicollectioniddiff) | Compares two versions. On `main`. | `readVersions`, `readDrafts` |
+| [`GET /api/globals/{slug}/versions`](/reference/http-api/drafts-and-history#get-apiglobalsslugversions) | Lists a global's versions. On `main`. | `readVersions` |
+| [`GET /api/globals/{slug}/versions/{vid}`](/reference/http-api/drafts-and-history#get-apiglobalsslugversionsvid) | Reads one version of a global. On `main`. | `readVersions` |
+| [`POST /api/globals/{slug}/versions/{vid}/restore`](/reference/http-api/drafts-and-history#post-apiglobalsslugversionsvidrestore) | Restores a version of a global. On `main`. | Content, `readVersions` |
+| [`GET /api/globals/{slug}/diff`](/reference/http-api/drafts-and-history#get-apiglobalsslugdiff) | Compares two versions of a global. On `main`. | `readVersions`, `readDrafts` |
+| [`GET /api/{collection}/trash`](/reference/http-api/drafts-and-history#get-apicollectiontrash) | Lists the trash. On `main`. | Content: `delete` |
+| [`DELETE /api/{collection}/trash`](/reference/http-api/drafts-and-history#delete-apicollectiontrash) | Empties the trash. On `main`. | Content: `delete` |
+| [`POST /api/{collection}/trash/{id}/restore`](/reference/http-api/drafts-and-history#post-apicollectiontrashidrestore) | Restores a document. On `main`. | Content: `delete` |
+| [`DELETE /api/{collection}/trash/{id}`](/reference/http-api/drafts-and-history#delete-apicollectiontrashid) | Deletes a document for good. On `main`. | Content: `delete` |

@@ -9,8 +9,8 @@ description: Decide which documents and fields each person can read and change, 
 
 | On | Actions |
 |---|---|
-| A collection, as `access` | `read`, `create`, `update`, `delete` |
-| A global, as `access` | `read`, `update` |
+| A collection, as `access` | `read`, `create`, `update`, `delete`, and with drafts or versions on, `readDrafts`, `readVersions` and `publish` |
+| A global, as `access` | `read`, `update`, and with drafts or versions on, `readDrafts`, `readVersions` and `publish` |
 | A field at any depth, inside groups, arrays and tabs too | `read`, `create`, `update` |
 
 A rule replaces the role default for the action it covers, and only that action. Actions without a rule keep the [role defaults](/roles#built-in-roles). Admins pass every rule, so nobody can lock themselves out.
@@ -66,7 +66,7 @@ curl -X POST localhost:3000/api/posts \
   -d '{"title": "Ann'\''s draft", "author": "01a18460-fbba-75ad-be56-f085bab18202"}'
 ```
 
-Signed out, only the published post shows. (`status` still says `"published"` on every document in v0.2.0; the rule reads your own `published` field.)
+Signed out, only the published post shows. (`status` still says `"published"` on every document in v0.2.0; the rule reads your own `published` field. On `main`, arriving in the next release, [real drafts](/drafts) replace this pattern: see [Rules for drafts and history](#rules-for-drafts-and-history).)
 
 ```sh
 curl -g 'localhost:3000/api/posts?select[title]=true&select[published]=true'
@@ -123,6 +123,58 @@ She can read the published post, but she didn't create it, so her role stops her
 With this rule, Editors also see only published posts and their own drafts, and a draft they can't see is one they can't change. To let them work on every post, add `{"role": "editor"}` to the read rule's `or`.
 :::
 
+## Rules for drafts and history
+
+On `main`, arriving in the next release, a collection or global with [drafts](/drafts) or [versions](/versions) takes three more rules:
+
+| Rule | Decides | Needs |
+|---|---|---|
+| `readDrafts` | Who reads drafts, with `?draft=true` and wherever a link is followed inside one. | `versions.drafts` |
+| `readVersions` | Who sees a document's [history](/versions). | `versions` |
+| `publish` | Who publishes, unpublishes and [schedules](/scheduling). | `versions.drafts` |
+
+They take everything `read` takes, filters and `$user` included. Without one, the [role default](/roles#drafts-versions-and-publishing) decides: every document for Admins and Editors, their own for Authors (no `publish`), nothing for Viewers and signed-out callers.
+
+This `tips` collection lets only Editors read drafts, so an Author's own drafts are out of reach too:
+
+```json
+{
+  "slug": "tips",
+  "versions": {"drafts": true},
+  "access": {"readDrafts": {"role": "editor"}},
+  "fields": [{"name": "text", "type": "text"}]
+}
+```
+
+The read rule still applies on top, so a draft you may read is one both rules let through. A version that was a draft needs `readDrafts` as well as `readVersions`.
+
+### Writes go through the draft
+
+In a collection with drafts, every write lands on the draft, so changing or deleting a document also needs `readDrafts`. Creating doesn't. Ann, an Author, can still create a tip, but she can't read the draft she made, so the answer holds only its `id`:
+
+```sh
+curl -X POST localhost:3000/api/tips \
+  -H "authorization: Bearer $ANN_TOKEN" \
+  -H 'content-type: application/json' \
+  -d '{"text": "Back up first."}'
+```
+
+```json
+{
+  "id": "01a1aedd-58c9-7456-a0de-7456db449674"
+}
+```
+
+Changing it afterwards is a `403`: she may read no draft in `tips`, so every change there is refused before any document is looked at, which says nothing about whether this one exists.
+
+When you may read some drafts but not this one, such as an Author with someone else's post, the status depends on what you can already see:
+
+- You can read the draft: the `update` or `delete` rule decides, as usual.
+- You can read what's published but not the draft: `403`. The document is on the site, so its existence is no secret.
+- You can read neither: `404`, like any document you can't read.
+
+A rule that can't apply is refused when you save the schema: ``access.publish: needs drafts on, in versions.drafts`` or ``access.readVersions: needs versions on``.
+
 ## Field rules
 
 A field rule decides who can read and write one field. Field rules can use roles, `signedIn` and `true`/`false`, but not filters. This field is only for Editors:
@@ -166,7 +218,7 @@ Sending it in a write you're not allowed, even as `null`, is a `403` that names 
 
 **Reads.** The rule's filter becomes part of the database query wherever a document can appear: lists and single reads, references, joins, populated links (one you can't read stays a bare ID) and virtual fields (no value from a document you can't read). Filters through relationships are covered too, so nobody can probe hidden documents with `where[author.team]`. A document you can't read is a `404`. A list the rule refuses outright, such as `false` or a role you don't have, is a `401` when you're signed out and a `403` when you're signed in.
 
-**Updates and deletes** are checked against the stored document inside the write. If you can't read the document it's a `404`; if you can read it but the rule says no, it's a `403`. A global's existence is no secret, so an update its rule refuses is always a `403`.
+**Updates and deletes** are checked against the stored document inside the write. With drafts on, that's the draft: see [Writes go through the draft](#writes-go-through-the-draft). If you can't read the document it's a `404`; if you can read it but the rule says no, it's a `403`. A global's existence is no secret, so an update its rule refuses is always a `403`.
 
 **Creates.** A create rule can only use roles, `signedIn` and `true`/`false`, since there's no document to compare yet. A refused create is a `401` or `403`.
 
@@ -226,7 +278,26 @@ curl localhost:3000/api/access -H "authorization: Bearer $ANN_TOKEN"
 - A collection or global answers `true`, `false` or `"conditional"`. Conditional means it depends on the document: the rule is a filter, or the role only reaches documents the caller created. It stays conditional even when every stored document would pass, because it's an answer about the rules, not the data.
 - A field answers `true` or `false`, and never allows more than its collection. Fields go by their dotted path: `seo.title`, and `links.url` for a field in every row of a list. Virtual and join fields can't be written, so `create` and `update` are `false`.
 - `internalNotes` is missing. Anything you can't do at all is left out, so a missing collection, global or field means no.
+- With drafts on, a collection or global also answers `readDrafts` and `publish`, and with versions on, `readVersions`. These are on `main` and arrive in the next release; see [Drafts and history answers](#drafts-and-history-answers).
 - `schemas` and `users` say whether you may change content types and manage users. Under `collections.users`, `read` is about profiles as links show them, and `update` is about the account routes, where you change only your own unless you manage users.
+
+### Drafts and history answers
+
+Here's Ann again, on the `main` build, for the `posts` collection from [Drafts and publishing](/drafts), which has drafts and keeps versions, and no rules of its own (trimmed to the collection's answers):
+
+```json
+{
+  "create": true,
+  "delete": "conditional",
+  "publish": false,
+  "read": true,
+  "readDrafts": "conditional",
+  "readVersions": "conditional",
+  "update": "conditional"
+}
+```
+
+She reads her own drafts and history, so both are conditional, and as an Author she can't publish. Ed, an Editor, gets `true` for all seven. A key with only `posts:publish` answers `"publish": true` and `false` for everything else, `read` included: it can publish, and nothing more.
 
 ## Rules are checked when you save
 
@@ -247,7 +318,7 @@ Both the API and [`tachyon schema apply`](/schema-files) refuse a rule that can'
 }
 ```
 
-A filter in a create rule gets `access.create: can use only roles, signedIn, true and false, since there's no document to compare yet`. Also refused: bad syntax, a `$user` value that isn't `id`, `role` or a stored `users` profile field, a filter field or operator that doesn't exist, a list-valued `$user` field with anything but `in` or `not_in`, `create` or `delete` on a global, and a rule on a layout field. A change elsewhere that would break a rule is refused too, such as removing a profile field another collection's rule reads as `$user.team`, or deleting a role a rule names.
+A filter in a create rule gets `access.create: can use only roles, signedIn, true and false, since there's no document to compare yet`. Also refused: bad syntax, a `$user` value that isn't `id`, `role` or a stored `users` profile field, a filter field or operator that doesn't exist, a list-valued `$user` field with anything but `in` or `not_in`, `create` or `delete` on a global, a rule on a layout field, and `readDrafts`, `readVersions` or `publish` where drafts or versions are off. A change elsewhere that would break a rule is refused too, such as removing a profile field another collection's rule reads as `$user.team`, or deleting a role a rule names.
 
 ## Known limits
 

@@ -1,6 +1,6 @@
 ---
 title: Configuration keys
-description: Every TachyonCMS v0.2.0 setting and environment variable, with its type and default.
+description: Every TachyonCMS v0.2.0 setting and environment variable, with its type and default, plus the [jobs] section on main.
 ---
 
 Every setting, in one table per section. For how settings are loaded and what each one is for, see [Configuration](/configuration).
@@ -43,6 +43,16 @@ A duration is a whole number above zero followed by `s`, `m`, `h` or `d`: `90s`,
 
 An unknown key under `[auth]`, in the file or the environment, stops every command and lists the keys that exist.
 
+## `[jobs]`
+
+On `main`, arriving in the next release. v0.2.0 stops on a `[jobs]` section as an unknown top-level key.
+
+| Key | Variable | Type | Default | Description |
+|---|---|---|---|---|
+| `workers` | `TACHYON_JOBS__WORKERS` | integer, 0 to 16 | `2` | Workers in `tachyon serve` that run [scheduled publishing](/scheduling). `0` runs none, leaving jobs to other servers on the same database. Must be fewer than the database pool's 10 connections. |
+
+An unknown key under `[jobs]` stops every command, as under `[auth]`.
+
 ## Other environment variables
 
 | Variable | Default | Description |
@@ -59,15 +69,16 @@ The subcommands are listed in the [CLI reference](/cli).
 
 ## Startup errors
 
-The first five stop every command before it touches the database. The rest stop `tachyon serve` after it connects and runs migrations, before it listens:
+The first six stop every command before it touches the database. The rest stop `tachyon serve` after it connects and runs migrations, before it listens:
 
 | Cause | Message |
 |---|---|
 | A `--config` file that doesn't exist | `Error: the config file prod.toml doesn't exist` |
-| An unknown top-level key in the file | ``Error: unknown key `publc_url` in tachyon.toml; the top-level keys are database_url, listen, public_url, auth`` |
+| An unknown top-level key in the file | ``Error: unknown key `publc_url` in tachyon.toml; the top-level keys are database_url, listen, public_url, auth`` (on `main`, ending `auth, jobs`) |
 | No `database_url` | `` Error: missing field `database_url` `` |
 | An empty `database_url` | `Error: database_url is empty` |
 | An unknown `[auth]` key | `` Error: unknown field: found `nope`, expected `one of …` `` |
+| An unknown `[jobs]` key, on `main` | ```Error: unknown field: found `wokers`, expected ``workers`` for key "default.jobs.wokers" in tachyon.toml TOML file``` |
 | No `public_url` while listening beyond loopback | `Error: set public_url (such as https://cms.example.com) when listening beyond this machine` |
 | A `public_url` that isn't a full `http` or `https` address | `Error: public_url must be a full web address, like https://cms.example.com` |
 | A bad duration | ``Error: auth.session_idle: `soon` isn't a duration; use a number and s, m, h or d, like 15m or 7d`` |
@@ -76,6 +87,8 @@ The first five stop every command before it touches the database. The rest stop 
 | An `allowed_origins` entry with a wildcard | ``Error: auth.allowed_origins: `https://*.example.com` uses a wildcard, which isn't supported; list each origin, like https://www.example.com`` |
 | `lockout_attempts` below 1 | `Error: auth.lockout_attempts is 0; it has to be at least 1` |
 | `session_absolute` shorter than `session_idle` | `Error: auth.session_absolute (1d) is shorter than auth.session_idle (7d), so the idle limit would never apply` |
+| `jobs.workers` above 16, on `main` | `Error: jobs.workers is 17; it can be at most 16` |
+| `jobs.workers` not fewer than the pool's connections, on `main` | `Error: jobs.workers is 10, but the database pool has 10 connections; use fewer than 10 so requests still get one` |
 
 ## Example file
 

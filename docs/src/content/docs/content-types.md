@@ -51,7 +51,7 @@ A slug starts with a lowercase letter and uses only lowercase letters, digits an
 
 From v0.2.0 a collection can also take a `url`, such as `"/blog/{slug}"`, saying where its documents live on your site. Links to them in [rich text](/rich-text#add-a-rich-text-field) point there when read as HTML.
 
-The schema is checked before it's saved. A misspelt option such as `maxLenght` is refused by name rather than ignored, and so is a field called `id`, `createdAt`, `updatedAt` or `status`, which the server adds to every document.
+The schema is checked before it's saved. A misspelt option such as `maxLenght` is refused by name rather than ignored, and so is a field called `id`, `createdAt`, `updatedAt` or `status`, which the server adds to every document. In a collection with [drafts](/drafts) on, `publishedAt` is reserved too, since every published copy carries one. Turning drafts on while the schema has a top-level `publishedAt` field is a `422`, ``field name `publishedAt` is reserved``; collections without drafts keep any `publishedAt` field they already have. Drafts are on `main` and arrive in the next release.
 
 ## List and read content types
 

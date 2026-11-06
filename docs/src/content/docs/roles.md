@@ -95,6 +95,20 @@ curl localhost:3000/api/admin/roles -H "authorization: Bearer $TOKEN"
 A role with the `users` ability can change anyone's role, its own included, to `admin`, and can make API keys with the `admin` scope. Treat it as Admin-equivalent, and give it only to people you'd make Admin.
 :::
 
+## Drafts, versions and publishing
+
+On `main`, arriving in the next release, collections and globals can keep [drafts](/drafts) and [versions](/versions), which bring three more rights. A role has no new abilities to set: each right follows its `content` ability.
+
+| Right | `content: all` (Admin, Editor) | `content: own` (Author) | `content: read` (Viewer), signed out |
+|---|---|---|---|
+| `readDrafts` | every document | their own | no |
+| `readVersions` | every document | their own | no |
+| `publish` | every document | no | no |
+
+So an Author writes drafts and reads their own drafts and history, and an Editor or Admin publishes them. An Author's "own" means documents they created, which no global is. Publishing, unpublishing and [scheduling](/scheduling) take `publish`.
+
+Custom roles get the same defaults from their `content` ability. To give a role more or less, use an [access rule](/access-rules#rules-for-drafts-and-history). `"readDrafts": {"role": ["editor", "reviewer"]}` lets a `reviewer` role with `content: read` read every draft and change none. A role that publishes needs `readDrafts` as well as `publish`, since publishing reads the draft.
+
 ## Add a role
 
 An Admin, or a role with the `users` ability, can add roles with `POST /api/admin/roles`. The slug uses lowercase letters, digits and underscores, starting with a letter:
