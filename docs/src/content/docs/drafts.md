@@ -253,6 +253,8 @@ Once Ann adds a title, the same request goes through and returns what's now live
 }
 ```
 
+`updatedAt` on what's live tells you when the live copy last changed, here the publish. Ann can go on saving her draft, and a published read keeps showing `2026-11-06T03:15:00.406018Z` until the next publish, so nobody reading the site can tell a draft is moving. `?draft=true` shows the time of her latest save.
+
 Ann, as an Author, can't publish at all; she gets a `403 You don't have permission to do this.` That's the `publish` right, covered [below](#who-may-do-what).
 
 Two more checks wait for publishing:
