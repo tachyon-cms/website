@@ -146,10 +146,10 @@ On `main`, arriving in the next release. Workers inside `tachyon serve` run [sch
 workers = 4
 ```
 
-The variable is `TACHYON_JOBS__WORKERS`. The count can be at most 16, and has to be fewer than the database pool's 10 connections, so 9 is the most that starts today. `tachyon serve` stops at startup on one that doesn't fit:
+The variable is `TACHYON_JOBS__WORKERS`. The count can be at most 16, but the pool is what really decides it. A worker running a large schema change holds two of the database pool's 10 connections, and requests need one left over, so the workers need `2 × workers + 1` connections and 4 is the most that starts today. `tachyon serve` stops at startup on one that doesn't fit:
 
 ```text
-Error: jobs.workers is 10, but the database pool has 10 connections; use fewer than 10 so requests still get one
+Error: jobs.workers is 5, but the database pool has 10 connections; each worker can hold two and requests need one, so use at most 4
 ```
 
 An unknown key under `[jobs]`, such as `wokers`, stops every command, as one under `[auth]` does.

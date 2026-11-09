@@ -1,5 +1,6 @@
 // The public surface on TachyonCMS main, for the next release: v0.2.0's, plus drafts,
-// versions, scheduled publishing and the trash (tachyon-cms/tachyoncms#57, 939571e).
+// versions, scheduled publishing and the trash (tachyon-cms/tachyoncms#57, 939571e), and
+// large schema changes on the jobs worker (#189, 0c0f6f7).
 // Copied by hand from the source as for v0.2.0-surface.mjs; re-check with
 // `git show main:<file>`. Rename it after the release it becomes. Field types and options,
 // operators and error statuses didn't change.
@@ -30,6 +31,7 @@ export const routes = [
   'PUT /api/{collection}/{id}/schedule',
   'GET /api/{collection}/{id}/schedule',
   'DELETE /api/{collection}/{id}/schedule',
+  'GET /api/admin/jobs/{id}',
 ];
 
 // `JobsSettings` in crates/tachyon/src/config.rs:54-60

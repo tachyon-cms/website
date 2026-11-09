@@ -143,8 +143,8 @@ Replaces a content type's schema. A change that keeps every value is saved at on
 | | |
 |---|---|
 | Who | `schemas` ability |
-| Returns | `200`, `{"collection": {"id", "schemaVersion", "schema"}, "preview": {...}}` |
-| Errors | `400`; `401`; `403`; `404`; `409 Confirmation required`, with `preview`; on `main`, `409` turning drafts off while documents have unpublished drafts, which no `confirm` overrides; `422` an invalid schema, values that aren't unique for a new `unique`, or a change that would break another collection's join, virtual field or access rule |
+| Returns | `200`, `{"collection": {"id", "schemaVersion", "schema"}, "preview": {...}}`; on `main`, past 2,000 rows, `202` with `{"job": {...}}` and a `Location` to poll with [`GET /api/admin/jobs/{id}`](#get-apiadminjobsid) |
+| Errors | `400`; `401`; `403`; `404`; `409 Confirmation required`, with `preview`; on `main`, `409` while a change to this schema is already queued, naming its job; on `main`, `409` turning drafts off while documents have unpublished drafts, which no `confirm` overrides; `422` an invalid schema, values that aren't unique for a new `unique`, or a change that would break another collection's join, virtual field or access rule |
 
 | Field | Type | Default | Description |
 |---|---|---|---|
@@ -231,7 +231,7 @@ Works out what a `PUT` with the same body would do, and saves nothing.
 |---|---|
 | Who | `schemas` ability |
 | Body | As for [`PUT`](#put-apiadmincollectionsslug); `confirm` is ignored |
-| Returns | `200` and the preview object |
+| Returns | `200` and the preview object; on `main`, past 2,000 rows, `202` and a job, as for `PUT` |
 | Errors | As for `PUT`, without the `409 Confirmation required` |
 
 Here `posts` would lose its `tags` field, so the change needs confirming:
@@ -328,6 +328,23 @@ curl -X POST localhost:3000/api/admin/collections/cta/preview \
   "needsConfirmation": false
 }
 ```
+
+### `GET /api/admin/jobs/{id}`
+
+On `main`. A schema change or preview that went to a job worker. See [Large changes run as a job](/content-types#large-changes-run-as-a-job).
+
+| | |
+|---|---|
+| Who | `schemas` ability |
+| Returns | `200`, `{"id", "kind", "state", "attempts", "runAt", "finishedAt", "result"}` |
+| Errors | `401`; `403`; `404` an unknown ID, or a job that isn't a schema change or preview |
+
+| Key | Type | Description |
+|---|---|---|
+| `kind` | string | `schema_change` or `schema_preview`. |
+| `state` | string | `queued`, `running`, `done`, `failed` or `cancelled`. |
+| `attempts` | number | Runs so far. A run that hits a deadlock or loses its worker runs again. |
+| `result` | object or null | `null` until the job ends. On `done`, the body the request would have returned. On `failed`, `{"status", "problem"}`: the status and problem body it would have sent. |
 
 ### `DELETE /api/admin/collections/{slug}`
 

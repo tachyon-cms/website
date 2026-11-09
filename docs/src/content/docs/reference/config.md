@@ -49,7 +49,7 @@ On `main`, arriving in the next release. v0.2.0 stops on a `[jobs]` section as a
 
 | Key | Variable | Type | Default | Description |
 |---|---|---|---|---|
-| `workers` | `TACHYON_JOBS__WORKERS` | integer, 0 to 16 | `2` | Workers in `tachyon serve` that run [scheduled publishing](/scheduling). `0` runs none, leaving jobs to other servers on the same database. Must be fewer than the database pool's 10 connections. |
+| `workers` | `TACHYON_JOBS__WORKERS` | integer, 0 to 16 | `2` | Workers in `tachyon serve` that run [scheduled publishing](/scheduling). `0` runs none, leaving jobs to other servers on the same database. Needs `2 × workers + 1` of the database pool's 10 connections, so at most 4 today. |
 
 An unknown key under `[jobs]` stops every command, as under `[auth]`.
 
@@ -88,7 +88,7 @@ The first six stop every command before it touches the database. The rest stop `
 | `lockout_attempts` below 1 | `Error: auth.lockout_attempts is 0; it has to be at least 1` |
 | `session_absolute` shorter than `session_idle` | `Error: auth.session_absolute (1d) is shorter than auth.session_idle (7d), so the idle limit would never apply` |
 | `jobs.workers` above 16, on `main` | `Error: jobs.workers is 17; it can be at most 16` |
-| `jobs.workers` not fewer than the pool's connections, on `main` | `Error: jobs.workers is 10, but the database pool has 10 connections; use fewer than 10 so requests still get one` |
+| `jobs.workers` too many for the pool's connections, on `main` | `Error: jobs.workers is 5, but the database pool has 10 connections; each worker can hold two and requests need one, so use at most 4` |
 
 ## Example file
 

@@ -125,10 +125,10 @@ workers = 4
 
 or `TACHYON_JOBS__WORKERS=4` in the environment. An idle worker looks for due jobs every second, so a job runs within a second or so of its time.
 
-The count can be at most 16, and has to be fewer than the database pool's connections, so requests still get one. The pool has 10 connections, which makes 9 the most that starts today. `0` runs no workers on this server: schedules are still accepted and wait until a server with workers picks them up. `tachyon serve` stops at startup, before it listens, on a count that doesn't fit:
+The count can be at most 16, but the database pool decides the real limit. A worker running a [large schema change](/content-types#large-changes-run-as-a-job) holds two of the pool's connections, and requests need one left over, so the workers need `2 × workers + 1` connections. The pool has 10, which makes 4 the most that starts today. `0` runs no workers on this server: schedules are still accepted and wait until a server with workers picks them up. `tachyon serve` stops at startup, before it listens, on a count that doesn't fit:
 
 ```text
-Error: jobs.workers is 10, but the database pool has 10 connections; use fewer than 10 so requests still get one
+Error: jobs.workers is 5, but the database pool has 10 connections; each worker can hold two and requests need one, so use at most 4
 ```
 
 ```text
