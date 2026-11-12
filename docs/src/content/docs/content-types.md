@@ -51,7 +51,7 @@ A slug starts with a lowercase letter and uses only lowercase letters, digits an
 
 From v0.2.0 a collection can also take a `url`, such as `"/blog/{slug}"`, saying where its documents live on your site. Links to them in [rich text](/rich-text#add-a-rich-text-field) point there when read as HTML.
 
-The schema is checked before it's saved. A misspelt option such as `maxLenght` is refused by name rather than ignored, and so is a field called `id`, `createdAt`, `updatedAt` or `status`, which the server adds to every document.
+The schema is checked before it's saved. A misspelt option such as `maxLenght` is refused by name rather than ignored, and so is a field called `id`, `createdAt`, `updatedAt` or `status`, which the server adds to every document. In a collection with [drafts](/drafts) on, `publishedAt` is reserved too, since every published copy carries one. Turning drafts on while the schema has a top-level `publishedAt` field is a `422`, ``field name `publishedAt` is reserved``; collections without drafts keep any `publishedAt` field they already have. Drafts are on `main` and arrive in the next release.
 
 ## List and read content types
 
@@ -273,6 +273,60 @@ curl -g 'localhost:3000/api/posts?select[headline]=true'
 ### Preview without changing anything
 
 `POST /api/admin/collections/{slug}/preview` takes the same body as `PUT` and returns only the preview. Nothing is saved.
+
+### Large changes run as a job
+
+On `main`, arriving in the next release. A request gets 30 seconds, and carrying tens of thousands of documents across a change can take longer. So past 2,000 rows (documents, trashed ones too, and their versions) a change or a preview goes to a [job worker](/scheduling#the-workers) instead, and you get `202 Accepted` straight away:
+
+```http
+HTTP/1.1 202 Accepted
+location: /api/admin/jobs/01a1be49-e220-733a-9878-bb827c8a47e3
+```
+
+```json
+{
+  "job": {
+    "attempts": 0,
+    "finishedAt": null,
+    "id": "01a1be49-e220-733a-9878-bb827c8a47e3",
+    "kind": "schema_change",
+    "result": null,
+    "runAt": "2026-11-09T03:11:15.488599Z",
+    "state": "queued"
+  }
+}
+```
+
+Poll the `location`. Once `state` reads `done` or `failed`, `result` holds what the request would have answered: on `done`, the same `collection` and `preview` as the `200`; on `failed`, the `status` and `problem` it would have sent back.
+
+Nothing is taken on trust from when you asked. The job checks everything again, as you, against the data as it is when it runs. A change that loses data without `"confirm": true` fails with the `409` and a fresh `preview`, so you can look before you send it again:
+
+```json
+{
+  "state": "failed",
+  "result": {
+    "status": 409,
+    "problem": {
+      "title": "Confirmation required",
+      "status": 409,
+      "detail": "This change removes or retypes fields, or leaves documents that won't validate. Send it again with \"confirm\": true to go ahead.",
+      "preview": {"documents": 2001, "needsConfirmation": true, "...": "..."}
+    }
+  }
+}
+```
+
+One change per schema waits at a time. Send another while one is queued, large or small, and you get a `409` naming the job ahead of it:
+
+```json
+{
+  "detail": "a change to `posts` is already queued; wait for job 01a1be49-e220-733a-9878-bb827c8a47e3",
+  "status": 409,
+  "title": "Conflict"
+}
+```
+
+While a change runs, writes to that collection's documents wait for it to finish. Somebody has to run the job, too: at least one server needs `workers` above 0, or use [`tachyon schema apply`](/cli/tachyon-schema-apply), which has no time limit.
 
 ### Changes that are refused
 

@@ -94,6 +94,7 @@ test('a reference page marks the Reference tab current and shows only the Refere
     '/reference/http-api/users-and-roles',
     '/reference/http-api/collections',
     '/reference/http-api/documents',
+    '/reference/http-api/drafts-and-history',
     '/reference/field-types',
     '/reference/filters',
     '/reference/config',

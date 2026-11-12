@@ -1,6 +1,6 @@
 ---
 title: Configuration
-description: Every TachyonCMS v0.2.0 setting, in tachyon.toml or as TACHYON_ environment variables.
+description: Every TachyonCMS v0.2.0 setting, in tachyon.toml or as TACHYON_ environment variables, plus the [jobs] section on main.
 ---
 
 TachyonCMS reads its settings from three places, each overriding the one before:
@@ -17,7 +17,7 @@ A top-level key TachyonCMS doesn't know, such as a misspelt `publc_url`, stops `
 unknown key `publc_url` in tachyon.toml; the top-level keys are database_url, listen, public_url, auth
 ```
 
-Environment variables aren't checked this way, so a `TACHYON_` variable that isn't a setting is left alone.
+Environment variables aren't checked this way, so a `TACHYON_` variable that isn't a setting is left alone. On `main`, where [`[jobs]`](#jobs) is added, the message ends `public_url, auth, jobs`.
 
 ## A complete file
 
@@ -132,6 +132,27 @@ Turn `breach_check` off on a server with no internet access. Otherwise, if the s
 ```text
 Error: auth.allowed_origins: `www.example.com` isn't an origin; use a scheme and host, like https://www.example.com
 ```
+
+## `[jobs]`
+
+On `main`, arriving in the next release. Workers inside `tachyon serve` run [scheduled publishing](/scheduling). v0.2.0 has no `[jobs]` section, and stops on one as an unknown key.
+
+| Setting | Default | Does |
+|---|---|---|
+| `workers` | `2` | How many workers this server runs. `0` runs none, leaving scheduled jobs to other servers on the same database. |
+
+```toml
+[jobs]
+workers = 4
+```
+
+The variable is `TACHYON_JOBS__WORKERS`. The count can be at most 16, but the pool is what really decides it. A worker running a large schema change holds two of the database pool's 10 connections, and requests need one left over, so the workers need `2 × workers + 1` connections and 4 is the most that starts today. `tachyon serve` stops at startup on one that doesn't fit:
+
+```text
+Error: jobs.workers is 5, but the database pool has 10 connections; each worker can hold two and requests need one, so use at most 4
+```
+
+An unknown key under `[jobs]`, such as `wokers`, stops every command, as one under `[auth]` does.
 
 ## Logs
 

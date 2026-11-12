@@ -20,6 +20,15 @@
 - [Joins and virtual fields](https://docs.tachyoncms.com/joins-and-virtual-fields)
 - [Schema files](https://docs.tachyoncms.com/schema-files)
 
+## Publishing
+
+On main, arriving in the next release; not in v0.2.0.
+
+- [Drafts and publishing](https://docs.tachyoncms.com/drafts): a draft beside each published document, `?draft=true`, publish and unpublish.
+- [Version history](https://docs.tachyoncms.com/versions): list, read, compare and restore past versions.
+- [Scheduled publishing](https://docs.tachyoncms.com/scheduling): publish and unpublish at a set time, and the `[jobs]` workers.
+- [The trash](https://docs.tachyoncms.com/trash): list, restore and empty deleted documents.
+
 ## Users and access
 
 - [Sign-in](https://docs.tachyoncms.com/sign-in)
@@ -40,7 +49,7 @@
 
 ## Reference
 
-- [HTTP API](https://docs.tachyoncms.com/reference/http-api): [auth](https://docs.tachyoncms.com/reference/http-api/auth), [users and roles](https://docs.tachyoncms.com/reference/http-api/users-and-roles), [collections](https://docs.tachyoncms.com/reference/http-api/collections), [documents](https://docs.tachyoncms.com/reference/http-api/documents)
+- [HTTP API](https://docs.tachyoncms.com/reference/http-api): [auth](https://docs.tachyoncms.com/reference/http-api/auth), [users and roles](https://docs.tachyoncms.com/reference/http-api/users-and-roles), [collections](https://docs.tachyoncms.com/reference/http-api/collections), [documents](https://docs.tachyoncms.com/reference/http-api/documents), [drafts and history](https://docs.tachyoncms.com/reference/http-api/drafts-and-history) (on main)
 - [Field types](https://docs.tachyoncms.com/reference/field-types)
 - [Filters](https://docs.tachyoncms.com/reference/filters)
 - [Config](https://docs.tachyoncms.com/reference/config)
