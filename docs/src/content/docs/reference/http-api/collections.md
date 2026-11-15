@@ -16,7 +16,8 @@ Collections, globals and shared blocks share these routes. A schema is a JSON ob
 | `slug` | string | none | Required. Lowercase letters, digits and underscores, starting with a letter, up to 64 characters. Not `access`, `admin`, `auth`, `blocks`, `globals`, `media`, `search`, `graphql`, `plugins` or `setup`. |
 | `kind` | string | `collection` | `collection`, `global`, or `block` for a [shared block](/blocks#shared-blocks) (new in v0.2.0). A shared block has no documents or routes of its own, and takes no `access`, `defaultPopulate` or `url`. |
 | `fields` | array | none | Required. See [Field types](/reference/field-types). |
-| `access` | object | none | Collection rules: `read`, `create`, `update`, `delete`. See [Access rules](/access-rules). |
+| `access` | object | none | Collection rules: `read`, `create`, `update`, `delete`, and on `main`, `readDrafts`, `readVersions` and `publish`, which need `versions`. See [Access rules](/access-rules). |
+| `versions` | `true`, `false` or object | none | Collections and globals, on `main`. `true` keeps history; `{"drafts": true, "maxVersions": 100}` adds drafts, and `"drafts": {"autosave": {"interval": 2000}}` allows autosave too. `interval` is 100 to 600000 milliseconds; `maxVersions` defaults to 100, and 0 keeps every version. With drafts on, a top-level field can't be called `publishedAt`. See [Drafts and publishing](/drafts#turn-drafts-on). |
 | `defaultPopulate` | object | none | A `select` for documents that populate a link to this collection. Not on globals. See [Relationships](/relationships#trim-populated-documents). |
 | `url` | string | none | Collections only, new in v0.2.0. Where a document lives on your site, such as `/blog/{slug}`, with `{field}` naming a stored top-level `text` or `slug` field. Starts with `http://`, `https://`, `/` or `#`. Rich text links to these documents point here in [HTML output](/rich-text#html). |
 | `labels` | object | none | Shared blocks only, new in v0.2.0. `{"singular": "…", "plural": "…"}`. |
@@ -142,8 +143,8 @@ Replaces a content type's schema. A change that keeps every value is saved at on
 | | |
 |---|---|
 | Who | `schemas` ability |
-| Returns | `200`, `{"collection": {"id", "schemaVersion", "schema"}, "preview": {...}}` |
-| Errors | `400`; `401`; `403`; `404`; `409 Confirmation required`, with `preview`; `422` an invalid schema, values that aren't unique for a new `unique`, or a change that would break another collection's join, virtual field or access rule |
+| Returns | `200`, `{"collection": {"id", "schemaVersion", "schema"}, "preview": {...}}`; on `main`, past 2,000 rows, `202` with `{"job": {...}}` and a `Location` to poll with [`GET /api/admin/jobs/{id}`](#get-apiadminjobsid) |
+| Errors | `400`; `401`; `403`; `404`; `409 Confirmation required`, with `preview`; on `main`, `409` while a change to this schema is already queued, naming its job; on `main`, `409` turning drafts off while documents have unpublished drafts, which no `confirm` overrides; `422` an invalid schema, values that aren't unique for a new `unique`, or a change that would break another collection's join, virtual field or access rule |
 
 | Field | Type | Default | Description |
 |---|---|---|---|
@@ -155,12 +156,13 @@ The `preview` object:
 
 | Key | Type | Description |
 |---|---|---|
-| `diff.changes` | array | Each field added, removed, renamed or changed. |
+| `diff.changes` | array | Each field added, removed, renamed or changed. On `main`, a change to `versions` is `{"type": "versionsChanged", "drafts": [before, after], "maxVersions": [before, after]}`. |
 | `documents` | number | Documents in the collection. |
 | `invalid` | number | Documents that won't validate against the new fields. |
 | `examples` | array | Up to five of them. |
 | `duplicates` | array | `unique` fields whose stored values repeat. |
 | `cleared` | number | Documents that lose a link their relationship no longer allows. |
+| `pruned` | number | On `main`. Versions the change deletes: removing `versions`, or lowering `maxVersions` below what documents hold. |
 | `indexes` | object | `create` and `drop`: indexes the change builds and removes. |
 | `needsConfirmation` | boolean | Whether the change needs `"confirm": true`. |
 
@@ -229,7 +231,7 @@ Works out what a `PUT` with the same body would do, and saves nothing.
 |---|---|
 | Who | `schemas` ability |
 | Body | As for [`PUT`](#put-apiadmincollectionsslug); `confirm` is ignored |
-| Returns | `200` and the preview object |
+| Returns | `200` and the preview object; on `main`, past 2,000 rows, `202` and a job, as for `PUT` |
 | Errors | As for `PUT`, without the `409 Confirmation required` |
 
 Here `posts` would lose its `tags` field, so the change needs confirming:
@@ -326,6 +328,23 @@ curl -X POST localhost:3000/api/admin/collections/cta/preview \
   "needsConfirmation": false
 }
 ```
+
+### `GET /api/admin/jobs/{id}`
+
+On `main`. A schema change or preview that went to a job worker. See [Large changes run as a job](/content-types#large-changes-run-as-a-job).
+
+| | |
+|---|---|
+| Who | `schemas` ability |
+| Returns | `200`, `{"id", "kind", "state", "attempts", "runAt", "finishedAt", "result"}` |
+| Errors | `401`; `403`; `404` an unknown ID, or a job that isn't a schema change or preview |
+
+| Key | Type | Description |
+|---|---|---|
+| `kind` | string | `schema_change` or `schema_preview`. |
+| `state` | string | `queued`, `running`, `done`, `failed` or `cancelled`. |
+| `attempts` | number | Runs so far. A run that hits a deadlock or loses its worker runs again. |
+| `result` | object or null | `null` until the job ends. On `done`, the body the request would have returned. On `failed`, `{"status", "problem"}`: the status and problem body it would have sent. |
 
 ### `DELETE /api/admin/collections/{slug}`
 

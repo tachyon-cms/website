@@ -260,7 +260,7 @@ Makes a key that acts as you, narrowed by its scopes. The response holds the sec
 | Field | Type | Default | Description |
 |---|---|---|---|
 | `name` | string | none | Required. A label for you. |
-| `scopes` | array of strings | none | Required, at least one: `collection:read`, `collection:write`, `*:read`, `*:write` or `admin`. See [Scopes](/api-keys#scopes). |
+| `scopes` | array of strings | none | Required, at least one: `collection:read`, `collection:write`, `*:read`, `*:write` or `admin`. On `main`, also `collection:publish` and `*:publish`, which `:write` doesn't cover. See [Scopes](/api-keys#scopes). |
 | `expiresAt` | string | none | An RFC 3339 date-time in the future. The key stops working then. |
 
 ```sh

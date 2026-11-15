@@ -1,8 +1,9 @@
-// The reference pages must cover the whole v0.2.0 surface, and nothing else.
+// The reference pages must cover the whole surface on main (v0.2.0's and what the next
+// release adds), and nothing else.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { configKeys, errors, fieldOptions, fieldTypes, operators, routes } from './v0.2.0-surface.mjs';
+import { configKeys, errors, fieldOptions, fieldTypes, operators, routes } from './main-surface.mjs';
 
 const page = (name) =>
   readFileSync(new URL(`../src/content/docs/reference/${name}.md`, import.meta.url), 'utf8');
@@ -22,7 +23,7 @@ const tableNames = (text) => [...text.matchAll(/^\| `([^`]+)` \|/gm)].map((m) =>
 
 const sorted = (xs) => [...xs].sort();
 
-const apiAreas = ['auth', 'users-and-roles', 'collections', 'documents'];
+const apiAreas = ['auth', 'users-and-roles', 'collections', 'documents', 'drafts-and-history'];
 
 test('the http-api area pages have one section per endpoint between them', () => {
   const headings = apiAreas.flatMap((area) =>
@@ -62,6 +63,7 @@ test('config lists exactly the keys, each with its own variable', () => {
   const rows = [
     ...section(text, '## Top-level keys').matchAll(/^\| `([^`]+)` \| `([^`]+)` \|/gm),
     ...section(text, '## `[auth]`').matchAll(/^\| `([^`]+)` \| `([^`]+)` \|/gm),
+    ...section(text, '## `[jobs]`').matchAll(/^\| `([^`]+)` \| `([^`]+)` \|/gm),
   ];
   const found = Object.fromEntries(rows.map((m) => [m[1], m[2]]));
   const want = Object.fromEntries(

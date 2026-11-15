@@ -128,6 +128,8 @@ export default defineConfig({
                   'schema-files',
                 ],
               },
+              // On main, arriving in the next release; each page says so.
+              { label: 'Publishing', items: ['drafts', 'versions', 'scheduling', 'trash'] },
               { label: 'Users and access', items: ['sign-in', 'roles', 'api-keys', 'access-rules'] },
               {
                 label: 'Running it',
@@ -154,6 +156,7 @@ export default defineConfig({
                   'reference/http-api/users-and-roles',
                   'reference/http-api/collections',
                   'reference/http-api/documents',
+                  'reference/http-api/drafts-and-history',
                 ],
               },
               'reference/field-types',

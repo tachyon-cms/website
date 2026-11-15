@@ -16,8 +16,9 @@ description: Filter, sort and page through documents, and choose which fields co
 | `select` | Returns only the fields you name. | every field |
 | `depth`, `populate` | Fill in linked documents. See [Relationships](/relationships). | `depth=1` |
 | `joins` | Shapes join fields. See [Joins and virtual fields](/joins-and-virtual-fields). | on |
+| `draft` | On `main`: `true` reads drafts instead of what's published. See [Read drafts](#read-drafts). | `false` |
 
-An unknown parameter is a `400`, so a typo can't silently return everything:
+An unknown parameter is a `400`, so a typo can't silently return everything. On `main`, arriving in the next release, the same goes for `POST`, `PATCH` and `DELETE` on documents, which v0.2.0 let through: they take no parameters, except `PATCH ?autosave=true` in a collection that [autosaves](/versions#autosave).
 
 ```json
 {
@@ -272,6 +273,18 @@ Treat a cursor as opaque, and use it only with the sort it came from. `page` and
 `select[field]=true` returns only the fields you name, plus `id`. Every example on this page uses it to keep the responses short. For a field inside a group, nest the brackets: `select[seo][title]=true`.
 
 To trim the documents a relationship fills in, use `populate`. See [Relationships](/relationships#trim-populated-documents).
+
+## Read drafts
+
+On `main`, arriving in the next release, a collection with [drafts](/drafts) keeps a draft beside each published document. Lists and single reads stay on what's published unless you add `draft=true`:
+
+```sh
+curl -g 'localhost:3000/api/posts?draft=true&select[title]=true' -H "authorization: Bearer $ED_TOKEN"
+```
+
+Everything else on this page works the same on drafts: `where`, `sort`, paging and `select`. Links inside a draft read as drafts where you may read them, and as what's published where you may not; [How links read inside a draft](/drafts#how-links-read-inside-a-draft) shows it.
+
+`draft` takes `true` or `false`. It's a `400` on a collection without drafts, and a `403` (signed out, a `401`) without the right to read drafts. In a collection with drafts, `select[publishedAt]=true` returns when each document went live; `publishedAt` can't be filtered or sorted on.
 
 ## Filters and access
 

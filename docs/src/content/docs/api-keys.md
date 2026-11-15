@@ -47,26 +47,48 @@ curl -X POST localhost:3000/api/auth/keys \
 | Scope | Allows |
 |---|---|
 | `posts:read` | Reading one collection, here `posts`. |
-| `posts:write` | Creating, changing and deleting in one collection, which includes reading it. |
-| `*:read`, `*:write` | The same, for every collection. |
+| `posts:write` | Creating, changing and deleting in one collection, which includes reading it. On `main`, also drafts, versions, restoring and the trash, but not publishing. |
+| `posts:publish` | On `main`: publishing, unpublishing and scheduling in one collection, and nothing else. See [Publish-only keys](#publish-only-keys). |
+| `*:read`, `*:write`, `*:publish` | The same, for every collection. |
 | `admin` | Everything the owner can do: content types, users and roles too. Only an Admin, or a role with the `users` ability, can make an `admin` key. |
 
-A scope that doesn't fit the pattern is refused:
+A scope that doesn't fit the pattern is refused. On the `main` build the message names the `:publish` scope too:
 
 ```json
 {
   "errors": [
     {
-      "message": "`posts:delete` isn't a scope; use collection:read, collection:write, *:read, *:write or admin",
+      "message": "`posts:delete` isn't a scope; use collection:read, collection:write, collection:publish (or * for every collection) or admin",
       "path": "scopes"
     }
   ],
-  "requestId": "01a18461-43af-7518-bf3f-147618fa580e",
+  "requestId": "01a1aede-c9f6-77f7-af28-2f74008545e0",
   "status": 422,
   "title": "Validation failed",
   "type": "about:blank"
 }
 ```
+
+v0.2.0 says ``use collection:read, collection:write, *:read, *:write or admin``.
+
+### Publish-only keys
+
+On `main`, arriving in the next release, collections can have [drafts](/drafts), and `posts:write` doesn't cover publishing them. Publishing takes `posts:publish`, `*:publish` or `admin`. A deploy script that only ever presses the button is what `:publish` is for.
+
+A `:publish` key can publish, unpublish and [schedule](/scheduling), and nothing more: no reading, no writing. It checks what it publishes with its owner's rights, so it publishes only drafts its owner could publish, and its answers hold only the document's `id`:
+
+```sh
+curl -X POST localhost:3000/api/posts/01a1aedc-09b8-700b-bf86-cf0980314258/publish \
+  -H 'authorization: Bearer tcy_4s302uqf_…'
+```
+
+```json
+{
+  "id": "01a1aedc-09b8-700b-bf86-cf0980314258"
+}
+```
+
+Asking the same key for the post's schedule gets `{"id"}` too, and `?draft=true` or a `PATCH` is a `403`.
 
 ## Use a key
 
@@ -170,7 +192,7 @@ curl -X POST localhost:3000/api/auth/keys/01a18461-438e-7037-aefb-b61210715c00/r
 }
 ```
 
-The old key stops working straight away, so deploy the new one before you rotate, or expect a short gap:
+The old key stops working straight away, so deploy the new one before you rotate, or expect a short gap. On `main`, anything the old key [scheduled](/scheduling#rotating-or-revoking-a-key-fails-its-schedules) fails when its time comes, so schedule it again with the new key:
 
 ```json
 {
@@ -184,4 +206,4 @@ The old key stops working straight away, so deploy the new one before you rotate
 
 ## Revoke a key
 
-`DELETE /api/auth/keys/{id}` revokes a key and answers `204`. Use the current `id`: after a rotation, that's the new one. Deleting a user revokes all of their keys.
+`DELETE /api/auth/keys/{id}` revokes a key and answers `204`. Use the current `id`: after a rotation, that's the new one. Deleting a user revokes all of their keys. On `main`, a revoked or expired key's schedules fail too, as after a rotation.

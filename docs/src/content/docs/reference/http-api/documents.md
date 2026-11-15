@@ -62,6 +62,8 @@ curl localhost:3000/api/access -H "authorization: Bearer $AUTHOR_TOKEN"
 
 The `fields` objects are trimmed to one field each.
 
+On `main`, arriving in the next release, a collection or global with [drafts](/drafts) also answers `readDrafts` and `publish`, and one with versions `readVersions`, each `true`, `false` or `"conditional"`. They're judged as their routes judge them before looking at a document. A `:publish` key answers `publish` by its owner's rights to read, as publishing does. See [Drafts and history answers](/access-rules#drafts-and-history-answers).
+
 ## Globals
 
 ### `GET /api/globals/{slug}`
@@ -71,8 +73,8 @@ Reads a global. Until it's first saved, it shows only its fields' defaults, with
 | | |
 |---|---|
 | Who | Content: anyone, unless a read rule says otherwise. A key needs `slug:read`, `slug:write`, `*:read`, `*:write` or `admin`. |
-| Query | `depth`, `select`, `populate` and `format`, as for [`GET /api/{collection}/{id}`](#get-apicollectionid) |
-| Returns | `200` and the global |
+| Query | `depth`, `select`, `populate` and `format`, as for [`GET /api/{collection}/{id}`](#get-apicollectionid), and on `main`, `draft` |
+| Returns | `200` and the global. With drafts on, what's published, or `{}` before the first publish. |
 | Errors | `400`; `401`, `403` a read rule or key scope refuses; `404` no such global |
 
 ```sh
@@ -110,7 +112,7 @@ curl 'localhost:3000/api/globals/site?format=html'
 
 ### `PATCH /api/globals/{slug}`
 
-Changes a global, saving it the first time. Fields merge as for a [document `PATCH`](#patch-apicollectionid). If the global's read or update rule is a filter, a global that has never been saved can't be saved this way, since there's no document for the rule to match.
+Changes a global, saving it the first time. Fields merge as for a [document `PATCH`](#patch-apicollectionid). On `main`, with drafts on, it changes the draft, and the global goes live with [`POST /api/globals/{slug}/publish`](/reference/http-api/drafts-and-history#post-apiglobalsslugpublish). If the global's read or update rule is a filter, a global that has never been saved can't be saved this way, since there's no document for the rule to match.
 
 | | |
 |---|---|
@@ -155,6 +157,7 @@ Lists the documents you may read, a page at a time.
 | `populate` | object | none | `populate[collection][field]=true`: the fields of populated documents from that collection. |
 | `joins` | `false` or object | on | `joins=false`, or `joins[field][option]=value` with `limit`, `page`, `sort`, `where` or `count`. See [Join options per request](/joins-and-virtual-fields#join-options-per-request). |
 | `format` | `json`, `html`, `markdown` or `text` | `json` | New in v0.2.0. How every [rich text](/rich-text#read-it-as-html-markdown-or-text) field comes back, populated and joined documents included. Anything but `json` gives a string. |
+| `draft` | `true` or `false` | `false` | On `main`. Read drafts instead of what's published, in a collection with drafts. Links read as drafts where you may read those. `400` without drafts; `401` or `403` without `readDrafts`. See [Read drafts](/drafts#read-drafts-with-drafttrue). |
 
 Any other parameter is a `400`.
 
@@ -196,7 +199,8 @@ Creates a document.
 |---|---|
 | Who | Content: a signed-in role whose `content` is `all` or `own`, subject to the create rule. A key needs `collection:write`, `*:write` or `admin`. |
 | Body | The document's fields. Fields left out take their `default`. A `richText` field may be sent as [Markdown](/markdown-input), `{"format": "markdown", "value": "…"}`. |
-| Returns | `201` and the document, with links filled in to depth 1. If a read rule hides it from you, only `{"id"}`. |
+| Query | None. On `main`, any query parameter is a `400`; v0.2.0 ignores them. |
+| Returns | `201` and the document, with links filled in to depth 1. If a read rule hides it from you, only `{"id"}`. On `main`, with drafts on, it's the draft, `required` waits until publishing, and without `readDrafts` you get only `{"id"}`. |
 | Errors | `401`; `403` the role, a rule, a field rule or a key scope refuses; `404` no such collection; `422` a value that doesn't validate, an unknown field, a link to a document that doesn't exist, or a `unique` value that's taken |
 
 ```sh
@@ -234,7 +238,7 @@ Reads one document.
 | | |
 |---|---|
 | Who | Content, as for [`GET /api/{collection}`](#get-apicollection) |
-| Query | `depth`, `select`, `populate`, `joins` and `format`, as for a list. Any other parameter is a `400`. |
+| Query | `depth`, `select`, `populate`, `joins` and `format`, as for a list, and on `main`, `draft`. Any other parameter is a `400`. |
 | Returns | `200` and the document |
 | Errors | `400`; `401`, `403` a read rule or key scope refuses; `404` no such document, or one a read rule hides |
 
@@ -265,8 +269,11 @@ Changes a document. What you send is merged into what's stored: a field inside a
 |---|---|
 | Who | Content: a role whose `content` is `all`, or `own` for documents you created, subject to the update rule. A key needs `collection:write`, `*:write` or `admin`. |
 | Body | The fields to change. A `richText` field may be sent as [Markdown](/markdown-input), `{"format": "markdown", "value": "…"}`. |
-| Returns | `200` and the document, with links filled in to depth 1. If a read rule now hides it from you, only `{"id"}`. |
-| Errors | `401`; `403 You can only change documents you created.`, `403 An access rule doesn't let you change this document.`, or a field rule or key scope refuses; `404`; `409` the collection's fields changed during the request; `422` |
+| Query | On `main`, only `autosave=true`, in a collection that [autosaves](/versions#autosave): save the draft without recording a version. Any other parameter is a `400`; v0.2.0 ignores them. |
+| Returns | `200` and the document, with links filled in to depth 1. If a read rule now hides it from you, only `{"id"}`. On `main`, with drafts on, it's the draft. |
+| Errors | `400` on `main`, a query parameter; `401`; `403 You can only change documents you created.`, `403 An access rule doesn't let you change this document.`, or a field rule or key scope refuses; `404`; `409` the collection's fields changed during the request, or on `main`, a write that collided with another (`Another change to the same documents got in the way; try again.`); `422` |
+
+On `main`, in a collection with drafts, a `PATCH` also needs `readDrafts`. Where you can read what's published but not the draft, it's a `403`; where you can read neither, a `404`. See [Changing a document needs its draft](/drafts#changing-a-document-needs-its-draft).
 
 ```sh
 curl -X PATCH localhost:3000/api/posts/01a18491-016c-7521-861e-dff9974d0737 \
@@ -279,11 +286,12 @@ The response is the whole document, as for `POST`, with `tags` now `["release", 
 
 ### `DELETE /api/{collection}/{id}`
 
-Deletes a document. A document other documents link to can't be deleted until those links are removed.
+Deletes a document. A document other documents link to can't be deleted until those links are removed. On `main`, the document goes to [the trash](/trash), where it can be restored or deleted for good, and anything scheduled for it is cancelled.
 
 | | |
 |---|---|
 | Who | Content, as for `PATCH`, subject to the delete rule |
+| Query | None. On `main`, any query parameter is a `400`; v0.2.0 ignores them. |
 | Returns | `204` |
 | Errors | `401`; `403`; `404`; `409` other documents link here |
 
@@ -311,7 +319,7 @@ Lists the documents that link to this one, among those you can read, through fie
 | | |
 |---|---|
 | Who | Content, as for reading the document |
-| Returns | `200` and `{"docs": [...]}`, each with `collection`, `id` and `path`, the field that holds the link |
+| Returns | `200` and `{"docs": [...]}`, each with `collection`, `id` and `path`, the field that holds the link. On `main`, each also has `copy`, `published` or `draft`: the copy of the linking document that holds it. |
 | Errors | `401`, `403` a read rule or key scope refuses; `404` no such document, or one you can't read |
 
 ```sh
